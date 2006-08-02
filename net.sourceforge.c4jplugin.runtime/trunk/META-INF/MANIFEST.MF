@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: C4J Runtime Plug-in
+Bundle-SymbolicName: net.sourceforge.c4jplugin.runtime
+Bundle-Version: 1.0.0
+Bundle-ClassPath: c4j.jar,
+ javassist.jar
+Bundle-Localization: plugin
+Export-Package: net.sourceforge.c4j
+Bundle-Vendor: chessed
