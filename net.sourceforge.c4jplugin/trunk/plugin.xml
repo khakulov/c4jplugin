@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.decorators">
+      <decorator
+            adaptable="true"
+            class="net.sourceforge.c4jplugin.internal.decorators.ContractDecorator"
+            id="net.sourceforge.c4j.plugin.decorators.Contract"
+            label="Contract Decorator"
+            lightweight="true"
+            state="true">
+         <enablement>
+            <and>
+               <objectClass name="org.eclipse.core.resources.IResource"/>
+               <objectClass name="org.eclipse.core.resources.IFile"/>
+               <objectState
+                     name="projectNature"
+                     value="net.sourceforge.c4j.plugin.c4jnature"/>
+            </and>
+         </enablement>
+      </decorator>
+   </extension>
+   <extension
+         point="org.eclipse.jdt.apt.core.annotationProcessorFactory">
+      <factories enableDefault="true">
+         <factory class="net.sourceforge.c4jplugin.internal.ap.ContractAnnotationProcessorFactory"/>
+      </factories>
+   </extension>
+   <extension
+         id="c4jnature"
+         name="C4J Nature"
+         point="org.eclipse.core.resources.natures">
+      <runtime>
+         <run class="net.sourceforge.c4jplugin.internal.nature.C4JProjectNature"/>
+      </runtime>
+      <requires-nature id="org.eclipse.jdt.core.javanature"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            adaptable="true"
+            id="iprojectcontributions"
+            objectClass="org.eclipse.core.resources.IProject">
+         <menu
+               id="net.sourceforge.c4j.plugin.internal.popup.tools"
+               label="%c4jTools">
+            <groupMarker name="group0"/>
+         </menu>
+         <visibility>
+            <and>
+               <objectState
+                     name="nature"
+                     value="org.eclipse.jdt.core.javanature"/>
+               <not>
+                  <objectState
+                        name="nature"
+                        value="net.sourceforge.c4j.plugin.c4jnature"/>
+               </not>
+               <objectState
+                     name="open"
+                     value="true"/>
+            </and>
+         </visibility>
+         <action
+               class="net.sourceforge.c4jplugin.internal.ui.actions.AddC4JNatureAction"
+               id="net.sourceforge.c4j.plugin.internal.actions.addc4jnature"
+               label="%convertToC4J"
+               menubarPath="net.sourceforge.c4j.plugin.internal.popup.tools/group0"/>
+      </objectContribution>
+      <objectContribution
+            adaptable="true"
+            id="iprojectcontributions"
+            objectClass="org.eclipse.core.resources.IProject">
+         <menu
+               id="net.sourceforge.c4j.plugin.internal.popup.c4jtools"
+               label="%c4jTools"/>
+         <visibility>
+            <objectState
+                  name="nature"
+                  value="net.sourceforge.c4j.plugin.c4jnature"/>
+         </visibility>
+         <action
+               class="net.sourceforge.c4jplugin.internal.ui.actions.RemoveC4JNatureAction"
+               id="net.sourceforge.c4j.plugin.action1"
+               label="%removeC4JNature"
+               menubarPath="net.sourceforge.c4j.plugin.internal.popup.c4jtools/group0"/>
+      </objectContribution>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer class="net.sourceforge.c4jplugin.internal.ui.preferences.C4JPreferenceInitializer"/>
+   </extension>
+   <extension
+         point="org.eclipse.jdt.core.classpathContainerInitializer">
+      <classpathContainerInitializer
+            class="net.sourceforge.c4jplugin.internal.core.C4JRuntimeContainerInitializer"
+            id="net.sourceforge.c4j.plugin.C4JRT_CONTAINER"/>
+   </extension>
+   <extension
+         point="org.eclipse.jdt.debug.ui.vmInstallTypePage">
+      <vmInstallTypePage
+            class="net.sourceforge.c4jplugin.internal.ui.launchtabs.C4JLaunchConfigTab"
+            id="net.sourceforge.c4j.plugin.vmInstallTypePage1"
+            vmInstallTypeID="org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType"/>
+   </extension>
+
+</plugin>
