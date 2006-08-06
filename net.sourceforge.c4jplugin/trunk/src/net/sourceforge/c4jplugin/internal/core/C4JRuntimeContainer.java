@@ -18,17 +18,14 @@ public class C4JRuntimeContainer implements IClasspathContainer {
 
 	private IClasspathEntry[] fClasspathEntries;
 
-	private static String[] c4jrtPath = null;
+	private static String c4jrtPath = null;
 
 	public IClasspathEntry[] getClasspathEntries() {
 		if (fClasspathEntries == null) {
-			String[] path = getC4JRtClasspath();
-			fClasspathEntries = new IClasspathEntry[path.length];
-			for (int i = 0; i < path.length; i++) {
-				IPath p = new Path(path[i]);
-				fClasspathEntries[i] = JavaCore.newLibraryEntry(p, null, null,
-						false);
-			}
+			String path = getC4JRtClasspath();
+			fClasspathEntries = new IClasspathEntry[1];
+			IPath p = new Path(path);
+			fClasspathEntries[0] = JavaCore.newLibraryEntry(p, null, null, false);
 		}
 		return fClasspathEntries;
 	}
@@ -46,12 +43,11 @@ public class C4JRuntimeContainer implements IClasspathContainer {
 	}
 
 	/**
-	 * Get the aspectjrt.jar classpath entry. This is usually in
-	 * plugins/org.aspectj.ajde_ <VERSION>/aspectjrt.jar
+	 * Get the c4j.jar classpath entry. This is usually in
+	 * plugins/net.sourceforge.c4jplugin.runtime_ <VERSION>/c4j.jar
 	 */
-	public static String[] getC4JRtClasspath() {
+	public static String getC4JRtClasspath() {
 		if (c4jrtPath == null) {
-			c4jrtPath = new String[1];
 			Bundle runtime = Platform
 					.getBundle(C4JActivator.RUNTIME_PLUGIN_ID);
 			if (runtime != null) {
@@ -61,10 +57,10 @@ public class C4JRuntimeContainer implements IClasspathContainer {
 					IPath path = new Path(runtime.getLocation().split("@")[1]); //$NON-NLS-1$
 					IPath full = new Path(Platform.getInstallLocation()
 							.getURL().getFile()).append(path);
-					c4jrtPath[0] = full.toString();
+					c4jrtPath = full.toString();
 				} else {
 					try {
-						c4jrtPath[0] = FileLocator.resolve(installLoc)
+						c4jrtPath = FileLocator.resolve(installLoc)
 								.getFile();
 					} catch (IOException e) {
 					}

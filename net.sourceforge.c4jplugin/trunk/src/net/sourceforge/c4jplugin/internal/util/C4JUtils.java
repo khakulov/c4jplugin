@@ -19,17 +19,19 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.jdt.apt.core.util.AptConfig;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.pde.core.plugin.IPluginImport;
 import org.eclipse.pde.core.plugin.IPluginModel;
 import org.eclipse.pde.internal.core.WorkspaceModelManager;
@@ -37,6 +39,8 @@ import org.eclipse.pde.internal.core.natures.PDE;
 import org.eclipse.pde.internal.ui.IPDEUIConstants;
 import org.eclipse.pde.internal.ui.editor.plugin.DependenciesPage;
 import org.eclipse.pde.internal.ui.editor.plugin.ManifestEditor;
+import org.eclipse.pde.ui.launcher.AbstractPDELaunchConfiguration;
+import org.eclipse.pde.ui.launcher.IPDELauncherConstants;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -73,7 +77,7 @@ public class C4JUtils {
 			// c4j.jar should be added to the classpath container
 			// that lists jars imported from dependent plugins. In order
 			// to do this, should add a dependency on the plugin
-			// net.sourceforge.c4jplugin to the current plugin project.
+			// net.sourceforge.c4jplugin.runtime to the current plugin project.
 
 			// Checks if the plugin already has the plugin dependency
 			// before adding it, this avoids duplication
@@ -85,6 +89,21 @@ public class C4JUtils {
 			// A Java project that is not a plugin project. Just add
 			// the c4j.jar to the build path.
 			addC4JToBuildPath(project);
+		}
+		
+		// Enabling annotation processing
+		IWorkbenchWindow window = C4JActivator.getDefault().getWorkbench().getActiveWorkbenchWindow();
+		IJavaProject jproject = JavaCore.create(project);
+		if (!AptConfig.isEnabled(jproject) && C4JPreferences.doAptAutoEnable()) {
+			boolean autoEnable = true;
+			if (C4JPreferences.askAptAutoEnable()) {
+				if (!confirmAptAutoEnable(window)) autoEnable = false;
+			}
+			
+			if (autoEnable) {
+				AptConfig.setEnabled(jproject, true);
+				C4JPreferences.setAptAutoEnableDone(project, true);
+			}
 		}
 		
 		refreshPackageExplorer();
@@ -133,9 +152,77 @@ public class C4JUtils {
 			removeC4JFromBuildPath(project);
 		}
 		
+		// Disabling annotation processing
+		if (C4JPreferences.isAptAutoEnableDone(project)) {
+			// only disable it if it was the C4J plug-in who enabled it
+			IWorkbenchWindow window = C4JActivator.getDefault().getWorkbench().getActiveWorkbenchWindow();
+			IJavaProject jproject = JavaCore.create(project);
+			if (AptConfig.isEnabled(jproject) && C4JPreferences.doAptAutoDisable()) {
+				boolean autoDisable = true;
+				if (C4JPreferences.askAptAutoDisable()) {
+					if (!confirmAptAutoDisable(window)) autoDisable = false;
+				}
+				
+				if (autoDisable) {
+					AptConfig.setEnabled(jproject, false);
+					C4JPreferences.setAptAutoEnableDone(project, false);
+				}
+			}
+		}
+		
 		//removeMarkerOnReferencingProjects(project);
 		
 		refreshPackageExplorer();
+	}
+	
+	public static IProject getC4JProjectFromLaunchConfig(ILaunchConfiguration launchConfig) {
+		IResource[] resources = null;
+		
+		try {
+			resources = launchConfig.getMappedResources();
+		} catch (CoreException e1) {}
+		
+		if (resources != null) {
+			for (IResource resource : resources) {
+				try {
+					if (resource.getProject().hasNature(C4JProjectNature.ID_NATURE)) {
+						return resource.getProject();
+					}
+				} catch (CoreException e) {
+				}
+			}
+		}
+		else {
+			if (launchConfig instanceof AbstractPDELaunchConfiguration) {
+				AbstractPDELaunchConfiguration pdeConfig = (AbstractPDELaunchConfiguration)launchConfig;
+				try {
+					launchConfig.getAttribute(IPDELauncherConstants.APPLICATION, "");
+				} catch (CoreException e) {
+				}
+				
+			}
+		}
+		
+		return null;
+	}
+	
+	/* Before calling this method, you must check if configuration belongs to a
+	 * project with a C4J nature and that the project preferences are set to
+	 * allow a change of the VM arguments for this type of configuration.
+	 */
+	public static void addVMArgsToLaunchConfig(ILaunchConfiguration configuration, String mode) {
+		String vmargs = null;
+		try {
+			vmargs = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, (String)null);
+			if (vmargs == null) {
+				// Backward compatibility
+				vmargs = configuration.getAttribute("vmargs", (String)null);
+			}
+		} catch (CoreException e) {}
+		
+		
+		if (vmargs == null) System.out.println("Could not get VM args from LaunchConfig");
+		else System.out.println("VM args: " + vmargs);
 	}
 	
 	/**
@@ -198,14 +285,11 @@ public class C4JUtils {
 		IWorkbenchWindow window = C4JActivator.getDefault().getWorkbench()
 				.getActiveWorkbenchWindow();
 
-		boolean autoImport = false;
-		if ((C4JPreferences.askPDEAutoImport() && confirmPDEAutoAddImport(window))
-				|| (C4JPreferences.doPDEAutoImport())) {
-			autoImport = true;
-		}
-
-		if (autoImport) {
-			importRuntimePlugin(project);
+		if (C4JPreferences.doPDEAutoImport()) {
+			if (C4JPreferences.askPDEAutoImport() && confirmPDEAutoAddImport(window))
+				importRuntimePlugin(project);
+			else if (!C4JPreferences.askPDEAutoImport())
+				importRuntimePlugin(project);
 		} else {
 			MessageDialog
 					.openWarning(
@@ -223,28 +307,19 @@ public class C4JUtils {
 	 *         otherwise
 	 */
 	private static boolean confirmPDEAutoAddImport(IWorkbenchWindow window) {
-		IPreferenceStore store = C4JActivator.getDefault().getPreferenceStore();
-		
 		MessageDialogWithToggle dialog = MessageDialogWithToggle.openYesNoQuestion(
 						window.getShell(),
 						UIMessages.PluginImportDialog_importConfirmTitle,
 						UIMessages.PluginImportDialog_importConfirmMsg,
 						UIMessages.PluginImportDialog_importConfirmToggleMsg,
 						false, // toggle is initially unchecked
-						store,
-						C4JPreferences.ASK_PDE_AUTO_IMPORT); 
+						null, null); 
 
 		int result = dialog.getReturnCode();
 
-		if (dialog.getToggleState()) {
-			if (result == IDialogConstants.YES_ID) {
-				// User chose Yes/Don't ask again, so always switch
-				C4JPreferences.setDoPDEAutoImport(true);
-			} else {
-				// User chose No/Don't ask again, so never switch
-				C4JPreferences.setDoPDEAutoImport(false);
-			}
-		}// end if
+		C4JPreferences.setDoPDEAutoImport(result == IDialogConstants.YES_ID);
+		if (dialog.getToggleState())
+			C4JPreferences.setAskPDEAutoImport(!dialog.getToggleState());
 		
 		return result == IDialogConstants.YES_ID;
 	}
@@ -325,8 +400,16 @@ public class C4JUtils {
 	private static void removeC4JPluginDependency(IProject project) {
 		IWorkbenchWindow window = C4JActivator.getDefault().getWorkbench()
 		.getActiveWorkbenchWindow();
-		if ((C4JPreferences.askPDEAutoRemoveImport() && confirmPDEAutoRemoveImport(window))
-				|| (C4JPreferences.doPDEAutoRemoveImport())) {
+		
+		boolean autoRemove = false;
+		if (C4JPreferences.doPDEAutoRemoveImport()) {
+			if (C4JPreferences.askPDEAutoRemoveImport()) {
+				if (confirmPDEAutoRemoveImport(window)) autoRemove = true;
+			}
+			else autoRemove = true;
+		}
+		
+		if (autoRemove) {
 
 			// Attempt to get hold of the open manifest editor
 			// for the current project.
@@ -354,6 +437,16 @@ public class C4JUtils {
 										.getActiveWorkbenchWindow().getShell(),
 										UIMessages.AutoPluginRemoveDialog_noEditor_title,
 										UIMessages.AutoPluginRemoveDialog_noEditor_message);
+			}
+		}
+		
+		// Disable annotation processing if it was previously enabled
+		// by the C4J Plug-in
+		IJavaProject jproject = JavaCore.create(project);
+		if (AptConfig.isEnabled(jproject) && C4JPreferences.isAptAutoEnableDone(project)) {
+			if ((C4JPreferences.askAptAutoDisable() && confirmAptAutoDisable(window))
+					|| C4JPreferences.doAptAutoDisable()) {
+				AptConfig.setEnabled(jproject, false);
 			}
 		}
 	}
@@ -461,9 +554,6 @@ public class C4JUtils {
 	 *         otherwise
 	 */
 	private static boolean confirmPDEAutoRemoveImport(IWorkbenchWindow window) {
-
-		IPreferenceStore store = C4JActivator.getDefault().getPreferenceStore();
-		
 		MessageDialogWithToggle dialog = MessageDialogWithToggle
 				.openYesNoQuestion(
 						window.getShell(),
@@ -471,20 +561,64 @@ public class C4JUtils {
 						UIMessages.PluginImportDialog_removeImportConfirmMsg,
 						UIMessages.PluginImportDialog_removeImportConfirmToggleMsg,
 						false, // toggle is initially unchecked
-						store,
-						C4JPreferences.ASK_PDE_AUTO_REMOVE_IMPORT);
+						null, null);
 
 		int result = dialog.getReturnCode();
 
-		if (dialog.getToggleState()) {
-			if (result == IDialogConstants.YES_ID) {
-				// User chose Yes/Don't ask again, so always switch
-				C4JPreferences.setDoPDEAutoRemoveImport(true);
-			} else {
-				// User chose No/Don't ask again, so never switch
-				C4JPreferences.setDoPDEAutoRemoveImport(false);
-			}
-		}// end if
+		C4JPreferences.setAskPDEAutoRemoveImport(!dialog.getToggleState());
+		if (dialog.getToggleState())
+			C4JPreferences.setDoPDEAutoRemoveImport(result == IDialogConstants.YES_ID);
+		
+		return result == IDialogConstants.YES_ID;
+	}
+	
+	/**
+	 * Prompts the user for whether to automatically enable annotation processing.
+	 * 
+	 * @return <code>true</code> if it's OK to enable, <code>false</code>
+	 *         otherwise
+	 */
+	private static boolean confirmAptAutoEnable(IWorkbenchWindow window) {
+		MessageDialogWithToggle dialog = MessageDialogWithToggle
+				.openYesNoQuestion(
+						window.getShell(),
+						UIMessages.AutoPluginEnableApt_title,
+						UIMessages.AutoPluginEnableApt_message,
+						UIMessages.AutoPluginEnableApt_toggleMsg,
+						false, // toggle is initially unchecked
+						null, null);
+
+		int result = dialog.getReturnCode();
+
+		C4JPreferences.setAskAptAutoEnable(!dialog.getToggleState());
+		if (dialog.getToggleState())
+			C4JPreferences.setDoAptAutoEnable(result == IDialogConstants.YES_ID);
+		
+		return result == IDialogConstants.YES_ID;
+	}
+
+	/**
+	 * Prompts the user for whether to automatically disable annotation processing.
+	 * 
+	 * @return <code>true</code> if it's OK to disable, <code>false</code>
+	 *         otherwise
+	 */
+	private static boolean confirmAptAutoDisable(IWorkbenchWindow window) {
+		MessageDialogWithToggle dialog = MessageDialogWithToggle
+				.openYesNoQuestion(
+						window.getShell(),
+						UIMessages.AutoPluginDisableApt_title,
+						UIMessages.AutoPluginDisableApt_message,
+						UIMessages.AutoPluginDisableApt_toggleMsg,
+						false, // toggle is initially unchecked
+						null, null);
+
+		int result = dialog.getReturnCode();
+
+		C4JPreferences.setAskAptAutoDisable(!dialog.getToggleState());
+		if (dialog.getToggleState())
+			C4JPreferences.setDoAptAutoDisable(result == IDialogConstants.YES_ID);
+		
 		return result == IDialogConstants.YES_ID;
 	}
 	

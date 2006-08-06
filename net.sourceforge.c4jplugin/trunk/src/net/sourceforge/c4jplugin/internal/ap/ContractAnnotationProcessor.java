@@ -9,7 +9,6 @@ import net.sourceforge.c4jplugin.internal.util.AnnotationUtil;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.apt.core.env.EclipseAnnotationProcessorEnvironment;
-import org.eclipse.jdt.apt.core.env.Phase;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -52,37 +51,38 @@ public class ContractAnnotationProcessor implements AnnotationProcessor {
 					if (annoKeyValue.getKey().getSimpleName().equals("contractClassName")) {
 						Object contractValue = annoValue.getValue();			// get the value
 						if (contractValue instanceof String) {
+							// check if the contractValue represents a valid class-name
 							CompilationUnit compilationUnit = getEclipseAPE().getAST();
 							IJavaElement javaElement = compilationUnit.getJavaElement();
 							try {
 								IType type = AnnotationUtil.getType(javaElement);
 								String[][] matches = type.resolveType((String)contractValue);
+								boolean resolved = true;
 								if (matches == null) {
+									// could not resolve the contractValue as a type
 									env.getMessager().printError(annoValue.getPosition(), "\"" + contractValue + "\" cannot be resolved");
-									AnnotationUtil.addUnresolvedContract(type.getFullyQualifiedName());
-									return;
+									resolved = false;
 								}
-								
-								if (matches.length > 1) {
+								else if (matches.length > 1) {
+									// the contractValue is ambigious
 									env.getMessager().printError(annoValue.getPosition(), "\"" + contractValue + "\" cannot uniquely be resolved");
-									AnnotationUtil.addUnresolvedContract(type.getFullyQualifiedName());
-									return;
+									resolved = false;
 								}
 								
-								if (getEclipseAPE().getPhase() == Phase.BUILD) {
-									AnnotationUtil.removeUnresolvedContract(type.getFullyQualifiedName());
-									IType[] subTypes = type.newTypeHierarchy(javaElement.getJavaProject(), null).getAllSubtypes(type);
-									for (IType subType : subTypes) {
-										try {
-											subType.getResource().getParent().refreshLocal(2, null);
-										} catch (CoreException e) {
-											e.printStackTrace();
-										}
-									}
+								if (resolved) {
+									type.getResource().setSessionProperty(AnnotationUtil.QN_CONTRACT_PROPERTY, AnnotationUtil.PROPERTY_IS_CONTRACTED);
 								}
+								else {
+									type.getResource().setSessionProperty(AnnotationUtil.QN_CONTRACT_PROPERTY, null);
+									
+								}
+								
 							} catch (JavaModelException e) {
 								e.printStackTrace();
+							} catch (CoreException e) {
+								e.printStackTrace();
 							}
+							
 						}
 					}
 				}
@@ -93,5 +93,5 @@ public class ContractAnnotationProcessor implements AnnotationProcessor {
 	private EclipseAnnotationProcessorEnvironment getEclipseAPE() {
 		return (EclipseAnnotationProcessorEnvironment)env;
 	}
-
+	
 }

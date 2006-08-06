@@ -7,7 +7,7 @@
             adaptable="true"
             class="net.sourceforge.c4jplugin.internal.decorators.ContractDecorator"
             id="net.sourceforge.c4j.plugin.decorators.Contract"
-            label="Contract Decorator"
+            label="%decoratorLabel"
             lightweight="true"
             state="true">
          <enablement>
@@ -16,9 +16,10 @@
                <objectClass name="org.eclipse.core.resources.IFile"/>
                <objectState
                      name="projectNature"
-                     value="net.sourceforge.c4j.plugin.c4jnature"/>
+                     value="net.sourceforge.c4jplugin.c4jnature"/>
             </and>
          </enablement>
+         <description>%decoratorDescr</description>
       </decorator>
    </extension>
    <extension
@@ -55,7 +56,7 @@
                <not>
                   <objectState
                         name="nature"
-                        value="net.sourceforge.c4j.plugin.c4jnature"/>
+                        value="net.sourceforge.c4jplugin.c4jnature"/>
                </not>
                <objectState
                      name="open"
@@ -78,11 +79,11 @@
          <visibility>
             <objectState
                   name="nature"
-                  value="net.sourceforge.c4j.plugin.c4jnature"/>
+                  value="net.sourceforge.c4jplugin.c4jnature"/>
          </visibility>
          <action
                class="net.sourceforge.c4jplugin.internal.ui.actions.RemoveC4JNatureAction"
-               id="net.sourceforge.c4j.plugin.action1"
+               id="net.sourceforge.c4j.plugin.internal.actions.removec4jnature"
                label="%removeC4JNature"
                menubarPath="net.sourceforge.c4j.plugin.internal.popup.c4jtools/group0"/>
       </objectContribution>
@@ -95,14 +96,49 @@
          point="org.eclipse.jdt.core.classpathContainerInitializer">
       <classpathContainerInitializer
             class="net.sourceforge.c4jplugin.internal.core.C4JRuntimeContainerInitializer"
-            id="net.sourceforge.c4j.plugin.C4JRT_CONTAINER"/>
+            id="net.sourceforge.c4jplugin.C4JRT_CONTAINER"/>
    </extension>
    <extension
-         point="org.eclipse.jdt.debug.ui.vmInstallTypePage">
-      <vmInstallTypePage
-            class="net.sourceforge.c4jplugin.internal.ui.launchtabs.C4JLaunchConfigTab"
-            id="net.sourceforge.c4j.plugin.vmInstallTypePage1"
-            vmInstallTypeID="org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType"/>
+         point="org.eclipse.core.variables.valueVariables">
+      <variable
+            description="%c4jPathVariableDescr"
+            initializerClass="net.sourceforge.c4jplugin.internal.core.C4JRuntimeVariable"
+            name="c4j_library">
+      </variable>
+   </extension>
+   <extension
+         point="org.eclipse.ui.propertyPages">
+      <page
+            adaptable="true"
+            class="net.sourceforge.c4jplugin.internal.ui.preferences.C4JProjectPreferencePage"
+            id="net.sourceforge.c4jplugin.internal.ui.C4JProjectPreferencePage"
+            name="%projectPreferencePageName"
+            objectClass="org.eclipse.core.resources.IProject">
+         <filter
+               name="nature"
+               value="net.sourceforge.c4jplugin.c4jnature">
+         </filter>
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="net.sourceforge.c4jplugin.internal.ui.preferences.C4JPreferencePage"
+            id="net.sourceforge.c4jplugin.internal.preferences.C4JPreferencePage"
+            name="C4J">
+      </page>
+      <page
+            category="net.sourceforge.c4jplugin.internal.preferences.C4JPreferencePage"
+            class="net.sourceforge.c4jplugin.internal.ui.preferences.C4JAutomationPreferencePage"
+            id="net.sourceforge.c4jplugin.internal.ui.preferences.C4JAutomationPreferencePage"
+            name="%preferencePageAutomation">
+      </page>
+      <page
+            category="net.sourceforge.c4jplugin.internal.preferences.C4JPreferencePage"
+            class="net.sourceforge.c4jplugin.internal.ui.preferences.C4JDecoratorPreferencePage"
+            id="net.sourceforge.c4jplugin.internal.ui.preferences.C4JDecoratorPreferencePage"
+            name="%preferencePageDecoration">
+      </page>
    </extension>
 
 </plugin>
