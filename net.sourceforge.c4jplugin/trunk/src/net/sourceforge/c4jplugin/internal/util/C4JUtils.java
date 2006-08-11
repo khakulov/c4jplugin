@@ -64,7 +64,7 @@ public class C4JUtils {
 		String[] prevNatures = description.getNatureIds();
 		String[] newNatures = new String[prevNatures.length + 1];
 		System.arraycopy(prevNatures, 0, newNatures, 1, prevNatures.length);
-		newNatures[0] = C4JProjectNature.ID_NATURE;
+		newNatures[0] = C4JProjectNature.NATURE_ID;
 		description.setNatureIds(newNatures);
 		project.setDescription(description, null);
 
@@ -118,7 +118,7 @@ public class C4JUtils {
 		String[] newNatures = new String[prevNatures.length - 1];
 		int newPosition = 0;
 		for (String prevNature : prevNatures) {
-			if (!prevNature.equals(C4JProjectNature.ID_NATURE)) {
+			if (!prevNature.equals(C4JProjectNature.NATURE_ID)) {
 				// guard against array out of bounds which will occur if we
 				// get to here in a project that DOES NOT have the c4j nature
 				// (should never happen).
@@ -138,7 +138,7 @@ public class C4JUtils {
 
 		// just remove plugin dependency if there is a plugin.xml file
 		// also consider bundles without a plugin.xml
-		if (project.hasNature(PDE.PLUGIN_NATURE) 
+		if (project.isNatureEnabled(PDE.PLUGIN_NATURE) 
 		        && (WorkspaceModelManager.hasPluginManifest(project)
 		        		|| WorkspaceModelManager.hasBundleManifest(project))) {
 			// Checks if it was c4j that added the c4j dependancy and removes
@@ -160,12 +160,14 @@ public class C4JUtils {
 			if (AptConfig.isEnabled(jproject) && C4JPreferences.doAptAutoDisable()) {
 				boolean autoDisable = true;
 				if (C4JPreferences.askAptAutoDisable()) {
-					if (!confirmAptAutoDisable(window)) autoDisable = false;
+					if (!confirmAptAutoDisable(window)) {
+						autoDisable = false;
+					}
 				}
 				
+				C4JPreferences.setAptAutoEnableDone(project, false);
 				if (autoDisable) {
 					AptConfig.setEnabled(jproject, false);
-					C4JPreferences.setAptAutoEnableDone(project, false);
 				}
 			}
 		}
@@ -185,7 +187,7 @@ public class C4JUtils {
 		if (resources != null) {
 			for (IResource resource : resources) {
 				try {
-					if (resource.getProject().hasNature(C4JProjectNature.ID_NATURE)) {
+					if (resource.getProject().isNatureEnabled(C4JProjectNature.NATURE_ID)) {
 						return resource.getProject();
 					}
 				} catch (CoreException e) {

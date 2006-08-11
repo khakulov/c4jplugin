@@ -5,8 +5,6 @@ import net.sourceforge.c4jplugin.internal.ui.preferences.C4JPreferences;
 import net.sourceforge.c4jplugin.internal.util.C4JUtils;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResourceChangeEvent;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
@@ -49,7 +47,7 @@ public class C4JActivator extends AbstractUIPlugin implements ILaunchListener {
 		DebugPlugin.getDefault().getLaunchManager().addLaunchListener(this);
 		
 		resourceChangeListener = new ResourceChangeListener();
-		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_BUILD);
+		//ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_BUILD);
 	}
 
 	/*
@@ -58,7 +56,7 @@ public class C4JActivator extends AbstractUIPlugin implements ILaunchListener {
 	 */
 	public void stop(BundleContext context) throws Exception {
 		DebugPlugin.getDefault().getLaunchManager().removeLaunchListener(this);
-		ResourcesPlugin.getWorkspace().removeResourceChangeListener(resourceChangeListener);
+		//ResourcesPlugin.getWorkspace().removeResourceChangeListener(resourceChangeListener);
 		
 		plugin = null;
 		super.stop(context);

@@ -10,7 +10,13 @@ public class UIMessages extends NLS {
 		
 	}
 	
+	// Jobs
 	public static String utils_refresh_explorer_job;
+	
+	// Annotation Processor
+	public static String AnnotationProcessor_error_contractNotFound;
+	public static String AnnotationProcessor_error_contractAmbiguous;
+	public static String AnnotationProcessor_warning_contractHasErrors;
 	
 	// Dialogs
 	public static String PluginImportDialog_importConfirmTitle;

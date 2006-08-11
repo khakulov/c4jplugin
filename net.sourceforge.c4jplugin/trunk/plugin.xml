@@ -2,6 +2,24 @@
 <?eclipse version="3.2"?>
 <plugin>
    <extension
+         id="c4jnature"
+         name="C4J Nature"
+         point="org.eclipse.core.resources.natures">
+      <runtime>
+         <run class="net.sourceforge.c4jplugin.internal.nature.C4JProjectNature"/>
+      </runtime>
+      <requires-nature id="org.eclipse.jdt.core.javanature"/>
+      <builder
+            id="net.sourceforge.c4jplugin.c4jbuilder">
+      </builder>
+   </extension>
+   <extension
+         point="org.eclipse.jdt.apt.core.annotationProcessorFactory">
+      <factories enableDefault="true">
+         <factory class="net.sourceforge.c4jplugin.internal.ap.ContractAnnotationProcessorFactory"/>
+      </factories>
+   </extension>
+   <extension
          point="org.eclipse.ui.decorators">
       <decorator
             adaptable="true"
@@ -11,31 +29,34 @@
             lightweight="true"
             state="true">
          <enablement>
-            <and>
-               <objectClass name="org.eclipse.core.resources.IResource"/>
-               <objectClass name="org.eclipse.core.resources.IFile"/>
+            <or>
+               <objectClass
+                     name="org.eclipse.jdt.core.IMethod">
+               </objectClass>
+               <and>
                <objectState
                      name="projectNature"
-                     value="net.sourceforge.c4jplugin.c4jnature"/>
+                     value="net.sourceforge.c4jplugin.c4jnature">
+               </objectState>
+               <objectClass
+                     name="org.eclipse.core.resources.IFile">
+               </objectClass>
             </and>
+            </or>
          </enablement>
          <description>%decoratorDescr</description>
       </decorator>
    </extension>
    <extension
-         point="org.eclipse.jdt.apt.core.annotationProcessorFactory">
-      <factories enableDefault="true">
-         <factory class="net.sourceforge.c4jplugin.internal.ap.ContractAnnotationProcessorFactory"/>
-      </factories>
-   </extension>
-   <extension
-         id="c4jnature"
-         name="C4J Nature"
-         point="org.eclipse.core.resources.natures">
-      <runtime>
-         <run class="net.sourceforge.c4jplugin.internal.nature.C4JProjectNature"/>
-      </runtime>
-      <requires-nature id="org.eclipse.jdt.core.javanature"/>
+         id="c4jbuilder"
+         name="%c4jBuilderName"
+         point="org.eclipse.core.resources.builders">
+      <builder
+            hasNature="true">
+         <run
+               class="net.sourceforge.c4jplugin.internal.builder.C4JBuilder">
+         </run>
+      </builder>
    </extension>
    <extension
          point="org.eclipse.ui.popupMenus">
@@ -139,6 +160,99 @@
             id="net.sourceforge.c4jplugin.internal.ui.preferences.C4JDecoratorPreferencePage"
             name="%preferencePageDecoration">
       </page>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editorActions">
+      <editorContribution
+            id="ieditorcontribution"
+            targetID="org.eclipse.jdt.ui.CompilationUnitEditor">
+         <menu
+               id="net.sourceforge.c4jplugin.menu1"
+               label="Contracted by"
+               >
+         </menu>
+      </editorContribution>
+   </extension>
+   <extension
+         id="classinvariantmarker"
+         name="%c4jClassInvariantMarker"
+         point="org.eclipse.core.resources.markers">
+      <attribute
+            name="contractReferences">
+      </attribute>
+      <super
+            type="org.eclipse.core.resources.textmarker">
+      </super>
+   </extension>
+   <extension
+         id="methodmarker"
+         name="%c4jMethodMarker"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="org.eclipse.core.resources.textmarker">
+      </super>
+      <attribute
+            name="handleIdentifier">
+      </attribute>
+      <attribute
+            name="contractReferences">
+      </attribute>
+      <attribute
+            name="contractType">
+      </attribute>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors.annotationTypes">
+      <type
+            markerType="net.sourceforge.c4jplugin.classinvariantmarker"
+            name="net.sourceforge.c4jplugin.annotationtypes.ClassInvariantAnnotation">
+      </type>
+      <type
+            markerType="net.sourceforge.c4jplugin.methodmarker"
+            name="net.sourceforge.c4jplugin.annotationtypes.ContractedMethodAnnotation">
+      </type>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors.markerAnnotationSpecification">
+      <specification
+            annotationType="net.sourceforge.c4jplugin.annotationtypes.ClassInvariantAnnotation"
+            colorPreferenceKey="c4jClassInvariantIndicationColor"
+            colorPreferenceValue="255,170,35"
+            contributesToHeader="false"
+            icon="icons/class_invariant.gif"
+            includeOnPreferencePage="true"
+            label="%c4jClassInvariantAnnotation"
+            overviewRulerPreferenceKey="c4jClassInvariantIndicationInOverviewRuler"
+            overviewRulerPreferenceValue="true"
+            textPreferenceKey="c4jClassInvariantIndication"
+            textPreferenceValue="false"
+            verticalRulerPreferenceKey="c4jClassInvariantIndicationInVerticalRuler"
+            verticalRulerPreferenceValue="true">
+      </specification>
+      <specification
+            annotationImageProvider="net.sourceforge.c4jplugin.internal.annotationtypes.MethodAnnotationImageProvider"
+            annotationType="net.sourceforge.c4jplugin.annotationtypes.ContractedMethodAnnotation"
+            colorPreferenceKey="c4jMethodIndicationColor"
+            colorPreferenceValue="255,170,35"
+            contributesToHeader="false"
+            includeOnPreferencePage="true"
+            label="%c4jMethodAnnotation"
+            overviewRulerPreferenceKey="c4jMethodIndicationInOverviewRuler"
+            overviewRulerPreferenceValue="true"
+            textPreferenceKey="c4jMethodIndication"
+            textPreferenceValue="false"
+            verticalRulerPreferenceKey="c4jMethodIndicationInVerticalRuler"
+            verticalRulerPreferenceValue="true">
+      </specification>
+   </extension>
+   <extension
+         point="org.eclipse.jdt.core.compilationParticipant">
+      <compilationParticipant
+            class="net.sourceforge.c4jplugin.internal.markers.C4JCompilationParticipant"
+            createsProblems="false"
+            id="net.sourceforge.c4jplugin."
+            modifiesEnvironment="false">
+      </compilationParticipant>
    </extension>
 
 </plugin>

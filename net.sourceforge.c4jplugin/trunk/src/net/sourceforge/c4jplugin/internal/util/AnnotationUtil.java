@@ -1,12 +1,23 @@
 package net.sourceforge.c4jplugin.internal.util;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Vector;
+
+import net.sourceforge.c4jplugin.C4JActivator;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.ISourceRange;
@@ -19,12 +30,27 @@ import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
+/**
+ * @author sascha
+ *
+ */
+/**
+ * @author sascha
+ *
+ */
 public class AnnotationUtil {
 	
-	static public final int PROPERTY_NOT_CONTRACTED = 0;
-	static public final int PROPERTY_IS_CONTRACTED = 1;
+	static public final String PROPERTY_NOT_CONTRACTED = "false";
+	static public final String PROPERTY_IS_CONTRACTED = "true";
 	
-	static public final QualifiedName QN_CONTRACT_PROPERTY = new QualifiedName("net.sourceforge.c4jplugin", "contracted");
+	// persistent property
+	static public final QualifiedName QN_CONTRACT_PROPERTY = new QualifiedName(C4JActivator.PLUGIN_ID, "isContracted");
+	// session property
+	static public final QualifiedName QN_CONTRACT_REFERENCES = new QualifiedName(C4JActivator.PLUGIN_ID, "contractReferences");
+	
+	static private final String ANNOTATION_CONTRACT_REFERENCE = "ContractReference";
+	
+	static private final ContractedClassVisitor contractedClassVisitor = new ContractedClassVisitor();
 	
 	/**
 	 * Determines if the java element contains a type with a specific annotation.
@@ -37,21 +63,21 @@ public class AnnotationUtil {
 	 * @param annotationName the qualified or unqualified name of the annotation to look for
 	 * @return true if the type is found in the element, false otherwise
 	 */
-	static public boolean hasContractReference(IJavaElement element, String annotationType) {
+	static private String getContractReference(IJavaElement element) {
 		try {
 			IType type = getType(element);
-			return hasContractReference(type, annotationType);
+			return getContractReferenceHandle(type);
 		} catch (JavaModelException e) {
 			e.printStackTrace();
 		}
 		
-		return false;
+		return null;
 	}
 	
-	static public boolean hasContractReference(IType type, String annotationType) {
+	static private String getContractReferenceHandle(IType type) {
 		try {			
 			if (type == null || !type.exists()) {
-				return false;
+				return null;
 			}
 			
 			IBuffer buffer= null;
@@ -61,7 +87,7 @@ public class AnnotationUtil {
 			} else if (openable instanceof IClassFile) {
 				buffer= ((IClassFile) openable).getBuffer();
 			}
-			if (buffer == null) return false;
+			if (buffer == null) return null;
 			
 			ISourceRange sourceRange= type.getSourceRange();
 			ISourceRange nameRange= type.getNameRange();
@@ -69,39 +95,46 @@ public class AnnotationUtil {
 				IScanner scanner= ToolFactory.createScanner(false, false, true, false);
 				scanner.setSource(buffer.getCharacters());
 				scanner.resetTo(sourceRange.getOffset(), nameRange.getOffset());
-				String arg = findAnnotation(scanner, annotationType);
-				if (arg == null || arg.length() == 0) return false;
+				String arg = findAnnotation(scanner, ANNOTATION_CONTRACT_REFERENCE);
+				if (arg == null || arg.length() == 0) return null;
 				
-				boolean resolved = true;
 				String[][] matches = type.resolveType(arg);
-				if (matches == null) {
-					// could not resolve the contractValue as a type
-					System.out.println("Could not resolve contract " + arg + " in: " + type.getElementName());
-					resolved = false;
-				}
-				else if (matches.length > 1) {
-					// the contractValue is ambigious
-					System.out.println("Ambigouties of " + arg + " in: " + type.getElementName());
-					resolved = false;
+				if (matches == null || matches.length > 1) {
+					// the contractValue cannot be resolved or is ambiguous
+					return null;
 				}
 				
-				if (resolved) return true;
-				return false;
+				IType resolvedType = type.getJavaProject().findType(matches[0][0], matches[0][1]);
+				// check if the resolved resource has java errors
+				if (hasJavaErrors(resolvedType))
+					return null;
+				
+				// resolved type has no java errors
+				return resolvedType.getHandleIdentifier();
 			}
-		} catch (JavaModelException e) {
-			e.printStackTrace();
-		} catch (InvalidInputException e) {
-			e.printStackTrace();
-		}
-		return false;
+		} 
+		catch (JavaModelException e) {}
+		catch (InvalidInputException e) {}
+		
+		return null;
 	}
 	
-	static public boolean checkContract(IResource resource) {
+	static public void cleanResource(IResource resource) throws CoreException {
+		resource.setPersistentProperty(QN_CONTRACT_PROPERTY, null);
+		resource.setSessionProperty(QN_CONTRACT_REFERENCES, null);
+	}
+	
+	
+	/**
+	 * @param resource
+	 * @return true if the contract status has changed
+	 */
+	static public boolean checkResourceForContracts(IResource resource) {
 		IJavaElement javaElement = JavaCore.create(resource);
-		return checkContract(javaElement);
+		return checkResourceForContracts(javaElement);
 	}
 	
-	static public boolean checkContract(IJavaElement javaElement) {
+	static private boolean checkResourceForContracts(IJavaElement javaElement) {
 		try {
 			if (javaElement != null) {
 				System.out.print("checking contract of: " + javaElement.getElementName() + "... ");
@@ -109,38 +142,67 @@ public class AnnotationUtil {
 				IResource resource = javaElement.getResource();
 				IType type = AnnotationUtil.getType(javaElement);
 				if (type != null) {
-					if (AnnotationUtil.hasContractReference(type, "ContractReference")) {
+					Vector<String> contractReferences = new Vector<String>();
+					String ref = getContractReferenceHandle(type);
+					//System.out.print("[" + ref + "]");
+					if (ref != null) {
 						// we found a class which is directly contracted
-						resource.setSessionProperty(QN_CONTRACT_PROPERTY, PROPERTY_IS_CONTRACTED);
-						System.out.println("TRUE");
-						return true;
+						contractReferences.add(ref);
 					}
-					else {
-						// search all super types for contracts
-						IType[] superTypes = type.newSupertypeHierarchy(null).getAllSupertypes(type);
-						for (IType superType : superTypes) {
-							IResource superResource = superType.getResource();
-							if (superResource == null) continue;
-							Integer contracted = (Integer)superResource.getSessionProperty(QN_CONTRACT_PROPERTY);
-							if (contracted == null) {
-								// the supertype has not yet been checked for contracts
-								if (AnnotationUtil.hasContractReference(superType, "ContractReference")) {
-									resource.setSessionProperty(QN_CONTRACT_PROPERTY, PROPERTY_IS_CONTRACTED);
-									System.out.println("TRUE");
-									return true;
-								}
-							}
-							else if (contracted == AnnotationUtil.PROPERTY_IS_CONTRACTED) {
-								// the supertype is contracted => this type too
-								resource.setSessionProperty(QN_CONTRACT_PROPERTY, PROPERTY_IS_CONTRACTED);
-								System.out.println("TRUE");
-								return true;
+					
+					// search all super types for contracts
+					IType[] superTypes = type.newSupertypeHierarchy(null).getSupertypes(type);
+					for (IType superType : superTypes) {
+						System.out.print("checking supertype: " + superType.getElementName());
+						IResource superResource = superType.getResource();
+						if (superResource == null) continue;
+						
+						String contracted = superResource.getPersistentProperty(QN_CONTRACT_PROPERTY);
+						boolean superTypeIsContracted = false;
+						if (contracted == null) {
+							// the supertype has not yet been checked for contracts
+							superTypeIsContracted = checkResourceForContracts(superType);
+						}
+						else if (contracted.equals(PROPERTY_IS_CONTRACTED)) {
+							superTypeIsContracted = true;
+							if (superResource.getSessionProperty(QN_CONTRACT_REFERENCES) == null) {
+								// the session property has not yet been set
+								superTypeIsContracted = checkResourceForContracts(superType);
 							}
 						}
+						
+						if (superTypeIsContracted) {
+							// the supertype is contracted, add its contract reference handle
+							String[] superRefs = (String[])superType.getResource().getSessionProperty(QN_CONTRACT_REFERENCES);
+							for (String superRef : superRefs)
+								contractReferences.add(superRef);
+						}
 					}
+					
+					if (contractReferences.size() > 0) {
+						// this type is contracted
+						resource.setPersistentProperty(QN_CONTRACT_PROPERTY, PROPERTY_IS_CONTRACTED);
+						resource.setSessionProperty(QN_CONTRACT_REFERENCES, contractReferences.toArray(new String[] {}));
+						System.out.println("TRUE");
+					}
+					else {
+						resource.setPersistentProperty(QN_CONTRACT_PROPERTY, PROPERTY_NOT_CONTRACTED);
+						resource.setSessionProperty(QN_CONTRACT_REFERENCES, null);
+						System.out.println("FALSE");
+					}
+						
 				}
-				resource.setSessionProperty(QN_CONTRACT_PROPERTY, PROPERTY_NOT_CONTRACTED);
-				System.out.println("FALSE");
+				else {
+					resource.setPersistentProperty(QN_CONTRACT_PROPERTY, PROPERTY_NOT_CONTRACTED);
+					resource.setSessionProperty(QN_CONTRACT_REFERENCES, null);
+					System.out.println("FALSE");
+				}
+				
+				String isContracted = resource.getPersistentProperty(QN_CONTRACT_PROPERTY);
+				if (isContracted == null || isContracted.equals(PROPERTY_NOT_CONTRACTED)) {
+					return false;
+				}
+				else return true;
 			}
 		} 
 		catch (JavaModelException e) {}
@@ -149,10 +211,43 @@ public class AnnotationUtil {
 		return false;
 	}
 	
+	static public Collection<IResource> checkAllSubtypes(IResource resource) {
+		Vector<IResource> resources = new Vector<IResource>();
+		try {
+			IType type = getType(JavaCore.create(resource));
+			if (type == null)
+				return Collections.emptyList();
+			IType[] subTypes = type.newTypeHierarchy(type.getJavaProject(),
+					null).getAllSubtypes(type);
+			for (IType subType : subTypes) {
+				checkResourceForContracts(subType);
+				resources.add(subType.getResource());
+			}
+			return resources;
+		} catch (JavaModelException e) {
+			return resources;
+		} 
+		
+	}
+	
+	static public IResource[] getResourcesContractedBy(IProject project, String handleIdentifier) {
+		try {
+			contractedClassVisitor.setContractHandle(handleIdentifier);
+			project.accept(contractedClassVisitor);
+			return contractedClassVisitor.getContractedResources();
+		} catch (JavaModelException e) {
+			e.printStackTrace();
+		} catch (CoreException e) {
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
 	static public IType getType(IJavaElement element) throws JavaModelException {
         IType type = null;
         if (element instanceof ICompilationUnit) {
-            type= ((ICompilationUnit) element).findPrimaryType();
+            type = ((ICompilationUnit) element).findPrimaryType();
         }
         else if (element instanceof IClassFile) {
             type = ((IClassFile)element).getType();
@@ -165,6 +260,23 @@ public class AnnotationUtil {
         }
         return type;
     }
+	
+	static public boolean hasJavaErrors(IType type) {
+		try {
+			IMarker[] markers = type.getCompilationUnit().getCorrespondingResource().findMarkers(
+					IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, true, 
+					IResource.DEPTH_INFINITE);
+			if (markers.length > 0) return true;
+			return false;
+		} 
+		catch (JavaModelException e) {
+			e.printStackTrace();
+		} 
+		catch (CoreException e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
 	
 	static private String findAnnotation(IScanner scanner, String annotationName) throws InvalidInputException {
 		String simpleName= Signature.getSimpleName(annotationName);
@@ -213,5 +325,35 @@ public class AnnotationUtil {
 			tok = scanner.getNextToken();
 		}
 		return tok;
+	}
+	
+	static private class ContractedClassVisitor implements IResourceVisitor {
+		
+		private String contractHandle;
+		private Vector<IResource> contractedResources = new Vector<IResource>();
+		
+		public void setContractHandle(String contractHandle) {
+			this.contractHandle = contractHandle;
+			contractedResources.clear();
+		}
+		
+		public IResource[] getContractedResources() {
+			return contractedResources.toArray(new IResource[] {});
+		}
+		
+		public boolean visit(IResource resource) throws CoreException {
+			if (resource instanceof IFile && resource.getName().endsWith(".java")) {
+				String[] contractHandles = (String[])resource.getSessionProperty(AnnotationUtil.QN_CONTRACT_REFERENCES);
+				if (contractHandles != null) {
+					for (String handle : contractHandles) {
+						if (handle.equals(contractHandle)) {
+							contractedResources.add(resource);
+						}
+					}
+				}
+			}
+			return true;
+		}
+		
 	}
 }

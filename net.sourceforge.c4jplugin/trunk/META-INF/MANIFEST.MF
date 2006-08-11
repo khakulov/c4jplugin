@@ -22,6 +22,10 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.debug.ui,
  org.eclipse.debug.core,
  org.eclipse.jdt.launching,
- org.eclipse.core.variables
+ org.eclipse.core.variables,
+ org.eclipse.ui.editors,
+ org.eclipse.ui.workbench.texteditor,
+ org.eclipse.jface.text,
+ org.eclipse.core.expressions
 Eclipse-LazyStart: true
 Bundle-ClassPath: .

@@ -5,14 +5,15 @@ import java.util.Map;
 import java.util.Set;
 
 import net.sourceforge.c4j.ContractReference;
+import net.sourceforge.c4jplugin.internal.ui.text.UIMessages;
 import net.sourceforge.c4jplugin.internal.util.AnnotationUtil;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.apt.core.env.EclipseAnnotationProcessorEnvironment;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.osgi.util.NLS;
 
 import com.sun.mirror.apt.AnnotationProcessor;
 import com.sun.mirror.apt.AnnotationProcessorEnvironment;
@@ -57,32 +58,22 @@ public class ContractAnnotationProcessor implements AnnotationProcessor {
 							try {
 								IType type = AnnotationUtil.getType(javaElement);
 								String[][] matches = type.resolveType((String)contractValue);
-								boolean resolved = true;
+								
 								if (matches == null) {
 									// could not resolve the contractValue as a type
-									env.getMessager().printError(annoValue.getPosition(), "\"" + contractValue + "\" cannot be resolved");
-									resolved = false;
+									env.getMessager().printError(annoValue.getPosition(), NLS.bind(UIMessages.AnnotationProcessor_error_contractNotFound, contractValue));
 								}
 								else if (matches.length > 1) {
-									// the contractValue is ambigious
-									env.getMessager().printError(annoValue.getPosition(), "\"" + contractValue + "\" cannot uniquely be resolved");
-									resolved = false;
-								}
-								
-								if (resolved) {
-									type.getResource().setSessionProperty(AnnotationUtil.QN_CONTRACT_PROPERTY, AnnotationUtil.PROPERTY_IS_CONTRACTED);
+									// the contractValue is ambiguous
+									env.getMessager().printError(annoValue.getPosition(), NLS.bind(UIMessages.AnnotationProcessor_error_contractAmbiguous, contractValue));
 								}
 								else {
-									type.getResource().setSessionProperty(AnnotationUtil.QN_CONTRACT_PROPERTY, null);
-									
+									// check if the resolved contract has compilation errors
+									IType resolvedType = type.getJavaProject().findType(matches[0][0], matches[0][1]);									
+									if (AnnotationUtil.hasJavaErrors(resolvedType))
+										env.getMessager().printWarning(annoValue.getPosition(), NLS.bind(UIMessages.AnnotationProcessor_warning_contractHasErrors, contractValue));
 								}
-								
-							} catch (JavaModelException e) {
-								e.printStackTrace();
-							} catch (CoreException e) {
-								e.printStackTrace();
-							}
-							
+							} catch (JavaModelException e) {}
 						}
 					}
 				}
