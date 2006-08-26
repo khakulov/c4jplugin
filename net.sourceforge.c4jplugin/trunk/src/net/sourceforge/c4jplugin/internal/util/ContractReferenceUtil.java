@@ -92,6 +92,7 @@ public class ContractReferenceUtil {
 						methodMarker.setAttribute(IMarker.LINE_NUMBER, cu.getLineNumber(method.getNameRange().getOffset()));			
 						methodMarker.setAttribute(IMethodMarker.ATTR_CONTRACT_TYPE, IMethodMarker.VALUE_CLASS_INVARIANT);
 						methodMarker.setAttribute(IMethodMarker.ATTR_HANDLE_IDENTIFIER, method.getHandleIdentifier());
+						methodMarker.setAttribute(IMarker.MESSAGE, UIMessages.MarkerMessage_contract_classInvariant);
 					}
 					
 					if (contractType != null) {
@@ -116,6 +117,7 @@ public class ContractReferenceUtil {
 									methodMarker.setAttribute(IMethodMarker.ATTR_CONTRACT_TYPE, contractType);
 									methodMarker.setAttribute(IMarker.LINE_NUMBER, cu.getLineNumber(method.getNameRange().getOffset()));
 									methodMarker.setAttribute(IMethodMarker.ATTR_HANDLE_IDENTIFIER, method.getHandleIdentifier());
+									methodMarker.setAttribute(IMarker.MESSAGE, UIMessages.MarkerMessage_contract_methodIsContracting);
 									isContracting = true;
 									break;
 								}
@@ -155,6 +157,7 @@ public class ContractReferenceUtil {
 				Vector<IType> typeCache = new Vector<IType>();
 				
 				// checking for class invariants
+				String invariantList = "";
 				for (IResource reference : references) {
 					IJavaElement refElement = JavaCore.create(reference);
 					IType refType = getType(refElement);
@@ -163,42 +166,61 @@ public class ContractReferenceUtil {
 					IMethod methodClassInvariant = refType.getMethod("classInvariant", new String[] {});
 					if (methodClassInvariant != null && methodClassInvariant.exists()) {
 						invariantCounter++;
+						invariantList += " - " + reference.getName() + "\n";
 						try {
 							if (markerClassInvariant == null) {
-									markerClassInvariant = resource.createMarker(IContractedClassInvariantMarker.ID);
-									markerClassInvariant.setAttribute(IMarker.LINE_NUMBER, cu.getLineNumber(refType.getNameRange().getOffset()));
-									markerClassInvariant.setAttribute(IMarker.MESSAGE, NLS.bind(UIMessages.MarkerMessage_contracted_classInvariant, 1));
-							}
-							else {
-								markerClassInvariant.setAttribute(IMarker.MESSAGE, NLS.bind(UIMessages.MarkerMessage_contracted_classInvariant, invariantCounter));
+								markerClassInvariant = resource.createMarker(IContractedClassInvariantMarker.ID);
+								markerClassInvariant.setAttribute(IMarker.LINE_NUMBER, cu.getLineNumber(refType.getNameRange().getOffset()));
 							}
 						} catch (CoreException e) {}
 					}
 				}
+				if (markerClassInvariant != null) {
+					try {
+						if (invariantList.length() > 0) invariantList = "<br>\n" + invariantList;
+						markerClassInvariant.setAttribute(IMarker.MESSAGE, NLS.bind(UIMessages.MarkerMessage_contracted_classInvariant, invariantCounter) + invariantList);
+					} catch (CoreException e) {}
+				}
 				
+				// checking for pre and post methods
 				for (IMethod method : type.getMethods()) {
 					boolean postMethod = false;
 					boolean preMethod = false;
+					String contractList = "";
 					for (IType refType : typeCache) {
-						if (!postMethod)
-							postMethod = refType.getMethod("post_" + method.getElementName(), method.getParameterTypes()).exists();
-						if (!preMethod)
-							preMethod = refType.getMethod("pre_" + method.getElementName(), method.getParameterTypes()).exists();
+						boolean refAdded = false;
+						if (refType.getMethod("post_" + method.getElementName(), method.getParameterTypes()).exists()) {
+							postMethod = true;
+							contractList += " - " + refType.getCompilationUnit().getCorrespondingResource().getName() + "\n";
+							refAdded = true;
+						}
+						if (refType.getMethod("pre_" + method.getElementName(), method.getParameterTypes()).exists()) {
+							preMethod = true;
+							if (!refAdded) {
+								contractList += " - " + refType.getCompilationUnit().getCorrespondingResource().getName() + "\n";
+							}
+						}
 					}
+					
+					if (contractList.length() > 0)
+						contractList = "\n\n" + contractList;
 				
 					try {
 						IMarker marker = null;
 						if (postMethod && preMethod) {
 							marker = resource.createMarker(IContractedMethodMarker.ID);
 							marker.setAttribute(IContractedMethodMarker.ATTR_CONTRACT_TYPE, IContractedMethodMarker.VALUE_PREPOST_METHOD);
+							marker.setAttribute(IMarker.MESSAGE, UIMessages.MarkerMessage_contracted_prepostMethod + contractList);
 						}
 						else if (postMethod) {
 							marker = resource.createMarker(IContractedMethodMarker.ID);
 							marker.setAttribute(IContractedMethodMarker.ATTR_CONTRACT_TYPE, IContractedMethodMarker.VALUE_POST_METHOD);
+							marker.setAttribute(IMarker.MESSAGE, UIMessages.MarkerMessage_contracted_postMethod + contractList);
 						}
 						else if (preMethod) {
 							marker = resource.createMarker(IContractedMethodMarker.ID);
 							marker.setAttribute(IContractedMethodMarker.ATTR_CONTRACT_TYPE, IContractedMethodMarker.VALUE_PRE_METHOD);
+							marker.setAttribute(IMarker.MESSAGE, UIMessages.MarkerMessage_contracted_preMethod + contractList);
 						}
 						
 						if (marker != null) {

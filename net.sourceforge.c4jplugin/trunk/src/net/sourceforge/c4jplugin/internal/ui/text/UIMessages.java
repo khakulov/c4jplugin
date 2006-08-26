@@ -90,7 +90,12 @@ public class UIMessages extends NLS {
 	public static String PreferencesDecorations_infoMsg_willDisableDeco;
 	
 	// Marker Messages
+	public static String MarkerMessage_contract_methodIsContracting;
+	public static String MarkerMessage_contract_classInvariant;
 	public static String MarkerMessage_contracted_classInvariant;
+	public static String MarkerMessage_contracted_preMethod;
+	public static String MarkerMessage_contracted_postMethod;
+	public static String MarkerMessage_contracted_prepostMethod;
 	public static String MarkerMessage_problem_methodNotContracting;
 	
 	// Log Messages
