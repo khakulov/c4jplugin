@@ -3,7 +3,7 @@ package net.sourceforge.c4jplugin.internal.ui.preferences;
 import java.util.ArrayList;
 
 import net.sourceforge.c4jplugin.C4JActivator;
-import net.sourceforge.c4jplugin.internal.decorators.ContractDecorator;
+import net.sourceforge.c4jplugin.internal.decorators.C4JDecorator;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
@@ -29,8 +29,10 @@ public class C4JPreferences {
 	
 	// Decoration Preferences
 	// ------------------------------
-	public static final String DECORATION_CLASSES = C4JActivator.PLUGIN_ID + ".preferences.decorationClasses";
-	public static final String DECORATION_METHODS = C4JActivator.PLUGIN_ID + ".preferences.decorationMethods";
+	public static final String DECORATION_CONTRACTED_CLASSES = C4JActivator.PLUGIN_ID + ".preferences.decorationContractedClasses";
+	public static final String DECORATION_CONTRACTED_METHODS = C4JActivator.PLUGIN_ID + ".preferences.decorationContractedMethods";
+	public static final String DECORATION_CONTRACTS = C4JActivator.PLUGIN_ID + ".preferences.decorationContracts";
+	public static final String DECORATION_CONTRACT_METHODS = C4JActivator.PLUGIN_ID + ".preferences.decorationContractMethods";
 	public static final String DECORATION_POSITION = C4JActivator.PLUGIN_ID + ".preferences.decorationPosition";
 	
 	private static ArrayList<String> configTypes = new ArrayList<String>();
@@ -237,47 +239,84 @@ public class C4JPreferences {
 		IPreferenceStore store = C4JActivator.getDefault()
 			.getPreferenceStore();
 		store.setValue(DECORATION_POSITION, pos);
-		ContractDecorator.setPosition(pos);
+		C4JDecorator.setPosition(pos);
 	}
 	
-	static public boolean getDecorateClasses() {
+	static public boolean getDecorateContractedClasses() {
 		IPreferenceStore store = C4JActivator.getDefault()
 			.getPreferenceStore();
-		return store.getBoolean(DECORATION_CLASSES);
+		return store.getBoolean(DECORATION_CONTRACTED_CLASSES);
 	}
 	
-	static public boolean getDefaultDecorateClasses() {
+	static public boolean getDefaultDecorateContractedClasses() {
 		IPreferenceStore store = C4JActivator.getDefault()
 		.getPreferenceStore();
-		return store.getDefaultBoolean(DECORATION_CLASSES);
+		return store.getDefaultBoolean(DECORATION_CONTRACTED_CLASSES);
 	}
 	
-	static public void setDecorateClasses(boolean value) {
+	static public void setDecorateContractedClasses(boolean value) {
 		IPreferenceStore store = C4JActivator.getDefault()
 			.getPreferenceStore();
-		store.setValue(DECORATION_CLASSES, value);
-		ContractDecorator.setDecorateClasses(value);
+		store.setValue(DECORATION_CONTRACTED_CLASSES, value);
+		C4JDecorator.setDecorateContractedClasses(value);
 	}
 	
-	static public boolean getDecorateMethods() {
+	static public boolean getDecorateContractedMethods() {
 		IPreferenceStore store = C4JActivator.getDefault()
 			.getPreferenceStore();
-		return store.getBoolean(DECORATION_METHODS);
+		return store.getBoolean(DECORATION_CONTRACTED_METHODS);
 	}
 	
-	static public boolean getDefaultDecorateMethods() {
+	static public boolean getDefaultDecorateContractedMethods() {
 		IPreferenceStore store = C4JActivator.getDefault()
 		.getPreferenceStore();
-		return store.getDefaultBoolean(DECORATION_METHODS);
+		return store.getDefaultBoolean(DECORATION_CONTRACTED_METHODS);
 	}
 	
-	static public void setDecorateMethods(boolean value) {
+	static public void setDecorateContractedMethods(boolean value) {
 		IPreferenceStore store = C4JActivator.getDefault()
 			.getPreferenceStore();
-		store.setValue(DECORATION_METHODS, value);
-		ContractDecorator.setDecorateMethods(value);
+		store.setValue(DECORATION_CONTRACTED_METHODS, value);
+		C4JDecorator.setDecorateContractedMethods(value);
 	}
 	
+	static public boolean getDecorateContracts() {
+		IPreferenceStore store = C4JActivator.getDefault()
+			.getPreferenceStore();
+		return store.getBoolean(DECORATION_CONTRACTS);
+	}
+	
+	static public boolean getDefaultDecorateContracts() {
+		IPreferenceStore store = C4JActivator.getDefault()
+		.getPreferenceStore();
+		return store.getDefaultBoolean(DECORATION_CONTRACTS);
+	}
+	
+	static public void setDecorateContracts(boolean value) {
+		IPreferenceStore store = C4JActivator.getDefault()
+			.getPreferenceStore();
+		store.setValue(DECORATION_CONTRACTS, value);
+		C4JDecorator.setDecorateContracts(value);
+	}
+	
+	static public boolean getDecorateContractMethods() {
+		IPreferenceStore store = C4JActivator.getDefault()
+			.getPreferenceStore();
+		return store.getBoolean(DECORATION_CONTRACT_METHODS);
+	}
+	
+	static public boolean getDefaultDecorateContractMethods() {
+		IPreferenceStore store = C4JActivator.getDefault()
+		.getPreferenceStore();
+		return store.getDefaultBoolean(DECORATION_CONTRACT_METHODS);
+	}
+	
+	static public void setDecorateContractMethods(boolean value) {
+		IPreferenceStore store = C4JActivator.getDefault()
+			.getPreferenceStore();
+		store.setValue(DECORATION_CONTRACT_METHODS, value);
+		C4JDecorator.setDecorateContractMethods(value);
+	}
 	// Project Scope Preferences
 	// ------------------------------------------------
 	

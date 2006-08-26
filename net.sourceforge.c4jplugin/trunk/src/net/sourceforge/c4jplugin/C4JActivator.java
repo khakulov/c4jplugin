@@ -1,15 +1,43 @@
 package net.sourceforge.c4jplugin;
 
-import net.sourceforge.c4jplugin.internal.decorators.ResourceChangeListener;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Vector;
+
+import net.sourceforge.c4jplugin.internal.core.C4JSaveParticipant;
+import net.sourceforge.c4jplugin.internal.core.ContractReferenceModel;
+import net.sourceforge.c4jplugin.internal.core.ResourceChangeListener;
+import net.sourceforge.c4jplugin.internal.decorators.C4JDecorator;
+import net.sourceforge.c4jplugin.internal.nature.C4JProjectNature;
 import net.sourceforge.c4jplugin.internal.ui.preferences.C4JPreferences;
+import net.sourceforge.c4jplugin.internal.ui.text.UIMessages;
 import net.sourceforge.c4jplugin.internal.util.C4JUtils;
+import net.sourceforge.c4jplugin.internal.util.ContractReferenceUtil;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.ISaveParticipant;
+import org.eclipse.core.resources.ISavedState;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchListener;
+import org.eclipse.ui.IMemento;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.WorkbenchException;
+import org.eclipse.ui.XMLMemento;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -43,11 +71,31 @@ public class C4JActivator extends AbstractUIPlugin implements ILaunchListener {
 	 */
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
+
+		ISaveParticipant saveParticipant = new C4JSaveParticipant();
+		ISavedState lastState = ResourcesPlugin.getWorkspace().addSaveParticipant(this, saveParticipant);
+
+		if (lastState != null) {    
+			String saveFileName = lastState.lookup(new Path(C4JSaveParticipant.SAVE_FILENAME)).toString();
+			File file = getStateLocation().append(saveFileName).toFile();
+			try {
+				readState(file);
+			}
+			catch (Exception e) {
+				C4JActivator.getDefault().getLog().log(
+						new Status(IStatus.ERROR, C4JActivator.PLUGIN_ID, 
+								IStatus.OK, UIMessages.LogMessage_readingStateFailed, e));
+				refreshContractReferenceModel();
+			}
+		}
+		else {
+			refreshContractReferenceModel();
+		}
 		
 		DebugPlugin.getDefault().getLaunchManager().addLaunchListener(this);
 		
 		resourceChangeListener = new ResourceChangeListener();
-		//ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_BUILD);
+		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_BUILD);
 	}
 
 	/*
@@ -56,7 +104,7 @@ public class C4JActivator extends AbstractUIPlugin implements ILaunchListener {
 	 */
 	public void stop(BundleContext context) throws Exception {
 		DebugPlugin.getDefault().getLaunchManager().removeLaunchListener(this);
-		//ResourcesPlugin.getWorkspace().removeResourceChangeListener(resourceChangeListener);
+		ResourcesPlugin.getWorkspace().removeResourceChangeListener(resourceChangeListener);
 		
 		plugin = null;
 		super.stop(context);
@@ -71,7 +119,102 @@ public class C4JActivator extends AbstractUIPlugin implements ILaunchListener {
 		return plugin;
 	}
 
-
+	public void writeState(File file) throws IOException {
+		XMLMemento memento = XMLMemento.createWriteRoot("contractMapping");
+		ContractReferenceModel.saveModel(memento);
+		memento.save(new FileWriter(file));
+	}
+	
+	public void readState(File file) throws FileNotFoundException, WorkbenchException, CoreException {
+		IMemento memento = XMLMemento.createReadRoot(new FileReader(file));
+		ContractReferenceModel.loadModel(memento);
+	}
+	
+	public void refreshContractReferenceModel() {
+		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+		
+		// get all open c4j projects
+		Vector<IProject> vecProjects = new Vector<IProject>();
+		for (IProject project : projects) {
+			try {
+				if (project.isOpen() && project.isNatureEnabled(C4JProjectNature.NATURE_ID))
+					vecProjects.add(project);
+			} catch (CoreException e) {}
+		}
+		
+		refreshContractReferenceModel(vecProjects.toArray(new IProject[] {}));
+	}
+	
+	public void refreshContractReferenceModel(final IProject[] projects) {
+		WorkspaceJob wsJob = new WorkspaceJob("C4J Model Job") {
+			@Override
+			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
+				
+				// add projects which are referenced by this projects
+				HashSet<IProject> depProjects = new HashSet<IProject>();
+				for (IProject project : projects) {
+					depProjects.add(project);
+					try {
+						IProject[] refProjects = project.getReferencedProjects();
+						for (IProject refProject : refProjects) {
+							if (refProject.isOpen())
+								depProjects.add(refProject);
+						}
+					}
+					catch (CoreException e) {}
+				}
+				
+				monitor.beginTask("C4J:", depProjects.size()*20 + 2);
+				
+				boolean clearProject = true;
+				IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+				HashSet<IProject> setProjects = new HashSet<IProject>();
+				for (IProject project : projects) {
+					try {
+						if (project.isOpen() && project.isNatureEnabled(C4JProjectNature.NATURE_ID)) {
+							setProjects.add(project);
+							IProject[] refProjects = project.getReferencedProjects();
+							for (IProject refProject : refProjects) {
+								if (refProject.isOpen())
+									setProjects.add(refProject);
+							}
+						}
+					} catch (CoreException e) {}
+				}
+				if (setProjects.size() == depProjects.size()) {
+					clearProject = false;
+					ContractReferenceModel.clearModel();
+				}
+				monitor.worked(1);
+				
+				for (IProject project : depProjects) {
+					ContractReferenceUtil.deleteMarkers(project);
+				}
+				monitor.worked(1);
+				
+				for (IProject project : depProjects) {
+					if (monitor.isCanceled()) break;
+					System.out.println("[REFRESH] project " + project.getName());
+					IProgressMonitor subMonitor = new SubProgressMonitor(monitor, 20);
+					ContractReferenceUtil.refreshModel(project, subMonitor, clearProject);
+				}
+				monitor.done();
+				
+				PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
+					public void run() {
+						((C4JDecorator)PlatformUI.getWorkbench().getDecoratorManager().getBaseLabelProvider(C4JDecorator.ID)).refreshAll();
+					}
+				});
+				
+				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+				return Status.OK_STATUS;
+			}
+		};
+		
+		wsJob.setUser(true);
+		wsJob.schedule();
+	}
+	
 	public void launchAdded(ILaunch launch) {
 		ILaunchConfiguration config = launch.getLaunchConfiguration();
 		IProject project = C4JUtils.getC4JProjectFromLaunchConfig(config);

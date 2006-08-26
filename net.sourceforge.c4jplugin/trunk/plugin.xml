@@ -23,9 +23,9 @@
          point="org.eclipse.ui.decorators">
       <decorator
             adaptable="true"
-            class="net.sourceforge.c4jplugin.internal.decorators.ContractDecorator"
-            id="net.sourceforge.c4j.plugin.decorators.Contract"
-            label="%decoratorLabel"
+            class="net.sourceforge.c4jplugin.internal.decorators.C4JDecorator"
+            id="net.sourceforge.c4j.plugin.decorators.C4JDecorator"
+            label="%decoratorLabelC4J"
             lightweight="true"
             state="true">
          <enablement>
@@ -44,7 +44,7 @@
             </and>
             </or>
          </enablement>
-         <description>%decoratorDescr</description>
+         <description>%decoratorDescrC4J</description>
       </decorator>
    </extension>
    <extension
@@ -96,7 +96,11 @@
             objectClass="org.eclipse.core.resources.IProject">
          <menu
                id="net.sourceforge.c4j.plugin.internal.popup.c4jtools"
-               label="%c4jTools"/>
+               label="%c4jTools">
+            <groupMarker name="group0"/>
+            <separator name="net.sourceforge.c4jplugin.separator2"/>
+            <groupMarker name="group1"/>
+         </menu>
          <visibility>
             <objectState
                   name="nature"
@@ -106,6 +110,28 @@
                class="net.sourceforge.c4jplugin.internal.ui.actions.RemoveC4JNatureAction"
                id="net.sourceforge.c4j.plugin.internal.actions.removec4jnature"
                label="%removeC4JNature"
+               menubarPath="net.sourceforge.c4j.plugin.internal.popup.c4jtools/group1"/>
+      </objectContribution>
+      <objectContribution
+            adaptable="true"
+            id="iprojectcontributions"
+            objectClass="org.eclipse.core.resources.IResource">
+         <menu
+               id="net.sourceforge.c4j.plugin.internal.popup.c4jtools"
+               label="%c4jTools">
+            <groupMarker name="group0"/>
+            <separator name="net.sourceforge.c4jplugin.separator1"/>
+            <groupMarker name="group1"/>
+         </menu>
+         <visibility>
+            <objectState
+                  name="projectNature"
+                  value="net.sourceforge.c4jplugin.c4jnature"/>
+         </visibility>
+         <action
+               class="net.sourceforge.c4jplugin.internal.ui.actions.RefreshC4JModelAction"
+               id="net.sourceforge.c4j.plugin.internal.actions.refreshc4jmodelaction"
+               label="%refreshModelAction"
                menubarPath="net.sourceforge.c4j.plugin.internal.popup.c4jtools/group0"/>
       </objectContribution>
    </extension>
@@ -162,20 +188,8 @@
       </page>
    </extension>
    <extension
-         point="org.eclipse.ui.editorActions">
-      <editorContribution
-            id="ieditorcontribution"
-            targetID="org.eclipse.jdt.ui.CompilationUnitEditor">
-         <menu
-               id="net.sourceforge.c4jplugin.menu1"
-               label="Contracted by"
-               >
-         </menu>
-      </editorContribution>
-   </extension>
-   <extension
-         id="classinvariantmarker"
-         name="%c4jClassInvariantMarker"
+         id="contractedclassinvariantmarker"
+         name="%c4jContractedClassInvariantMarker"
          point="org.eclipse.core.resources.markers">
       <attribute
             name="contractReferences">
@@ -183,10 +197,18 @@
       <super
             type="org.eclipse.core.resources.textmarker">
       </super>
+      <persistent value="true"/>
    </extension>
    <extension
-         id="methodmarker"
-         name="%c4jMethodMarker"
+         id="classinvariantmarker"
+         name="%c4jClassInvariantMarker"
+         point="org.eclipse.core.resources.markers">
+      <super type="net.sourceforge.c4jplugin.methodmarker"/>
+      <persistent value="true"/>
+   </extension>
+   <extension
+         id="contractedmethodmarker"
+         name="%c4jContractedMethodMarker"
          point="org.eclipse.core.resources.markers">
       <super
             type="org.eclipse.core.resources.textmarker">
@@ -200,26 +222,68 @@
       <attribute
             name="contractType">
       </attribute>
+      <persistent value="true"/>
+   </extension>
+   <extension
+         id="methodmarker"
+         name="%c4jMethodMarker"
+         point="org.eclipse.core.resources.markers">
+      <super type="org.eclipse.core.resources.textmarker"/>
+      <persistent value="true"/>
+      <attribute name="handleIdentifier"/>
+      <attribute name="contractType"/>
+   </extension>
+   <extension
+         id="problemmarker"
+         name="%c4jProblemMarker"
+         point="org.eclipse.core.resources.markers">
+      <super type="org.eclipse.core.resources.problemmarker"/>
+      <persistent value="true"/>
    </extension>
    <extension
          point="org.eclipse.ui.editors.annotationTypes">
       <type
+            markerType="net.sourceforge.c4jplugin.contractedclassinvariantmarker"
+            name="net.sourceforge.c4jplugin.annotationtypes.ContractedClassInvariantAnnotation">
+      </type>
+      <type
             markerType="net.sourceforge.c4jplugin.classinvariantmarker"
-            name="net.sourceforge.c4jplugin.annotationtypes.ClassInvariantAnnotation">
+            name="net.sourceforge.c4jplugin.annotationtypes.ClassInvariantAnnotation"/>
+      <type
+            markerType="net.sourceforge.c4jplugin.contractedmethodmarker"
+            name="net.sourceforge.c4jplugin.annotationtypes.ContractedMethodAnnotation">
       </type>
       <type
             markerType="net.sourceforge.c4jplugin.methodmarker"
-            name="net.sourceforge.c4jplugin.annotationtypes.ContractedMethodAnnotation">
-      </type>
+            name="net.sourceforge.c4jplugin.annotationtypes.MethodAnnotation"/>
+      <type
+            markerSeverity="1"
+            markerType="net.sourceforge.c4jplugin.problemmarker"
+            name="net.sourceforge.c4jplugin.annotationtypes.WarningAnnotation"/>
    </extension>
    <extension
          point="org.eclipse.ui.editors.markerAnnotationSpecification">
       <specification
+            annotationType="net.sourceforge.c4jplugin.annotationtypes.ContractedClassInvariantAnnotation"
+            colorPreferenceKey="c4jContractedClassInvariantIndicationColor"
+            colorPreferenceValue="248,157,0"
+            contributesToHeader="false"
+            icon="icons/markers/contracted_class_invariant.gif"
+            includeOnPreferencePage="true"
+            label="%c4jContractedClassInvariantAnnotation"
+            overviewRulerPreferenceKey="c4jContractedClassInvariantIndicationInOverviewRuler"
+            overviewRulerPreferenceValue="true"
+            textPreferenceKey="c4jContractedClassInvariantIndication"
+            textPreferenceValue="false"
+            verticalRulerPreferenceKey="c4jContractedClassInvariantIndicationInVerticalRuler"
+            verticalRulerPreferenceValue="true">
+      </specification>
+      <specification
             annotationType="net.sourceforge.c4jplugin.annotationtypes.ClassInvariantAnnotation"
             colorPreferenceKey="c4jClassInvariantIndicationColor"
-            colorPreferenceValue="255,170,35"
+            colorPreferenceValue="246,76,14"
             contributesToHeader="false"
-            icon="icons/class_invariant.gif"
+            icon="icons/markers/class_invariant.gif"
             includeOnPreferencePage="true"
             label="%c4jClassInvariantAnnotation"
             overviewRulerPreferenceKey="c4jClassInvariantIndicationInOverviewRuler"
@@ -230,10 +294,25 @@
             verticalRulerPreferenceValue="true">
       </specification>
       <specification
-            annotationImageProvider="net.sourceforge.c4jplugin.internal.annotationtypes.MethodAnnotationImageProvider"
+            annotationImageProvider="net.sourceforge.c4jplugin.internal.annotationtypes.ContractedMethodAnnotationImageProvider"
             annotationType="net.sourceforge.c4jplugin.annotationtypes.ContractedMethodAnnotation"
+            colorPreferenceKey="c4jContractedMethodIndicationColor"
+            colorPreferenceValue="248,157,0"
+            contributesToHeader="false"
+            includeOnPreferencePage="true"
+            label="%c4jContractedMethodAnnotation"
+            overviewRulerPreferenceKey="c4jContractedMethodIndicationInOverviewRuler"
+            overviewRulerPreferenceValue="true"
+            textPreferenceKey="c4jContractedMethodIndication"
+            textPreferenceValue="false"
+            verticalRulerPreferenceKey="c4jContractedMethodIndicationInVerticalRuler"
+            verticalRulerPreferenceValue="true">
+      </specification>
+      <specification
+            annotationImageProvider="net.sourceforge.c4jplugin.internal.annotationtypes.MethodAnnotationImageProvider"
+            annotationType="net.sourceforge.c4jplugin.annotationtypes.MethodAnnotation"
             colorPreferenceKey="c4jMethodIndicationColor"
-            colorPreferenceValue="255,170,35"
+            colorPreferenceValue="246,76,14"
             contributesToHeader="false"
             includeOnPreferencePage="true"
             label="%c4jMethodAnnotation"
@@ -244,15 +323,22 @@
             verticalRulerPreferenceKey="c4jMethodIndicationInVerticalRuler"
             verticalRulerPreferenceValue="true">
       </specification>
-   </extension>
-   <extension
-         point="org.eclipse.jdt.core.compilationParticipant">
-      <compilationParticipant
-            class="net.sourceforge.c4jplugin.internal.markers.C4JCompilationParticipant"
-            createsProblems="false"
-            id="net.sourceforge.c4jplugin."
-            modifiesEnvironment="false">
-      </compilationParticipant>
+      <specification
+            annotationType="net.sourceforge.c4jplugin.annotationtypes.WarningAnnotation"
+            colorPreferenceKey="c4jWarningIndicationColor"
+            colorPreferenceValue="244,200,45"
+            contributesToHeader="true"
+            highlightPreferenceValue="false"
+            icon="icons/markers/warning.gif"
+            includeOnPreferencePage="true"
+            label="%c4jWarningAnnotation"
+            overviewRulerPreferenceKey="c4jWarningIndicationOverviewRuler"
+            overviewRulerPreferenceValue="true"
+            presentationLayer="5"
+            textPreferenceKey="c4jWarningIndication"
+            textPreferenceValue="true"
+            verticalRulerPreferenceKey="c4jWarningIndicationVerticalRuler"
+            verticalRulerPreferenceValue="true"/>
    </extension>
 
 </plugin>

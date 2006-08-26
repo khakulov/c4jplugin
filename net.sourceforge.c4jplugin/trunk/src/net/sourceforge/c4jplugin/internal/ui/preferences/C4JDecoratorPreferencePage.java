@@ -1,6 +1,6 @@
 package net.sourceforge.c4jplugin.internal.ui.preferences;
 
-import net.sourceforge.c4jplugin.internal.decorators.ContractDecorator;
+import net.sourceforge.c4jplugin.internal.decorators.C4JDecorator;
 import net.sourceforge.c4jplugin.internal.ui.text.UIMessages;
 
 import org.eclipse.core.runtime.CoreException;
@@ -26,8 +26,10 @@ public class C4JDecoratorPreferencePage extends PreferencePage implements
 
 	private IDecoratorManager decoManager = PlatformUI.getWorkbench().getDecoratorManager();
 	
-	private Button buttonClasses;
-	private Button buttonMethods;
+	private Button buttonContractedClasses;
+	private Button buttonContractedMethods;
+	private Button buttonContracts;
+	private Button buttonContractMethods;
 	private Button buttonTL;
 	private Button buttonBL;
 	private Button buttonTR;
@@ -35,6 +37,7 @@ public class C4JDecoratorPreferencePage extends PreferencePage implements
 	
 	@Override
 	protected Control createContents(Composite parent) {
+		
 		Composite comp = new Composite(parent, SWT.NONE);
 		GridLayout gridLayout = new GridLayout(1, false);
 		gridLayout.marginHeight = 0;
@@ -44,10 +47,20 @@ public class C4JDecoratorPreferencePage extends PreferencePage implements
 		
 		Label labelDeco = new Label(comp, SWT.NONE);
 		
-		buttonClasses = new Button(comp, SWT.CHECK);
-		buttonMethods = new Button(comp, SWT.CHECK);
+		Composite compButtons = new Composite(comp, SWT.NONE);
+		gridLayout = new GridLayout(2, false);
+		gridLayout.marginHeight = 0;
+		gridLayout.marginWidth = 0;
+		compButtons.setLayout(gridLayout);
+		buttonContractedClasses = new Button(compButtons, SWT.CHECK);
+		buttonContracts = new Button(compButtons, SWT.CHECK);
+		buttonContractedMethods = new Button(compButtons, SWT.CHECK);
+		buttonContractMethods = new Button(compButtons, SWT.CHECK);
 		
 		Label labelPos = new Label(comp, SWT.NONE);
+		GridData gridData = new GridData();
+		gridData.verticalIndent = 15;
+		labelPos.setLayoutData(gridData);
 		
 		Composite compPos = new Composite(comp, SWT.NONE);
 		gridLayout = new GridLayout(2, false);
@@ -60,15 +73,17 @@ public class C4JDecoratorPreferencePage extends PreferencePage implements
 		buttonBR = new Button(compPos, SWT.RADIO);
 		
 		Label labelPreview = new Label(comp, SWT.NONE);
-		GridData gridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
+		gridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		gridData.verticalIndent = 10;
 		labelPreview.setLayoutData(gridData);
 		Table tablePreview = new Table(comp, SWT.BORDER);
 		tablePreview.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		labelDeco.setText(UIMessages.PreferencesDecorations_decoHeader);
-		buttonClasses.setText(UIMessages.PreferencesDecorations_decoClasses);
-		buttonMethods.setText(UIMessages.PreferencesDecorations_decoMethods);
+		buttonContractedClasses.setText(UIMessages.PreferencesDecorations_decoContractedClasses);
+		buttonContractedMethods.setText(UIMessages.PreferencesDecorations_decoContractedMethods);
+		buttonContracts.setText(UIMessages.PreferencesDecorations_decoContracts);
+		buttonContractMethods.setText(UIMessages.PreferencesDecorations_decoContractMethods);
 		labelPos.setText(UIMessages.PreferencesDecorations_posHeader);
 		buttonTL.setText(UIMessages.PreferencesDecorations_posUL);
 		buttonBL.setText(UIMessages.PreferencesDecorations_posLL);
@@ -76,15 +91,20 @@ public class C4JDecoratorPreferencePage extends PreferencePage implements
 		buttonBR.setText(UIMessages.PreferencesDecorations_posLR);
 		labelPreview.setText(UIMessages.PreferencesDecorations_preview);
 		
-		buttonClasses.addSelectionListener(this);
-		buttonMethods.addSelectionListener(this);
+		buttonContractedClasses.addSelectionListener(this);
+		buttonContractedMethods.addSelectionListener(this);
+		buttonContracts.addSelectionListener(this);
+		buttonContractMethods.addSelectionListener(this);
 		buttonTL.addSelectionListener(this);
 		buttonTR.addSelectionListener(this);
 		buttonBL.addSelectionListener(this);
 		buttonBR.addSelectionListener(this);
 		
-		buttonClasses.setSelection(C4JPreferences.getDecorateClasses());
-		buttonMethods.setSelection(C4JPreferences.getDecorateMethods());
+		buttonContracts.setSelection(C4JPreferences.getDecorateContracts());
+		buttonContractMethods.setSelection(C4JPreferences.getDecorateContractMethods());
+		
+		buttonContractedClasses.setSelection(C4JPreferences.getDecorateContractedClasses());
+		buttonContractedMethods.setSelection(C4JPreferences.getDecorateContractedMethods());
 		
 		getButtonPosition(C4JPreferences.getDecorationPosition()).setSelection(true);
 		
@@ -97,8 +117,11 @@ public class C4JDecoratorPreferencePage extends PreferencePage implements
 
 	@Override
 	protected void performDefaults() {
-		buttonClasses.setSelection(C4JPreferences.getDefaultDecorateClasses());
-		buttonMethods.setSelection(C4JPreferences.getDefaultDecorateMethods());
+		buttonContracts.setSelection(C4JPreferences.getDefaultDecorateContracts());
+		buttonContractMethods.setSelection(C4JPreferences.getDefaultDecorateContractMethods());
+		
+		buttonContractedClasses.setSelection(C4JPreferences.getDefaultDecorateContractedClasses());
+		buttonContractedMethods.setSelection(C4JPreferences.getDefaultDecorateContractedMethods());
 		
 		getButtonPosition(C4JPreferences.getDefaultDecorationPosition()).setSelection(true);
 		
@@ -107,8 +130,11 @@ public class C4JDecoratorPreferencePage extends PreferencePage implements
 
 	@Override
 	public boolean performOk() {
-		C4JPreferences.setDecorateClasses(buttonClasses.getSelection());
-		C4JPreferences.setDecorateMethods(buttonMethods.getSelection());
+		C4JPreferences.setDecorateContracts(buttonContracts.getSelection());
+		C4JPreferences.setDecorateContractMethods(buttonContractMethods.getSelection());
+		
+		C4JPreferences.setDecorateContractedClasses(buttonContractedClasses.getSelection());
+		C4JPreferences.setDecorateContractedMethods(buttonContractedMethods.getSelection());
 		
 		int pos = C4JPreferences.getDecorationPosition();
 		if (buttonTL.getSelection()) pos = IDecoration.TOP_LEFT;
@@ -117,13 +143,14 @@ public class C4JDecoratorPreferencePage extends PreferencePage implements
 		else if (buttonBR.getSelection()) pos = IDecoration.BOTTOM_RIGHT;
 		C4JPreferences.setDecorationPosition(pos);
 		
-		if (!buttonClasses.getSelection() && !buttonMethods.getSelection()) {
+		if (!buttonContractedClasses.getSelection() && !buttonContractedMethods.getSelection()
+				&& !buttonContracts.getSelection() && !buttonContractMethods.getSelection()) {
 			try {
-				decoManager.setEnabled(ContractDecorator.ID, false);
+				decoManager.setEnabled(C4JDecorator.ID, false);
 			} catch (CoreException e) {}
 		}
 		else {
-			((ContractDecorator)decoManager.getBaseLabelProvider(ContractDecorator.ID)).refreshAll();
+			((C4JDecorator)decoManager.getBaseLabelProvider(C4JDecorator.ID)).refreshAll();
 		}
 		return super.performOk();
 	}
@@ -149,9 +176,13 @@ public class C4JDecoratorPreferencePage extends PreferencePage implements
 	}
 	
 	private boolean isPreferencesChanged() {
-		if (buttonClasses.getSelection() != C4JPreferences.getDecorateClasses())
+		if (buttonContractedClasses.getSelection() != C4JPreferences.getDecorateContractedClasses())
 			return true;
-		if (buttonMethods.getSelection() != C4JPreferences.getDecorateMethods())
+		if (buttonContractedMethods.getSelection() != C4JPreferences.getDecorateContractedMethods())
+			return true;
+		if (buttonContracts.getSelection() != C4JPreferences.getDecorateContracts())
+			return true;
+		if (buttonContractMethods.getSelection() != C4JPreferences.getDecorateContractMethods())
 			return true;
 		
 		int pos = C4JPreferences.getDecorationPosition();
@@ -163,8 +194,9 @@ public class C4JDecoratorPreferencePage extends PreferencePage implements
 	public void widgetDefaultSelected(SelectionEvent e) {}
 
 	public void widgetSelected(SelectionEvent e) {
-		if (decoManager.getEnabled(ContractDecorator.ID)) {
-			if (buttonClasses.getSelection() || buttonMethods.getSelection())
+		if (decoManager.getEnabled(C4JDecorator.ID)) {
+			if (buttonContractedClasses.getSelection() || buttonContractedMethods.getSelection()
+					|| buttonContracts.getSelection() || buttonContractMethods.getSelection())
 				setMessage(null);
 			else if (isPreferencesChanged()) {
 				setMessage(UIMessages.PreferencesDecorations_infoMsg_willDisableDeco, INFORMATION);

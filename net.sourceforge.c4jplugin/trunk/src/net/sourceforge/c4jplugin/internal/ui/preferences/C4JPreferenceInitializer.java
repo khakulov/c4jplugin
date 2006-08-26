@@ -24,8 +24,10 @@ public class C4JPreferenceInitializer extends AbstractPreferenceInitializer {
 		store.setDefault(C4JPreferences.ASK_APT_AUTO_DISABLE, true);
 		
 		store.setDefault(C4JPreferences.DECORATION_POSITION, IDecoration.TOP_LEFT);
-		store.setDefault(C4JPreferences.DECORATION_CLASSES, true);
-		store.setDefault(C4JPreferences.DECORATION_METHODS, true);
+		store.setDefault(C4JPreferences.DECORATION_CONTRACTED_CLASSES, true);
+		store.setDefault(C4JPreferences.DECORATION_CONTRACTED_METHODS, true);
+		store.setDefault(C4JPreferences.DECORATION_CONTRACTS, true);
+		store.setDefault(C4JPreferences.DECORATION_CONTRACT_METHODS, true);
 	}
 
 }

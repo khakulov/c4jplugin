@@ -6,7 +6,7 @@ import java.util.Set;
 
 import net.sourceforge.c4j.ContractReference;
 import net.sourceforge.c4jplugin.internal.ui.text.UIMessages;
-import net.sourceforge.c4jplugin.internal.util.AnnotationUtil;
+import net.sourceforge.c4jplugin.internal.util.ContractReferenceUtil;
 
 import org.eclipse.jdt.apt.core.env.EclipseAnnotationProcessorEnvironment;
 import org.eclipse.jdt.core.IJavaElement;
@@ -56,7 +56,7 @@ public class ContractAnnotationProcessor implements AnnotationProcessor {
 							CompilationUnit compilationUnit = getEclipseAPE().getAST();
 							IJavaElement javaElement = compilationUnit.getJavaElement();
 							try {
-								IType type = AnnotationUtil.getType(javaElement);
+								IType type = ContractReferenceUtil.getType(javaElement);
 								String[][] matches = type.resolveType((String)contractValue);
 								
 								if (matches == null) {
@@ -70,7 +70,7 @@ public class ContractAnnotationProcessor implements AnnotationProcessor {
 								else {
 									// check if the resolved contract has compilation errors
 									IType resolvedType = type.getJavaProject().findType(matches[0][0], matches[0][1]);									
-									if (AnnotationUtil.hasJavaErrors(resolvedType))
+									if (ContractReferenceUtil.hasJavaErrors(resolvedType))
 										env.getMessager().printWarning(annoValue.getPosition(), NLS.bind(UIMessages.AnnotationProcessor_warning_contractHasErrors, contractValue));
 								}
 							} catch (JavaModelException e) {}

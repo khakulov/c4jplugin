@@ -12,6 +12,9 @@ public class UIMessages extends NLS {
 	
 	// Jobs
 	public static String utils_refresh_explorer_job;
+	public static String Builder_startRefreshContractModel;
+	public static String Builder_checkingContractedClasses;
+	public static String Builder_creatingContractMarkers;
 	
 	// Annotation Processor
 	public static String AnnotationProcessor_error_contractNotFound;
@@ -72,8 +75,10 @@ public class UIMessages extends NLS {
 
 	public static String PreferencesDecorations_title;
 	public static String PreferencesDecorations_decoHeader;
-	public static String PreferencesDecorations_decoClasses;
-	public static String PreferencesDecorations_decoMethods;
+	public static String PreferencesDecorations_decoContractedClasses;
+	public static String PreferencesDecorations_decoContractedMethods;
+	public static String PreferencesDecorations_decoContracts;
+	public static String PreferencesDecorations_decoContractMethods;
 	public static String PreferencesDecorations_posHeader;
 	public static String PreferencesDecorations_posUL;
 	public static String PreferencesDecorations_posLL;
@@ -83,6 +88,14 @@ public class UIMessages extends NLS {
 	
 	public static String PreferencesDecorations_warningMsg_disabledDeco;
 	public static String PreferencesDecorations_infoMsg_willDisableDeco;
+	
+	// Marker Messages
+	public static String MarkerMessage_contracted_classInvariant;
+	public static String MarkerMessage_problem_methodNotContracting;
+	
+	// Log Messages
+	public static String LogMessage_writingStateFailed;
+	public static String LogMessage_readingStateFailed;
 	
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, UIMessages.class);
