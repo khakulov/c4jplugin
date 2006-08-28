@@ -177,7 +177,7 @@ public class ContractReferenceUtil {
 				}
 				if (markerClassInvariant != null) {
 					try {
-						if (invariantList.length() > 0) invariantList = "<br>\n" + invariantList;
+						if (invariantList.length() > 0) invariantList = "\n\n" + invariantList;
 						markerClassInvariant.setAttribute(IMarker.MESSAGE, NLS.bind(UIMessages.MarkerMessage_contracted_classInvariant, invariantCounter) + invariantList);
 					} catch (CoreException e) {}
 				}

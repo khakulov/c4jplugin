@@ -140,20 +140,6 @@
       <initializer class="net.sourceforge.c4jplugin.internal.ui.preferences.C4JPreferenceInitializer"/>
    </extension>
    <extension
-         point="org.eclipse.jdt.core.classpathContainerInitializer">
-      <classpathContainerInitializer
-            class="net.sourceforge.c4jplugin.internal.core.C4JRuntimeContainerInitializer"
-            id="net.sourceforge.c4jplugin.C4JRT_CONTAINER"/>
-   </extension>
-   <extension
-         point="org.eclipse.core.variables.valueVariables">
-      <variable
-            description="%c4jPathVariableDescr"
-            initializerClass="net.sourceforge.c4jplugin.internal.core.C4JRuntimeVariable"
-            name="c4j_library">
-      </variable>
-   </extension>
-   <extension
          point="org.eclipse.ui.propertyPages">
       <page
             adaptable="true"

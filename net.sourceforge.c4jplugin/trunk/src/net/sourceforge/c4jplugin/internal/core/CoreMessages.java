@@ -10,8 +10,6 @@ private static final String BUNDLE_NAME = CoreMessages.class.getName();
 		
 	}
 	
-	public static String c4jRuntimeContainerName;
-	
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, CoreMessages.class);
 	}

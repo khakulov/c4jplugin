@@ -3,6 +3,7 @@
 	<name>net.sourceforge.c4jplugin</name>
 	<comment></comment>
 	<projects>
+		<project>net.sourceforge.c4jplugin.runtime</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

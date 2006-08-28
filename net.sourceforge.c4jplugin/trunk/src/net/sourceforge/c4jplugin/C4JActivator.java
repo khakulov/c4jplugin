@@ -51,8 +51,6 @@ public class C4JActivator extends AbstractUIPlugin implements ILaunchListener {
 	
 	public static final String RUNTIME_PLUGIN_ID = "net.sourceforge.c4jplugin.runtime";
 	
-	public static final String C4JRT_CONTAINER = PLUGIN_ID + ".C4JRT_CONTAINER";
-
 	// The shared instance
 	private static C4JActivator plugin;
 	
