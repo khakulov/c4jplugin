@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?NLS TYPE="org.eclipse.help.toc"?>
+
+<toc label="C4J Library Guide">
+
+	<topic label="Overview" href="doc/overview.html" /> 
+	
+	<topic label="Features" href="doc/features.html" />
+	
+	<topic label="What's New" href="doc/whats_new.html" /> 
+	
+	<topic label="Getting Started" >
+		<topic label="Contracts and Targets" href="doc/getting_started/contracts_targets.html" />
+		<topic label="Class Invariants" href="doc/getting_started/class_invariants.html" />
+		<topic label="Pre and PostConditions" href="doc/getting_started/conditions.html" />
+		<topic label="Target Members" href="doc/getting_started/target_members.html" />
+		<topic label="Logging" href="doc/getting_started/logging.html" />
+	</topic>
+	
+	<topic label="Examples" href="doc/examples.html" />
+	
+	<topic label="Running" href="doc/running.html" />
+	
+	<topic label="Under the Hood" href="doc/under_the_hood.html" />
+	
+	<topic label="API Reference" >
+		<topic label="net.sourceforge.c4j" href="doc/javadoc/net/sourceforge/c4j/package-summary.html"/>
+	</topic> 
+	
+	<topic label="Legal" href="doc/legal.html" /> 
+	
+</toc>
