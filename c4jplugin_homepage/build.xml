@@ -3,7 +3,7 @@
 	<property name="c4jplugin_doc" location="../net.sourceforge.c4jplugin/doc"/>
 	<property name="c4jplugin.runtime_doc" location="../net.sourceforge.c4jplugin.runtime/doc"/>
 
-	<property name="html_root"  location="WebContent"/>
+	<property name="html_root"  location="htdocs"/>
 	
 	<target name="clean">
 		<delete dir="${html_root}/c4jplugin/doc"/>
