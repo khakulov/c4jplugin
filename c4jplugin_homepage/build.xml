@@ -1,0 +1,31 @@
+<project name="c4jplugin_homepage" default="copy_plugindoc">
+
+	<property name="c4jplugin_doc" location="../net.sourceforge.c4jplugin/doc"/>
+	<property name="c4jplugin.runtime_doc" location="../net.sourceforge.c4jplugin.runtime/doc"/>
+
+	<property name="html_root"  location="WebContent"/>
+	
+	<target name="clean">
+		<delete dir="${html_root}/c4jplugin/doc"/>
+		<delete dir ="${html_root}/runtime/doc" />
+	</target>
+	
+	<target name="init">
+		<mkdir dir="${html_root}/c4jplugin/doc"/>
+		<mkdir dir="${html_root}/runtime/doc"/>
+	</target>
+
+	<target name="cleancopy_plugindoc" depends="clean, init, copy_plugindoc"/>
+	
+	<target name="copy_plugindoc">
+		
+		<copy todir="${html_root}/c4jplugin/doc" failonerror="false">
+			<fileset dir="${c4jplugin_doc}" excludes="*.svn*"/>
+		</copy>
+		
+		<copy todir="${html_root}/runtime/doc" failonerror="false">
+			<fileset dir="${c4jplugin.runtime_doc}" excludes="*.svn*"/>
+		</copy>
+		
+	</target>
+</project>
