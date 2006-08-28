@@ -2,36 +2,6 @@
 
 /**********************************************************************************************
 
-                               Tree Items and Content
-
-**********************************************************************************************/
-
-/*  
-
-        Note:  Each <li... tag below creates a new tree item, you may add as many as you wish.  Terminate each line with 
-               a backslash '\'.
-
-     Warning:  Double check that there are no extra white spaces after your terminating '\' backslashes, the scroll will fail to
-               load if there are extra spaces present.
-
-*/
-
-
-document.write('\
-<ul id="tmenu0" style="display:none;">\
-\
-	<!-- Main Item 0... --><li><a href="home.html" target="right">Home</a></li>\
-			<li><a href="news.html" target="right">News</a></li>\
-			<li><a href="http://sourceforge.net/projects/c4jplugin" target=_blank>Sourceforge Page</a></li>\
-			<li><a href="http://c4j.sourceforge.net" target=_blank>C4J Home Page</a></li>\
-\
-</ul>');
-
-
-
-
-/**********************************************************************************************
-
                                Customizable Options and Styles
 
 **********************************************************************************************/
