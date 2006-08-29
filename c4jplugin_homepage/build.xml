@@ -1,7 +1,10 @@
 <project name="c4jplugin_homepage" default="copy_plugindoc">
 
-	<property name="c4jplugin_doc" location="../net.sourceforge.c4jplugin/doc"/>
-	<property name="c4jplugin.runtime_doc" location="../net.sourceforge.c4jplugin.runtime/doc"/>
+	<property name="c4jplugin" location="../net.sourceforge.c4jplugin" />
+	<property name="c4jplugin_doc" location="${c4jplugin}/doc"/>
+	
+	<property name="c4jplugin.runtime" location="../net.sourceforge.c4jplugin.runtime" />
+	<property name="c4jplugin.runtime_doc" location="${c4jplugin.runtime}/doc"/>
 
 	<property name="html_root"  location="htdocs"/>
 	
@@ -19,9 +22,13 @@
 	
 	<target name="copy_plugindoc">
 		
+		<copy file="${c4jplugin}/license.txt" todir="${html_root}/c4jplugin" failonerror="false"/>
+		
 		<copy todir="${html_root}/c4jplugin/doc" failonerror="false">
 			<fileset dir="${c4jplugin_doc}" excludes="*.svn*"/>
 		</copy>
+		
+		<copy file="${c4jplugin.runtime}/license.txt" todir="${html_root}/runtime" failonerror="false"/>
 		
 		<copy todir="${html_root}/runtime/doc" failonerror="false">
 			<fileset dir="${c4jplugin.runtime_doc}" excludes="*.svn*"/>
