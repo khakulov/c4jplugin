@@ -2,14 +2,15 @@
 <html>
 <head>
 
-  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 
-  <link rel="stylesheet" href="../book.css" charset="ISO-8859-1" type="text/css">
+<link rel="stylesheet" href="../book.css" charset="ISO-8859-1"
+	type="text/css">
 
-  <style>
+<style type="text/css">
 pre { margin-left: 20px; }
   </style>
-  <title>Contracts and Targets</title>
+<title>Contracts and Targets</title>
 
 
 </head>
@@ -20,33 +21,45 @@ pre { margin-left: 20px; }
 <h1>Contracts and Targets</h1>
 
 In C4J, contracts for a class (called the target) are implemented in a
-separate class (the contract). The contract class can by of any type,
-in any location. However, since you usually do not want to deploy your
+separate class (the contract). The contract class can by of any type, in
+any location. However, since you usually do not want to deploy your
 contracts together with your final product, it is a good idea to keep
-them in a separate source tree (or even a separate project).<br>
+them in a separate source tree (or even a separate project).
+<br>
 
 <br>
 
 <h3>Connecting Contracts and Target Classes</h3>
 
-The contracts are tied to their targets via the <a href="../javadoc/net/sourceforge/c4j/ContractReference.html"><tt>ContractReference</tt></a>
+The contracts are tied to their targets via the
+<a href="../javadoc/net/sourceforge/c4j/ContractReference.html"><tt>ContractReference</tt></a>
 annotation. The simplest example of a target class and its contract,
-wich both do nothing, is:<br>
+wich both do nothing, is:
+<br>
 
 <pre>@ContractReference(contractClassName="DummyContract")<br>public class Dummy {}<br><br>public class DummyContract {}</pre>
 
-This works if the <tt>Dummy</tt> and <tt>DummyContract</tt>
-classes are defined in the
-same package. If they are not, you must supply a fully qualified class
-name as the value for the <tt>contractClassName</tt> attribute.<br>
+This works if the
+<tt>Dummy</tt>
+and
+<tt>DummyContract</tt>
+classes are defined in the same package. If they are not, you must
+supply a fully qualified class name as the value for the
+<tt>contractClassName</tt>
+attribute.
+<br>
 
 <br>
 
 How to write actual contracts for classes and methods is explained in
-the sections <a href="class_invariants.html">Class
-Invariants</a>, <a href="conditions.html">Pre and
-Post Conditions</a> and <a href="target_members.html">Target
-Members</a>.<br>
+the sections
+<a href="class_invariants.html">Class Invariants</a>
+,
+<a href="conditions.html">Pre and Post Conditions</a>
+and
+<a href="target_members.html">Target Members</a>
+.
+<br>
 
 <br>
 
@@ -55,14 +68,15 @@ Members</a>.<br>
 Your contract class gains access to its target by defining a
 non-standard constructor, which has as its only argument a target
 object. This enables the contract to access all but the private members
-of its target:<br>
+of its target:
+<br>
 
 <pre>@ContractReference(contractClassName="DummyContract")
 public class Dummy {
     ...
 }
 
-public class DummyContract extends ContractBase&lt;Dummy&gt; {
+public class DummyContract {
     Dummy m_target;
     
     public DummyContract(Dummy target) {
@@ -72,19 +86,27 @@ public class DummyContract extends ContractBase&lt;Dummy&gt; {
     ...
 }</pre>
 
-If you need to get your hands on private members, see <a href="target_members.html">Target Members</a>.<br>
+If you need to get your hands on private members, see
+<a href="target_members.html">Target Members</a>
+.
+<br>
 
 <br>
 
 <h3>The <tt>ContractBase</tt> class</h3>
 
-The package <tt>net.sourceforge.c4j</tt> contains the generic class
+The package
+<tt>net.sourceforge.c4j</tt>
+contains the generic class
 <a href="../javadoc/net/sourceforge/c4j/ContractBase.html"><tt>ContractBase&lt;T&gt;</tt></a>
 which is designed in order to give your contracts access to pre
-condition values, return values and private members of the target
-class. Additionally, you can register a <a href="../javadoc/net/sourceforge/c4j/Logger.html"><tt>Logger</tt></a>
-object to track contract verifications, see also the <a href="logging.html">Logging section</a>, for further
-details.<br>
+invocation values, method return values and private members of the target class.
+Additionally, you can register a
+<a href="../javadoc/net/sourceforge/c4j/Logger.html"><tt>Logger</tt></a>
+object to track contract verifications, see also the
+<a href="logging.html">Logging section</a>
+, for further details.
+<br>
 
 </body>
 </html>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mirrors>
+  <mirror
+   url="http://ovh.dl.sourceforge.net/sourceforge/c4jplugin"
+   label="[France] OVH"/>
+  <mirror
+  	url="http://kent.dl.sourceforge.net/sourceforge/c4jplugin"
+  	label="[United Kingdom] University of Kent">
+  </mirror>
+</mirrors>

@@ -3,13 +3,40 @@
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"/>
-    <link rel="stylesheet" href="book.css" charset="ISO-8859-1" type="text/css"/>
+    <link rel="stylesheet" href="../book.css" charset="ISO-8859-1" type="text/css"/>
 
     <title>Logging</title>
   </head>
 
   <body>
   <h1>Logging</h1>
-  Coming soon...
+  C4J comes with a logging mechanism which enables you to log class invariant, post, and
+  pre condition checks. A logger class must implement the interface
+  <a href="../javadoc/net/sourceforge/c4j/Logger.html">Logger</a> and can then be
+  registered via <tt>ContractBase.addLogger(Logger logger)</tt>.
+  <br><br>
+  Here is an example:
+  <pre>public class ContractLogger implements Logger {
+    void classInvariantCheck(String className) {
+        System.out.println("Verifying class invariant of: " + className);
+    }
+    
+    void postConditionCheck(String className, String method, Object[] parameters) {
+        System.out.println("Verifying post condition of method" + method + " in class " + className);
+    }
+	
+    void preConditionCheck(String className, String method, Object[] parameters) {
+        System.out.println("Verifying pre condition of method" + method + " in class " + className);
+    }
+}
+
+public class SomeContract extends ContractBase&lt;Some&gt; {
+    public void SomeContract(Some target) {
+        super(target);
+        addLogger(new ContractLogger());
+    }
+	
+    ...
+}</pre>
   </body>
 </html>
