@@ -1,0 +1,37 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"/>
+    <link rel="stylesheet" href="../book.css" charset="ISO-8859-1" type="text/css"/>
+
+    <title>Pre and Post Conditions</title>
+  </head>
+
+  <body>
+  <h1>Pre and Post Conditions</h1>
+  Pre and post conditions for a method in the target class are defined by implementing a
+  method in the contract which has the same parameter signature as the target's method and
+  the same name, except that it is prefixed with &quot;pre_&quot; or &quot;post_&quot;,
+  respectively.<br>
+  
+  <h3>Pre Conditions</h3>
+  Due to the same parameter signature, pre conditions are invoked right before the
+  target method with exactly the same arguments. For an example, click
+  <a href="../examples.html#Pre_and_Post_Conditions">here</a>.
+  
+  <h3>Post Conditions</h3>
+  The same as for pre conditions applies also for post conditions, except that they are
+  called right after the target method returns. Therefore, they have access to the targets
+  state <i>after</i> the target method has returned. 
+  <br><br>
+  In order to gain access to some
+  state information <i>before</i> the method was invoked, you can make use of the
+  utility methods <tt>ContractBase.setPreconditionValue(String)</tt> and
+  <tt>ContractBase.getPreconditionValue(String)</tt> if your contract extends
+  <tt>ContractBase&lt;T&gt;</tt>. Finally, the return value of the target method is given
+  by <tt>ContractBase.getReturnValue()</tt>.
+  <br><br>
+  For an example, click <a href="../examples.html#Pre_and_Post_Conditions">here</a>.
+  </body>
+</html>

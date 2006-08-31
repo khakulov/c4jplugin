@@ -1,0 +1,189 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<html>
+<head>
+
+  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+
+  <link rel="stylesheet" href="book.css" charset="ISO-8859-1" type="text/css">
+
+  <style>
+td {border-top: solid thin black;}
+  </style>
+  <title>Examples</title>
+</head>
+
+  <body>
+
+<h1>Examples</h1>
+
+Here is a list of examples, to get you started:<br>
+
+<ul>
+
+  <li><a href="#Class_Invariants">Class Invariants</a></li>
+
+  <li><a href="#Pre_and_Post_Conditions">Pre and
+Post Conditions</a></li>
+
+  <li><a href="#Accessing_Private_Target_Members">Accessing
+Private Target Members</a></li>
+
+</ul>
+
+<br>
+
+<table cellpadding="10" cellspacing="0" width="600">
+
+  <tbody>
+
+    <tr>
+
+      <td>
+      <div style="font-size: 16px; font-weight: bold;"><a name="Class_Invariants"></a>Class
+Invariants</div>
+
+      </td>
+
+    </tr>
+
+    <tr>
+
+      <td>The target class, which will be contracted
+      <pre>@ContractReference(contractClassName = "DummyContract")
+public class Dummy {
+    protected double m_divisor;
+        
+    public Dummy(double divisor) {
+        m_divisor = divisor;
+    }
+        
+    public double divide(double x) {
+        return x / m_divisor;
+    }
+}</pre>
+
+and it's contract class
+      <pre>public class DummyContract {
+    Dummy m_target;
+    
+    public DummyContract(Dummy target) {
+        m_target = target;
+    }
+        
+    public void classInvariant() {
+        assert m_target.m_divisor != 0;
+    }
+}</pre>
+
+The assumption made in the Dummy class constructor is that parameter
+divisor is never 0. This is verified by the classInvariant method in
+the DummyContract class. <br>
+
+      <br>
+
+The contractClassName attribute of the ContractReference annotation
+does not have to be fully qualified if the contract class is
+implemented in the same package as the target class.<br>
+      <br>
+
+      </td>
+
+    </tr>
+
+    <tr>
+
+      <td>
+      <div style="font-size: 16px; font-weight: bold;"><a name="Pre_and_Post_Conditions"></a>Pre
+and Post Conditions</div>
+
+      </td>
+
+    </tr>
+
+    <tr>
+
+      <td>The target class<br>
+
+      <pre>@ContractReference(contractClassName = "DummyContract")
+public class Dummy {
+    protected List m_stuff = new LinkedList();
+        
+    public int addItem(Object item) {
+        m_stuff.add(item);
+        return m_stuff.size();
+    }
+}</pre>
+
+and it's contract<br>
+
+      <pre>public class DummyContract extends ContractBase&lt;Dummy&gt; {
+    public DummyContract(Dummy target) {
+        super(target);
+    }
+    
+    public void classInvariant() {
+        assert m_target.m_stuff != null;
+    }
+    
+    public void pre_addItem(Object item) {
+        assert item != null;
+        super.setPreconditionValue("list-size", m_target.m_stuff.size());
+    }
+    
+    public void post_addItem(Object item) {
+        assert m_target.m_stuff.contains(item);
+        int preSize = super.getPreconditionValue("list-size");
+        assert preSize == m_target.m_stuff.size() - 1;
+        assert m_target.m_stuff.size() == super.getReturnValue();
+    }
+}</pre>
+
+The pre condition checks for null arguments and by extending the
+ContractBase class, the post condition verifies both
+that the item actually has been added, that nothing else has been
+removed, and that the return value is the expected.<br>
+
+      <br>
+
+      </td>
+
+    </tr>
+
+    <tr>
+
+      <td>
+      <div style="font-size: 16px; font-weight: bold;"><a name="Accessing_Private_Target_Members"></a>Accessing
+Private Target Members</div>
+
+      </td>
+
+    </tr>
+
+    <tr>
+
+      <td>If you pass in the target reference to the ContractBase
+constructor,
+you will be able to get access to private fields in the target using
+the&nbsp;<a href="javadoc/net/sourceforge/c4j/ContractBase.html#getTargetField%28java.lang.String%29"><tt>ContractBase.getTargetField(String
+fieldName)</tt></a> method, as shown below:<br>
+
+      <pre>public class SomeContract extends ContractBase&lt;Some&gt; {
+    public SomeContract(Some target) {
+        super(target);
+    }
+    
+    public void classInvariant() {
+        assert ((List)super.getTargetField("m_stuff")).size() &gt; 0;
+        assert ((List)super.getTargetField("m_stuff")).get(0).equals("boho");
+    }
+}</pre>
+
+      </td>
+
+    </tr>
+
+  </tbody>
+</table>
+
+</body>
+</html>
