@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<site
-      mirrorsURL="mirrors.xml">
+<site>
    <description url="http://c4jplugin.sourceforge.net/update/">
       The update site for the c4jplugin sourceforge project.
    </description>
