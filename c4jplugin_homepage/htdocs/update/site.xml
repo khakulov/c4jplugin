@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site
       mirrorsURL="mirrors.xml">
-   <description url="http://c4jplugin.sourceforge.net/update">
+   <description url="http://c4jplugin.sourceforge.net/update/">
       The update site for the c4jplugin sourceforge project.
    </description>
    <feature url="features/net.sourceforge.c4jplugin.runtime.feature_2.5.1.0.jar" id="net.sourceforge.c4jplugin.runtime.feature" version="2.5.1.0">
