@@ -3,13 +3,26 @@
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"/>
-    <link rel="stylesheet" href="book.css" charset="ISO-8859-1" type="text/css"/>
+    <link rel="stylesheet" href="../book.css" charset="ISO-8859-1" type="text/css"/>
 
     <title>Target Members</title>
   </head>
 
   <body>
   <h1>Target Members</h1>
-  Coming soon...
+  To be able to implement good contracts, the contract needs access to the 
+  targets member fields (this is at least true for in-house testing, however, 
+  to verify libraries that e.g. are used by clients you may only want to use the 
+  publicly available information about your components).
+  <br><br>
+  If you define a one-parameter constructor in your contract with the target class
+  as parameter, you get access to the target and therefore to all its members
+  according to the access level modifiers of the targets fields and methods.
+  However, if you pass in the target reference to the <tt>ContractBase</tt> constructor, you 
+  will be able to get access to private fields in the target using the 
+  <a href="../javadoc/net/sourceforge/c4j/ContractBase.html#getTargetField(java.lang.String)">
+  	<tt>Object getTargetField(String fieldName)</tt></a> method, as shown in this
+	<a href="../examples.html#Accessing_Private_Target_Members">Example</a>.
+  
   </body>
 </html>

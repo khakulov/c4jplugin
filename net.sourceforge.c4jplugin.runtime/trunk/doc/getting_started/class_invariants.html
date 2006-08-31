@@ -3,13 +3,31 @@
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"/>
-    <link rel="stylesheet" href="book.css" charset="ISO-8859-1" type="text/css"/>
+    <link rel="stylesheet" href="../book.css" charset="ISO-8859-1" type="text/css"/>
 
     <title>Class Invariants</title>
   </head>
 
   <body>
   <h1>Class Invariants</h1>
-  Coming soon...
+  Class invariants are a concept which allow you to assure that your target class is
+  always in a valid (&quot;invariant&quot;) state. They can be used to restrain the value
+  of class variables to a certain range (being never <tt>null</tt>, or a collection to
+  hold at least 1 object, ...).
+  
+  To define a class invariant, you have to implement a method called <tt>classInvariant()</tt>
+  in your contract:
+  <pre>public class DummyContract {
+  
+    public void classInvariant() {
+        // check some properties of the target class
+        ...
+    }
+	
+}</pre>
+  Everytime a method of the target class (or subtypes of it) gets called, the classInvariant()
+  method is called afterwards.<br><br>
+  
+  In order to see a full example of a class invariant, click <a href="../examples.html#Class_Invariants">here</a>.
   </body>
 </html>

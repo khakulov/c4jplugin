@@ -14,6 +14,7 @@
 		<topic label="Class Invariants" href="doc/getting_started/class_invariants.html" />
 		<topic label="Pre and PostConditions" href="doc/getting_started/conditions.html" />
 		<topic label="Target Members" href="doc/getting_started/target_members.html" />
+		<topic label="Contract Inheritance" href="doc/getting_started/contract_inheritance.html" />
 		<topic label="Logging" href="doc/getting_started/logging.html" />
 	</topic>
 	
@@ -23,9 +24,12 @@
 	
 	<topic label="Under the Hood" href="doc/under_the_hood.html" />
 	
-	<topic label="API Reference" >
-		<topic label="net.sourceforge.c4j" href="doc/javadoc/net/sourceforge/c4j/package-summary.html"/>
-	</topic> 
+	<topic label="References" >
+		<topic label="API Reference" >
+			<topic label="net.sourceforge.c4j" href="doc/javadoc/net/sourceforge/c4j/package-summary.html"/>
+		</topic>
+		<topic label="C4J Arguments" href="doc/references/c4j_arguments.html" /> 
+	</topic>
 	
 	<topic label="Legal" href="doc/legal.html" /> 
 	

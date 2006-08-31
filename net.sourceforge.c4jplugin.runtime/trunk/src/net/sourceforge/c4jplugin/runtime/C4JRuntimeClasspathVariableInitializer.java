@@ -12,9 +12,7 @@ public class C4JRuntimeClasspathVariableInitializer extends ClasspathVariableIni
 		if (variable.equals("C4J_RUNTIME_LIB")) {
 			try {
 				JavaCore.setClasspathVariable(variable, new Path(C4JRuntimeContainer.getC4JRtClasspath()), null);
-			} catch (JavaModelException e) {
-				e.printStackTrace();
-			}
+			} catch (JavaModelException e) {}
 		}
 	}
 

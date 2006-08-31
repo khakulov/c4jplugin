@@ -62,11 +62,11 @@ public class C4JRuntimeContainer implements IClasspathContainer {
 					try {
 						c4jrtPath = FileLocator.resolve(installLoc)
 								.getFile();
-					} catch (IOException e) {
-					}
+					} catch (IOException e) {}
 				}
 			}
 		}
+		
 		return c4jrtPath;
 	}
 
