@@ -1,0 +1,128 @@
+C4J PLUGIN RUNTIME RELEASE HOWTO
+=================================================
+
+
+PREREQUISITES
+-------------------
+
+In order to build a new release, you need to check out the following modules
+from the c4jplugin sourceforge project into the same parent folder:
+
+c4jplugin_homepage   (for the Eclipse update site)
+net.sourceforge.c4jplugin.runtime.feature   (for the Eclipse update site)
+net.sourceforge.c4jplugin.runtime
+
+Upgrading to a new c4j.jar version is done by replacing the current c4j.jar file
+in the root folder of the net.sourceforge.c4jplugin.runtime project and
+following the release steps below.
+
+
+VERSION NUMBER POLICY
+================================
+
+The version number of the net.sourceforge.c4jplugin.runtime plug-in consists
+of 4 numeric segments. The first three should always be in sync with the
+version number of the included c4j.jar. The last segment should be "0", when
+the plug-in is released with a new c4j.jar version. Otherwise it should be
+incremented by one (i.e. when updating the docs or fixing bugs in the source code).
+
+
+
+
+Releasing a new runtime plug-in consists of two major steps (in this order):
+----------------------------------------------------------------------------
+
+A: Export the plug-in and release it on SF.net
+B: Build a new Eclipse Update Site and update it on the c4jplugin homepage
+
+
+A: PLUG-IN EXPORT AND SF RELEASE
+==================================
+
+- Open the "net.sourceforge.c4jplugin.runtime" project. If the c4j.jar library
+  has been updated with a release containing new features, add them in the
+  file doc/whats_new.html".
+
+- Update the version number in the MANIFEST.MF file (Overview tab) according
+  to the rules stated above.
+
+- In the MANIFEST.MF file (in the Overview tab) click on "Export Wizard" at
+  the bottom-right corner of the page. In the list of "Available Plug-ins
+  and Fragments" choose only the net.sourceforge.c4jplugin.runtime plug-in (the
+  new version number should be visible). In the "Destination" tab, choose an
+  empty temporary directory. In the "Options" tab, make sure none of the
+  options is selected. Click "Finish". This will create a "plugins" folder
+  in your chosen destination directory.
+  
+- Zip the newly created "plugins" folder in the destination directory. Make
+  sure the directory structure inside the zip file is:
+  
+    plugins/
+      net.sourceforge.c4jplugin.runtime_<version_number>/
+        doc/
+        META_INF/
+        net/
+        c4j.jar
+        ...
+        
+  Rename the zip file to "net.sourceforge.c4jplugin.runtime_<version_number>.zip".
+  
+- Release the file "net.sourceforge.c4jplugin.runtime_<version_number>.zip" on
+  sourceforge. If only the last segment in the version number changed, add the
+  file to the latest existing release in the package "C4J Plugin Runtime". If
+  the c4j.jar version changed, create a new release in the package "C4J Plugin
+  Runtime", named after the c4j.jar version.
+  
+- If all went well, commit the net.sourceforge.c4jplugin.runtime project project 
+  and add a SVN tag named "RELEASE_<version_number>".
+  
+
+B: BUILD ECLIPSE UPDATE SITE AND UPDATE HOMEPAGE
+===================================================
+
+- In the project net.sourceforge.c4jplugin.runtime.feature, open the file
+  "feature.xml". In the "Overview" tab, update the version number to be in sync
+  with the version number of net.sourceforge.c4jplugin.runtime.
+  
+- In the "Plug-ins" tab of the feature.xml file, select the
+  "net.sourceforge.c4jplugin.runtime" plug-in in the "Plug-ins and Fragments"
+  list. Make sure the option "Unpack the plug-in archive after the installation"
+  is checked. Optionally update the download and installation size (you can use
+  the size of the .zip file created in step A, and the size of the unpacked .zip
+  for the installation size).
+  
+- Save the feature.xml file and commit it to SVN.
+
+- Open the "c4jplugin_homepage" project. If the documentation of the runtime 
+  plug-in has changed, execute the Ant target "copy_plugindoc" of the "build.xml"
+  file.
+
+- Add a news entry in the file htdocs/news.html.
+
+- In the "c4jplugin_homepage" project, open the file "htdocs/update/site.xml".
+  In the "Site Map" tab, expand the "C4J Plugin" category and select the
+  "net.sourceforge.c4jplugin.runtime.feature" entry. Click on "Synchronize..." and
+  synchronize this feature only. Make sure, the right version number is displayed
+  in the list.
+
+- With the entry "net.sourceforge.c4jplugin.runtime.feature (...)" still selected,
+  click "Build". This will create the two files:
+    
+    htdocs/update/features/net.sourceforge.c4jplugin.runtime.feature_<version>.jar
+    htdocs/update/plugins/net.sourceforge.c4jplugin.runtime_<version>.jar
+    
+  Note that the directories "plugins" and "features" are not under version control.
+  
+- Commit the "c4jplugin_homepage" project. This should write the changed docs, if
+  any, and the file "site.xml".
+  
+- Copy the two .jar files above into the same location (via scp or sftp) of the
+  c4jplugin projects web space (shell.sourceforge.net:/home/groups/c/c4/c4jplugin/)
+  
+- Open a ssh session to shell.sourceforge.net. Go to /home/groups/c/c4/c4jplugin/htdocs
+  and issue the command "svn update". This will update the homepage, especially
+  the update site and the changed plug-in documentation.
+  
+- Add a news entry at Sourceforge for the new release.
+  
+================================== DONE =========================================
