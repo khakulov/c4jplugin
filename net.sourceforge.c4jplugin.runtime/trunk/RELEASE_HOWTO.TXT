@@ -112,7 +112,11 @@ B: BUILD ECLIPSE UPDATE SITE AND UPDATE HOMEPAGE
     htdocs/update/plugins/net.sourceforge.c4jplugin.runtime_<version>.jar
     
   Note that the directories "plugins" and "features" are not under version control.
-  
+
+- In the "Find and Install..." dialog, create a new "Local Site" which points to
+  the "htdocs/update/" directory, if not already present. Check if the update
+  manager finds the new version.
+
 - Commit the "c4jplugin_homepage" project. This should write the changed docs, if
   any, and the file "site.xml".
   
