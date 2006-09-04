@@ -120,7 +120,6 @@ public class C4JUtils {
 	}
 	
 	static public void removeC4JNature(IProject project) throws CoreException {
-		// MarkerUpdating.deleteAllMarkers(project);
 		
 		// remove the C4J Nature
 		IProjectDescription description = project.getDescription();
@@ -181,6 +180,8 @@ public class C4JUtils {
 				}
 			}
 		}
+		
+		ContractReferenceUtil.deleteMarkers(project);
 		
 		// Recalculate contract dependencies
 		C4JActivator.getDefault().refreshContractReferenceModel();

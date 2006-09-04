@@ -93,7 +93,6 @@ public class UIMessages extends NLS {
 	public static String PreferencesDecorations_posLL;
 	public static String PreferencesDecorations_posUR;
 	public static String PreferencesDecorations_posLR;
-	public static String PreferencesDecorations_preview;
 	
 	public static String PreferencesDecorations_warningMsg_disabledDeco;
 	public static String PreferencesDecorations_infoMsg_willDisableDeco;

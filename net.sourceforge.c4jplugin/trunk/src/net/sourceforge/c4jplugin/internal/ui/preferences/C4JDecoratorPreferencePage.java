@@ -15,7 +15,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.IDecoratorManager;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
@@ -48,7 +47,7 @@ public class C4JDecoratorPreferencePage extends PreferencePage implements
 		Label labelDeco = new Label(comp, SWT.NONE);
 		
 		Composite compButtons = new Composite(comp, SWT.NONE);
-		gridLayout = new GridLayout(2, false);
+		gridLayout = new GridLayout(1, false);
 		gridLayout.marginHeight = 0;
 		gridLayout.marginWidth = 0;
 		compButtons.setLayout(gridLayout);
@@ -72,13 +71,6 @@ public class C4JDecoratorPreferencePage extends PreferencePage implements
 		buttonBL = new Button(compPos, SWT.RADIO);
 		buttonBR = new Button(compPos, SWT.RADIO);
 		
-		Label labelPreview = new Label(comp, SWT.NONE);
-		gridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
-		gridData.verticalIndent = 10;
-		labelPreview.setLayoutData(gridData);
-		Table tablePreview = new Table(comp, SWT.BORDER);
-		tablePreview.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
 		labelDeco.setText(UIMessages.PreferencesDecorations_decoHeader);
 		buttonContractedClasses.setText(UIMessages.PreferencesDecorations_decoContractedClasses);
 		buttonContractedMethods.setText(UIMessages.PreferencesDecorations_decoContractedMethods);
@@ -89,7 +81,6 @@ public class C4JDecoratorPreferencePage extends PreferencePage implements
 		buttonBL.setText(UIMessages.PreferencesDecorations_posLL);
 		buttonTR.setText(UIMessages.PreferencesDecorations_posUR);
 		buttonBR.setText(UIMessages.PreferencesDecorations_posLR);
-		labelPreview.setText(UIMessages.PreferencesDecorations_preview);
 		
 		buttonContractedClasses.addSelectionListener(this);
 		buttonContractedMethods.addSelectionListener(this);
