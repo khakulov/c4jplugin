@@ -30,6 +30,7 @@ public class ResourceChangeListener implements IResourceChangeListener {
 		IResourceDelta delta = event.getDelta();
 		
 		try {
+			
 			delta.accept(deltaVisitor);
 			
 			Collection<IResource> visitedResources = deltaVisitor.getVisitedResources();

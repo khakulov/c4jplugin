@@ -10,6 +10,8 @@ public class UIMessages extends NLS {
 		
 	}
 	
+	public static String Msg_error;
+	
 	// Jobs
 	public static String utils_refresh_explorer_job;
 	public static String Builder_startRefreshContractModel;
@@ -49,17 +51,24 @@ public class UIMessages extends NLS {
 	public static String AutoPluginDisableApt_message;
 	public static String AutoPluginDisableApt_toggleMsg;
 	
-	// Project Preference Pages
-	public static String ProjectPreferencesLaunch_title;
-	public static String ProjectPreferencesLaunch_tableHeader_type;
-	public static String ProjectPreferencesLaunch_tableHeader_confirm;
+	public static String DialogMsg_changeLaunchConfig_title;
+	public static String DialogMsg_changeLaunchConfig_message;
+	public static String DialogMsg_changeLaunchConfig_toggleMsg;
 	
-	public static String ProjectPreferencesLaunch_buttonSelectAll;
-	public static String ProjectPreferencesLaunch_buttonSelectNone;
-	public static String ProjectPreferencesLaunch_buttonConfirmAll;
-	public static String ProjectPreferencesLaunch_buttonConfirmNone;
+	public static String DialogMsg_launchConfig_errorRetrievingConfigs;
 	
 	// Window Preference Pages
+	public static String PreferencesLaunch_title;
+	public static String PreferencesLaunch_tableHeader_label;
+	public static String PreferencesLaunch_tableHeader_enable;
+	public static String PreferencesLaunch_tableHeader_confirm;
+	public static String PreferencesLaunch_labelVMArgs;
+	
+	public static String PreferencesLaunch_buttonSelectAll;
+	public static String PreferencesLaunch_buttonSelectNone;
+	public static String PreferencesLaunch_buttonConfirmAll;
+	public static String PreferencesLaunch_buttonConfirmNone;
+	
 	public static String PreferencesMain_title;
 	public static String PreferencesMain_hint;
 	
@@ -101,6 +110,8 @@ public class UIMessages extends NLS {
 	// Log Messages
 	public static String LogMessage_writingStateFailed;
 	public static String LogMessage_readingStateFailed;
+	
+	public static String LogMessage_updatingVMArgsFailed;
 	
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, UIMessages.class);

@@ -1,7 +1,5 @@
 package net.sourceforge.c4jplugin.internal.ui.preferences;
 
-import java.util.ArrayList;
-
 import net.sourceforge.c4jplugin.C4JActivator;
 import net.sourceforge.c4jplugin.internal.decorators.C4JDecorator;
 
@@ -9,7 +7,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
-import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.osgi.service.prefs.BackingStoreException;
 
@@ -34,17 +31,6 @@ public class C4JPreferences {
 	public static final String DECORATION_CONTRACTS = C4JActivator.PLUGIN_ID + ".preferences.decorationContracts";
 	public static final String DECORATION_CONTRACT_METHODS = C4JActivator.PLUGIN_ID + ".preferences.decorationContractMethods";
 	public static final String DECORATION_POSITION = C4JActivator.PLUGIN_ID + ".preferences.decorationPosition";
-	
-	private static ArrayList<String> configTypes = new ArrayList<String>();
-	
-	static {
-		configTypes.add(IJavaLaunchConfigurationConstants.ID_JAVA_APPLET);
-		configTypes.add(IJavaLaunchConfigurationConstants.ID_JAVA_APPLICATION);
-		configTypes.add(IJavaLaunchConfigurationConstants.ID_REMOTE_JAVA_APPLICATION);
-		configTypes.add("org.eclipse.pde.ui.RuntimeWorkbench");
-		configTypes.add("org.eclipse.pde.ui.EquinoxLauncher");
-		configTypes.add("org.eclipse.pde.ui.swtLaunchConfig");
-	}
 	
 	
 	/**
@@ -317,52 +303,47 @@ public class C4JPreferences {
 		store.setValue(DECORATION_CONTRACT_METHODS, value);
 		C4JDecorator.setDecorateContractMethods(value);
 	}
-	// Project Scope Preferences
-	// ------------------------------------------------
 	
-	static public boolean doChangeLaunchConfig(IProject project, String identifier) {
-		IScopeContext projectScope = new ProjectScope(project);
-		IEclipsePreferences projectNode = projectScope
-				.getNode(C4JActivator.PLUGIN_ID);
-		return projectNode.getBoolean(identifier, configTypes.contains(identifier));
+	static public boolean doChangeLaunchConfig(String identifier) {
+		IPreferenceStore store = C4JActivator.getDefault()
+		.getPreferenceStore();
+		return store.getBoolean(identifier);
 	}
 	
-	static public boolean askChangeLaunchConfig(IProject project, String identifier) {
-		IScopeContext projectScope = new ProjectScope(project);
-		IEclipsePreferences projectNode = projectScope
-				.getNode(C4JActivator.PLUGIN_ID);
-		return projectNode.getBoolean(identifier + "_ask", configTypes.contains(identifier));
+	static public boolean askChangeLaunchConfig(String identifier) {
+		IPreferenceStore store = C4JActivator.getDefault()
+		.getPreferenceStore();
+		return store.getBoolean(identifier + "_ask");
 	}
 	
 	static public boolean defaultDoChangeLaunchConfig(String identifier) {
-		return configTypes.contains(identifier);
+		IPreferenceStore store = C4JActivator.getDefault()
+		.getPreferenceStore();
+		return store.getDefaultBoolean(identifier);
 	}
 	
 	static public boolean defaultAskChangeLaunchConfig(String identifier) {
-		return configTypes.contains(identifier);
+		IPreferenceStore store = C4JActivator.getDefault()
+		.getPreferenceStore();
+		return store.getDefaultBoolean(identifier);
 	}
 	
-	static public void setDoChangeLaunchConfig(IProject project, String identifier, boolean value) {
-		IScopeContext projectScope = new ProjectScope(project);
-		IEclipsePreferences projectNode = projectScope
-				.getNode(C4JActivator.PLUGIN_ID);
-		projectNode.putBoolean(identifier, value);
-		try {
-			projectNode.flush();
-		} catch (BackingStoreException e) {
-		}
+	static public void setDoChangeLaunchConfig(String identifier, boolean value) {
+		IPreferenceStore store = C4JActivator.getDefault()
+		.getPreferenceStore();
+		store.setValue(identifier, value);
 	}
 	
-	static public void setAskChangeLaunchConfig(IProject project, String identifier, boolean value) {
-		IScopeContext projectScope = new ProjectScope(project);
-		IEclipsePreferences projectNode = projectScope
-				.getNode(C4JActivator.PLUGIN_ID);
-		projectNode.putBoolean(identifier + "_ask", value);
-		try {
-			projectNode.flush();
-		} catch (BackingStoreException e) {
-		}
+	static public void setAskChangeLaunchConfig(String identifier, boolean value) {
+		IPreferenceStore store = C4JActivator.getDefault()
+		.getPreferenceStore();
+		store.setValue(identifier + "_ask", value);
 	}
+	
+	
+	
+	// Project Scope Preferences
+	// -------------------------------------------------------------
 	
 	static public boolean isAptAutoEnableDone(IProject project) {
 		IScopeContext projectScope = new ProjectScope(project);

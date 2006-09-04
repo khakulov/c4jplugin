@@ -21,6 +21,9 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.core.model.ILaunchConfigurationDelegate;
 import org.eclipse.jdt.apt.core.util.AptConfig;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -28,11 +31,13 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
+import org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.pde.core.plugin.IPluginImport;
 import org.eclipse.pde.core.plugin.IPluginModel;
 import org.eclipse.pde.internal.core.WorkspaceModelManager;
@@ -41,7 +46,6 @@ import org.eclipse.pde.internal.ui.IPDEUIConstants;
 import org.eclipse.pde.internal.ui.editor.plugin.DependenciesPage;
 import org.eclipse.pde.internal.ui.editor.plugin.ManifestEditor;
 import org.eclipse.pde.ui.launcher.AbstractPDELaunchConfiguration;
-import org.eclipse.pde.ui.launcher.IPDELauncherConstants;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -49,6 +53,9 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.progress.UIJob;
 
 public class C4JUtils {
+	
+	public static final String REGEXP_C4J_JAVAAGENT = "(.*-javaagent:\\S*c4j.jar.*)|(.*-javaagent:\\S*\\$\\{c4j_library\\}.*)";
+	public static final String C4J_JAVAAGENT = "-javaagent:${c4j_library} ";
 	
 	private static Job refreshJob;
 
@@ -106,6 +113,8 @@ public class C4JUtils {
 				C4JPreferences.setAptAutoEnableDone(project, true);
 			}
 		}
+		
+		C4JActivator.getDefault().refreshContractReferenceModel(new IProject[] { project });
 		
 		refreshPackageExplorer();
 	}
@@ -173,47 +182,121 @@ public class C4JUtils {
 			}
 		}
 		
-		//removeMarkerOnReferencingProjects(project);
+		// Recalculate contract dependencies
+		C4JActivator.getDefault().refreshContractReferenceModel();
 		
 		refreshPackageExplorer();
 	}
 	
-	public static IProject getC4JProjectFromLaunchConfig(ILaunchConfiguration launchConfig) {
-		IResource[] resources = null;
+	public static boolean isC4JLaunchConfig(ILaunchConfiguration launchConfig) {
+		
+		ILaunchConfigurationDelegate configDelegate = null;
+		try {
+			configDelegate = launchConfig.getType().getDelegate(ILaunchManager.RUN_MODE);
+		} catch (CoreException e) {
+			e.printStackTrace();
+		} catch (NullPointerException e) {}
+		
+		if (configDelegate == null) return false;
+		
+		if (configDelegate instanceof AbstractJavaLaunchConfigurationDelegate) {
+			try {
+				IProject project = ((AbstractJavaLaunchConfigurationDelegate)configDelegate).getJavaProject(launchConfig).getProject();
+				if (project.isOpen() && project.isNatureEnabled(C4JProjectNature.NATURE_ID))
+					return true;
+			} catch (CoreException e) {
+				e.printStackTrace();
+			} catch (NullPointerException e) { }
+		}
+		else if (configDelegate instanceof AbstractPDELaunchConfiguration) {
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public static void changeLaunchConfig(ILaunchConfiguration config) {
+		if (!isC4JLaunchConfig(config)) return;
+		if (isC4JEnabled(config)) return;
 		
 		try {
-			resources = launchConfig.getMappedResources();
-		} catch (CoreException e1) {}
-		
-		if (resources != null) {
-			for (IResource resource : resources) {
-				try {
-					if (resource.getProject().isNatureEnabled(C4JProjectNature.NATURE_ID)) {
-						return resource.getProject();
-					}
-				} catch (CoreException e) {
+			String id = config.getType().getIdentifier();
+			IWorkbenchWindow window = C4JActivator.getDefault().getWorkbench().getActiveWorkbenchWindow();
+			if (C4JPreferences.doChangeLaunchConfig(id)) {
+				if (C4JPreferences.askChangeLaunchConfig(id) && confirmChangeLaunchConfig(window, id)) {
+					setVMArgs(config, null);
+				}
+				else if (!C4JPreferences.askChangeLaunchConfig(id)) {
+					setVMArgs(config, null);
 				}
 			}
-		}
-		else {
-			if (launchConfig instanceof AbstractPDELaunchConfiguration) {
-				AbstractPDELaunchConfiguration pdeConfig = (AbstractPDELaunchConfiguration)launchConfig;
-				try {
-					launchConfig.getAttribute(IPDELauncherConstants.APPLICATION, "");
-				} catch (CoreException e) {
-				}
-				
-			}
-		}
-		
-		return null;
+		} catch (CoreException e) {}
+	}
+	
+	private static boolean confirmChangeLaunchConfig(IWorkbenchWindow window, String id) {
+		MessageDialogWithToggle dialog = MessageDialogWithToggle.openYesNoQuestion(
+				window.getShell(),
+				UIMessages.DialogMsg_changeLaunchConfig_title,
+				UIMessages.DialogMsg_changeLaunchConfig_message,
+				UIMessages.DialogMsg_changeLaunchConfig_toggleMsg,
+				false, // toggle is initially unchecked
+				null, null); 
+
+		int result = dialog.getReturnCode();
+
+		C4JPreferences.setAskChangeLaunchConfig(id, !dialog.getToggleState());
+		if (dialog.getToggleState())
+			C4JPreferences.setDoChangeLaunchConfig(id, result == IDialogConstants.YES_ID);
+
+		return result == IDialogConstants.YES_ID;
 	}
 	
 	/* Before calling this method, you must check if configuration belongs to a
 	 * project with a C4J nature and that the project preferences are set to
 	 * allow a change of the VM arguments for this type of configuration.
 	 */
-	public static void addVMArgsToLaunchConfig(ILaunchConfiguration configuration, String mode) {
+	public static void setVMArgs(ILaunchConfiguration configuration, String vmargs) {
+				
+		if (vmargs == null) {
+			if (isC4JEnabled(configuration)) return;
+			vmargs =  getVMArgs(configuration);
+			if (!vmargs.matches(".*-ea.*")) vmargs = "-ea " + vmargs;
+			if (!vmargs.matches(REGEXP_C4J_JAVAAGENT))
+				vmargs = C4J_JAVAAGENT + vmargs;
+		}
+		
+		if (vmargs == null) {
+			return;
+		}
+		
+		System.out.println("VM args: " + vmargs);
+		
+		try {
+			ILaunchConfigurationWorkingCopy wcConfig = configuration.getWorkingCopy();
+			wcConfig.setAttribute("vmargs", vmargs);
+			wcConfig.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, vmargs);
+			wcConfig.doSave();
+		} catch (CoreException e) {
+			IStatus status = new Status(IStatus.WARNING, 
+					C4JActivator.PLUGIN_ID, IStatus.OK, 
+					NLS.bind(UIMessages.LogMessage_updatingVMArgsFailed, configuration.getName()),
+					e);
+			C4JActivator.getDefault().getLog().log(status);
+		}
+	}
+	
+	public static boolean isC4JEnabled(ILaunchConfiguration configuration) {
+		String vmargs = getVMArgs(configuration);
+		if (vmargs == null) return false;
+		
+		if (!vmargs.matches(".*-ea.*")) return false;
+		
+		if (vmargs.matches(REGEXP_C4J_JAVAAGENT)) return true;
+		
+		return false;
+	}
+	
+	public static String getVMArgs(ILaunchConfiguration configuration) {
 		String vmargs = null;
 		try {
 			vmargs = configuration.getAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, (String)null);
@@ -223,9 +306,7 @@ public class C4JUtils {
 			}
 		} catch (CoreException e) {}
 		
-		
-		if (vmargs == null) System.out.println("Could not get VM args from LaunchConfig");
-		else System.out.println("VM args: " + vmargs);
+		return vmargs;
 	}
 	
 	/**
@@ -320,9 +401,9 @@ public class C4JUtils {
 
 		int result = dialog.getReturnCode();
 
-		C4JPreferences.setDoPDEAutoImport(result == IDialogConstants.YES_ID);
+		C4JPreferences.setAskPDEAutoImport(!dialog.getToggleState());
 		if (dialog.getToggleState())
-			C4JPreferences.setAskPDEAutoImport(!dialog.getToggleState());
+			C4JPreferences.setDoPDEAutoImport(result == IDialogConstants.YES_ID);
 		
 		return result == IDialogConstants.YES_ID;
 	}

@@ -13,7 +13,6 @@ import net.sourceforge.c4jplugin.internal.core.ContractReferenceModel;
 import net.sourceforge.c4jplugin.internal.core.ResourceChangeListener;
 import net.sourceforge.c4jplugin.internal.decorators.C4JDecorator;
 import net.sourceforge.c4jplugin.internal.nature.C4JProjectNature;
-import net.sourceforge.c4jplugin.internal.ui.preferences.C4JPreferences;
 import net.sourceforge.c4jplugin.internal.ui.text.UIMessages;
 import net.sourceforge.c4jplugin.internal.util.C4JUtils;
 import net.sourceforge.c4jplugin.internal.util.ContractReferenceUtil;
@@ -34,6 +33,7 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchListener;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.WorkbenchException;
@@ -213,14 +213,13 @@ public class C4JActivator extends AbstractUIPlugin implements ILaunchListener {
 		wsJob.schedule();
 	}
 	
-	public void launchAdded(ILaunch launch) {
-		ILaunchConfiguration config = launch.getLaunchConfiguration();
-		IProject project = C4JUtils.getC4JProjectFromLaunchConfig(config);
-		try {
-			if (project != null && 	C4JPreferences.doChangeLaunchConfig(project, config.getType().getIdentifier())) {
-				C4JUtils.addVMArgsToLaunchConfig(config, launch.getLaunchMode());
+	public void launchAdded(final ILaunch launch) {
+		Display.getDefault().syncExec(new Runnable() {
+			public void run() {
+				ILaunchConfiguration config = launch.getLaunchConfiguration();
+				C4JUtils.changeLaunchConfig(config);
 			}
-		} catch (CoreException e) {}
+		});
 	}
 
 	public void launchChanged(ILaunch launch) {}

@@ -138,22 +138,7 @@
    <extension
          point="org.eclipse.core.runtime.preferences">
       <initializer class="net.sourceforge.c4jplugin.internal.ui.preferences.C4JPreferenceInitializer"/>
-   </extension>
-   <extension
-         point="org.eclipse.ui.propertyPages">
-      <page
-            adaptable="true"
-            class="net.sourceforge.c4jplugin.internal.ui.preferences.C4JProjectPreferencePage"
-            id="net.sourceforge.c4jplugin.internal.ui.C4JProjectPreferencePage"
-            name="%projectPreferencePageName"
-            objectClass="org.eclipse.core.resources.IProject">
-         <filter
-               name="nature"
-               value="net.sourceforge.c4jplugin.c4jnature">
-         </filter>
-      </page>
-   </extension>
-   <extension
+   </extension> <extension
          point="org.eclipse.ui.preferencePages">
       <page
             class="net.sourceforge.c4jplugin.internal.ui.preferences.C4JPreferencePage"
@@ -172,7 +157,12 @@
             id="net.sourceforge.c4jplugin.internal.ui.preferences.C4JDecoratorPreferencePage"
             name="%preferencePageDecoration">
       </page>
-   </extension>
+
+      <page
+            category="net.sourceforge.c4jplugin.internal.preferences.C4JPreferencePage"
+            class="net.sourceforge.c4jplugin.internal.ui.preferences.C4JLaunchPreferencePage"
+            id="net.sourceforge.c4jplugin.internal.ui.preferences.C4JLaunchPreferencePage"
+            name="%preferencePageLaunch"/>   </extension>
    <extension
          id="contractedclassinvariantmarker"
          name="%c4jContractedClassInvariantMarker"
