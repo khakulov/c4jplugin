@@ -6,5 +6,8 @@
    <feature url="features/net.sourceforge.c4jplugin.runtime.feature_2.5.1.0.jar" id="net.sourceforge.c4jplugin.runtime.feature" version="2.5.1.0">
       <category name="C4J Plugin"/>
    </feature>
+   <feature url="features/net.sourceforge.c4jplugin.feature_0.1.0.jar" id="net.sourceforge.c4jplugin.feature" version="0.1.0">
+      <category name="C4J Plugin"/>
+   </feature>
    <category-def name="C4J Plugin" label="C4J Plugin"/>
 </site>
