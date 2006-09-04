@@ -203,7 +203,6 @@ public class ContractReferenceModel {
 	}
 	
 	synchronized static public Collection<IResource> removeContractedClass(IResource resource) {
-		System.out.println("[REMOVING CONTRACTED CLASS] " + resource.getName());
 		Collection<IResource> contracts = getContractReferences(resource);
 		for (IResource contract : contracts) {
 			Collection<IResource> contracted = mapContractClasses.get(contract);
@@ -211,7 +210,6 @@ public class ContractReferenceModel {
 			if (contracted.size() == 0) {
 				mapContractClasses.remove(contract);
 				clearResource(contract, QN_CONTRACT_PROPERTY);
-				System.out.println("[REMOVING CONTRACTED CLASS] clearing contract" + contract.getName());
 			}
 		}
 		mapClassContracts.remove(resource);
@@ -291,29 +289,19 @@ public class ContractReferenceModel {
 	}
 	
 	synchronized static public void clearContractReferences(IResource resource) {
-		System.out.println("[CLEAR CONTRACT RESOURCE] starting clear of " + resource.getName());
 		Collection<IResource> allContracts = mapClassContracts.get(resource);
 		if (allContracts == null) {
-			System.out.println("[CLEAR CONTRACT RESOURCE] resource has no contracts");
 			return;
 		}
 		
 		for (IResource contract : allContracts) {
-			System.out.println("[CLEAR CONTRACT RESOURCE] checking contract " + contract.getName());
 			Collection<IResource> contractedClasses = mapContractClasses.get(contract);
 			if (contractedClasses != null) {
 				contractedClasses.remove(resource);
 				if (contractedClasses.size() == 0) {
 					mapContractClasses.remove(contract);
-					System.out.println("[CLEAR CONTRACT RESOURCE] contract has no classes left");
 					clearResource(contract, QN_CONTRACT_PROPERTY);
 				}
-				else {
-					System.out.println("[CLEAR CONTRACT RESOURCE] contract has classes left");
-				}
-			}
-			else {
-				System.out.println("[CLEAR CONTRACT RESOURCE] contractedClasses == null");
 			}
 		}
 		

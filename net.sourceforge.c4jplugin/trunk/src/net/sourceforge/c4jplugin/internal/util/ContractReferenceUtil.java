@@ -60,7 +60,6 @@ public class ContractReferenceUtil {
 		try {
 			IType type = getType(jelement);
 			if (type != null) {
-				System.out.println("[CONTRACT] creating markers for " + contract.getName());
 				ASTParser parser = ASTParser.newParser(AST.JLS3);
 				parser.setSource(type.getCompilationUnit());
 				CompilationUnit cu = (CompilationUnit)parser.createAST(null);
@@ -76,7 +75,6 @@ public class ContractReferenceUtil {
 				// on another method in some class or if it is a classInvariant method
 				for (IMethod method : type.getMethods()) {
 					String name = method.getElementName();
-					System.out.println("[CONTRACT] checking method " + name);
 					String contractType = null;
 					String methodName = null;
 					if (name.startsWith("pre_")) {
@@ -109,7 +107,6 @@ public class ContractReferenceUtil {
 								// check if the found method has the same paramter types
 								// and the same name without "pre_" or "post_"
 								IMethod contractedMethod = (IMethod)JavaCore.create(methodHandle);
-								System.out.println("[CONTRACT] checking method " + contractedMethod.getElementName() + " with parameter types " + contractedMethod.getParameterTypes() + " against " + methodName + " with parameter types " + method.getParameterTypes());
 								if (Arrays.equals(contractedMethod.getParameterTypes(), method.getParameterTypes()) &&
 										contractedMethod.getElementName().equals(methodName)) {
 									// yes, create a marker for the contract method
@@ -244,7 +241,6 @@ public class ContractReferenceUtil {
 			IJavaElement javaElement = JavaCore.create(resource);
 			IType type = getType(javaElement);
 			if (type != null) {
-				System.out.print("checking contract of: " + type.getElementName() + "... ");
 				
 				Vector<IResource> contractReferences = new Vector<IResource>();
 				IResource ref = AnnotationUtil.getContractReference(resource);
@@ -256,7 +252,6 @@ public class ContractReferenceUtil {
 				// search all super types for contracts
 				IType[] superTypes = type.newSupertypeHierarchy(null).getSupertypes(type);
 				for (IType superType : superTypes) {
-					System.out.print("checking supertype: " + superType.getElementName());
 					IResource superResource = superType.getResource();
 					if (superResource == null) continue;
 					
@@ -273,12 +268,10 @@ public class ContractReferenceUtil {
 				if (contractReferences.size() > 0) {
 					// this type is contracted
 					ContractReferenceModel.setContractReferences(resource, contractReferences);
-					System.out.println(" TRUE");
 					return contractReferences;
 				}
 				else {
 					ContractReferenceModel.setContractReferences(resource, null);
-					System.out.println(" FALSE");
 				}
 			}
 		} 
@@ -415,7 +408,6 @@ public class ContractReferenceUtil {
 		}
 		
 		public boolean visit(IResource resource) throws CoreException {
-			System.out.println("visiting resource " + resource.getName());
 			if (resource.getName().endsWith(".java")) {
 				checkResourceForContracts(resource);
 				createContractedClassMarkers(resource);

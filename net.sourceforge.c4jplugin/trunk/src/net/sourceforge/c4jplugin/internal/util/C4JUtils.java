@@ -269,8 +269,6 @@ public class C4JUtils {
 			return;
 		}
 		
-		System.out.println("VM args: " + vmargs);
-		
 		try {
 			ILaunchConfigurationWorkingCopy wcConfig = configuration.getWorkingCopy();
 			wcConfig.setAttribute("vmargs", vmargs);
@@ -737,7 +735,7 @@ public class C4JUtils {
 				pep.getTreeViewer().refresh();
 			}
 			previousExecutionTime = (int)(System.currentTimeMillis() - start);
-			//System.out.println("refresh explorer: elapsed="+previousExecutionTime);
+			
 			return Status.OK_STATUS;
 		}
 	}

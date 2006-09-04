@@ -192,7 +192,6 @@ public class C4JActivator extends AbstractUIPlugin implements ILaunchListener {
 				
 				for (IProject project : depProjects) {
 					if (monitor.isCanceled()) break;
-					System.out.println("[REFRESH] project " + project.getName());
 					IProgressMonitor subMonitor = new SubProgressMonitor(monitor, 20);
 					ContractReferenceUtil.refreshModel(project, subMonitor, clearProject);
 				}

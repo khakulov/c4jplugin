@@ -39,7 +39,6 @@ public class RefreshC4JModelAction implements IObjectActionDelegate {
 			}
 		}
 		
-		System.out.println("project count: " + c4jProjects.size());
 		if (c4jProjects.size() > 0)
 			C4JActivator.getDefault().refreshContractReferenceModel(c4jProjects.toArray(new IProject[] {}));
 	}

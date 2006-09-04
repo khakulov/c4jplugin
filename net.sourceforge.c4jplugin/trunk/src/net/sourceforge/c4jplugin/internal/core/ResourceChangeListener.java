@@ -82,12 +82,8 @@ public class ResourceChangeListener implements IResourceChangeListener {
 			if (project == null) return true;
 			if (!project.isNatureEnabled(C4JProjectNature.NATURE_ID)) return false;
 			
-			System.out.println("[DELTA VISITOR] " + resource.getName());
-			
 			if (resource instanceof IFile && resource.getName().endsWith(".java")) {
-				System.out.println("checking delta kind");
 				if (delta.getKind() == IResourceDelta.REMOVED) {
-					System.out.println("kind is REMOVED");
 					if (ContractReferenceModel.isContract(resource, true)) {
 						handleRemovedContract(resource);
 					}
