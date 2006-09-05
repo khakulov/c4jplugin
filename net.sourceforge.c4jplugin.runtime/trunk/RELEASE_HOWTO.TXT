@@ -73,6 +73,10 @@ A: PLUG-IN EXPORT AND SF RELEASE
   the c4j.jar version changed, create a new release in the package "C4J Plugin
   Runtime", named after the c4j.jar version.
   
+- In the "c4jplugin_homepage" project, edit the "htdocs/runtime/download.html"
+  file to point to the new release on SourceForge (under the "Direct Download"
+  section).
+  
 - If all went well, commit the net.sourceforge.c4jplugin.runtime project project 
   and add a SVN tag named "RELEASE_<version_number>".
   
