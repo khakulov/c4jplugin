@@ -2,7 +2,7 @@
 <feature
       id="net.sourceforge.c4jplugin.feature"
       label="C4J Plugin"
-      version="0.1.0"
+      version="0.1.1"
       provider-name="chessed">
 
    <description>
@@ -297,6 +297,10 @@ POSSIBILITY OF SUCH DAMAGES.
        END OF TERMS AND CONDITIONS
    </license>
 
+   <url>
+      <update label="C4J Plugin Update Site" url="http://c4jplugin.sourceforge.net/update/"/>
+   </url>
+
    <requires>
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.core.runtime"/>
@@ -324,8 +328,8 @@ POSSIBILITY OF SUCH DAMAGES.
 
    <plugin
          id="net.sourceforge.c4jplugin"
-         download-size="238"
-         install-size="238"
+         download-size="300"
+         install-size="300"
          version="0.0.0"
          unpack="false"/>
 
