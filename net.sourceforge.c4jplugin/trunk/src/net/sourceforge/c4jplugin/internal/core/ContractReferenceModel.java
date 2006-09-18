@@ -96,14 +96,6 @@ public class ContractReferenceModel {
 	}
 	
 	synchronized static public void clearModel() {
-		for (IResource resource : mapClassContracts.keySet()) {
-			clearResource(resource);
-		}
-		
-		for (IResource contract : mapContractClasses.keySet()) {
-			clearResource(contract);
-		}
-		
 		mapClassContracts.clear();
 		mapContractClasses.clear();
 	}
@@ -112,14 +104,12 @@ public class ContractReferenceModel {
 		for (IResource resource : mapClassContracts.keySet()) {
 			if (resource.getProject().equals(project)) {
 				mapClassContracts.remove(resource);
-				clearResource(resource);
 			}
 		}
 		
 		for (IResource contract : mapContractClasses.keySet()) {
 			if (contract.getProject().equals(project)) {
 				mapContractClasses.remove(contract);
-				clearResource(contract);
 			}
 		}
 		

@@ -114,7 +114,7 @@ public class C4JUtils {
 			}
 		}
 		
-		C4JActivator.getDefault().refreshContractReferenceModel(new IProject[] { project });
+		//C4JActivator.getDefault().refreshContractReferenceModel(new IProject[] { project });
 		
 		refreshPackageExplorer();
 	}
@@ -305,7 +305,7 @@ public class C4JUtils {
 			}
 		} catch (CoreException e) {}
 		
-		return vmargs;
+		return vmargs == null ? "" : vmargs;
 	}
 	
 	/**

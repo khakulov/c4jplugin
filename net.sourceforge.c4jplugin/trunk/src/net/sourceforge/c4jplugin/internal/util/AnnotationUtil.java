@@ -63,8 +63,9 @@ public class AnnotationUtil {
 				
 				IType resolvedType = type.getJavaProject().findType(matches[0][0], matches[0][1]);
 				// check if the resolved resource has java errors
-				if (ContractReferenceUtil.hasJavaErrors(resolvedType))
+				if (ContractReferenceUtil.hasJavaErrors(resolvedType)) {
 					return null;
+				}
 				
 				// resolved type has no java errors
 				return resolvedType.getCompilationUnit().getCorrespondingResource();
@@ -124,7 +125,7 @@ public class AnnotationUtil {
 	
 	static private int readArgument(IScanner scanner, StringBuffer buf) throws InvalidInputException {
 		int tok = scanner.getNextToken();
-		while (tok != ITerminalSymbols.TokenNameRBRACE) {
+		while (tok != ITerminalSymbols.TokenNameRPAREN & tok != ITerminalSymbols.TokenNameEOF) {
 			if (tok == ITerminalSymbols.TokenNameStringLiteral) {
 				char[] literal = scanner.getCurrentTokenSource();
 				buf.append(literal, 1, literal.length-2);

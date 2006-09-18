@@ -19,6 +19,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -163,7 +164,7 @@ public class ContractReferenceUtil {
 					IMethod methodClassInvariant = refType.getMethod("classInvariant", new String[] {});
 					if (methodClassInvariant != null && methodClassInvariant.exists()) {
 						invariantCounter++;
-						invariantList += " - " + reference.getName() + "\n";
+						invariantList += " " + reference.getName();
 						try {
 							if (markerClassInvariant == null) {
 								markerClassInvariant = resource.createMarker(IContractedClassInvariantMarker.ID);
@@ -188,20 +189,17 @@ public class ContractReferenceUtil {
 						boolean refAdded = false;
 						if (refType.getMethod("post_" + method.getElementName(), method.getParameterTypes()).exists()) {
 							postMethod = true;
-							contractList += " - " + refType.getCompilationUnit().getCorrespondingResource().getName() + "\n";
+							contractList += " " + refType.getCompilationUnit().getCorrespondingResource().getName();
 							refAdded = true;
 						}
 						if (refType.getMethod("pre_" + method.getElementName(), method.getParameterTypes()).exists()) {
 							preMethod = true;
 							if (!refAdded) {
-								contractList += " - " + refType.getCompilationUnit().getCorrespondingResource().getName() + "\n";
+								contractList += " " + refType.getCompilationUnit().getCorrespondingResource().getName();
 							}
 						}
 					}
 					
-					if (contractList.length() > 0)
-						contractList = "\n\n" + contractList;
-				
 					try {
 						IMarker marker = null;
 						if (postMethod && preMethod) {
@@ -232,28 +230,35 @@ public class ContractReferenceUtil {
 	
 	static public Collection<IResource> checkResourceForContracts(IResource resource) {
 		try {
+			//System.out.println("Checking for contracts: " + resource.getName());
 			Boolean contracted = ContractReferenceModel.isContracted(resource);
 			if (contracted != null && contracted == true)
 				return ContractReferenceModel.getContractReferences(resource);
 			else if (contracted != null && contracted == false)
 				return Collections.emptyList();
 			
+			//System.out.println("Creating Java Element from resource");
 			IJavaElement javaElement = JavaCore.create(resource);
 			IType type = getType(javaElement);
 			if (type != null) {
 				
+				//System.out.println("Trying to get direct contract reference");
 				Vector<IResource> contractReferences = new Vector<IResource>();
 				IResource ref = AnnotationUtil.getContractReference(resource);
 				if (ref != null) {
 					// we found a class which is directly contracted
+					//System.out.println("Found direct contract " + ref.getName());
 					contractReferences.add(ref);
 				}
 				
+				//System.out.println("Searching for super contracts");
 				// search all super types for contracts
 				IType[] superTypes = type.newSupertypeHierarchy(null).getSupertypes(type);
 				for (IType superType : superTypes) {
 					IResource superResource = superType.getResource();
 					if (superResource == null) continue;
+					
+					//System.out.println("Checking supertype " + superResource.getName() + " for contracts");
 					
 					contracted = ContractReferenceModel.isContracted(superResource);
 					if (contracted == null) {
@@ -267,15 +272,19 @@ public class ContractReferenceUtil {
 				
 				if (contractReferences.size() > 0) {
 					// this type is contracted
+					//System.out.println("Resource " + resource.getName() + " has " + contractReferences.size() + " contracts");
 					ContractReferenceModel.setContractReferences(resource, contractReferences);
 					return contractReferences;
 				}
 				else {
+					//System.out.println("Resource " + resource.getName() + " has no contracts");
 					ContractReferenceModel.setContractReferences(resource, null);
 				}
 			}
 		} 
-		catch (JavaModelException e) {}
+		catch (JavaModelException e) {
+			e.printStackTrace();
+		}
 		
 		return Collections.emptyList();
 	}
@@ -308,38 +317,55 @@ public class ContractReferenceUtil {
 	}
 	
 	static public void refreshModel(IProject project, IProgressMonitor monitor, boolean clear) {
-		monitor.beginTask(UIMessages.Builder_startRefreshContractModel, 102);
 		
-		if (clear)
-			ContractReferenceModel.clearModel(project);
-		
-		monitor.worked(1);
-		
-		int sourceCount = getNumberOfSourceFiles(project);
-		monitor.worked(2);
-		
-		IProgressMonitor submonitor = new SubProgressMonitor(monitor, 50);
-		submonitor.beginTask(UIMessages.Builder_checkingContractedClasses, sourceCount);
-		IResourceVisitor contractVisitor = new ContractResourceVisitor(submonitor);
 		try {
-			project.accept(contractVisitor);
-		} catch (CoreException e) {
-			// TODO error handling in case something went wrong refreshing the model
-			e.printStackTrace();
+			monitor.beginTask(UIMessages.Builder_startRefreshContractModel, 102);
+			
+			if (clear)
+				ContractReferenceModel.clearModel(project);
+			
+			monitor.worked(1);
+			
+			if (monitor.isCanceled()) throw new OperationCanceledException();
+			
+			int sourceCount = getNumberOfSourceFiles(project);
+			monitor.worked(2);
+			
+			if (monitor.isCanceled()) throw new OperationCanceledException();
+			
+			IProgressMonitor submonitor = new SubProgressMonitor(monitor, 50);
+			IResourceVisitor contractVisitor = new ContractResourceVisitor(submonitor, clear);
+			try {
+				submonitor.beginTask(UIMessages.Builder_checkingContractedClasses, sourceCount);
+				project.accept(contractVisitor);
+			} catch (CoreException e) {
+				// TODO error handling in case something went wrong refreshing the model
+				e.printStackTrace();
+			}
+			finally {
+				submonitor.done();
+			}
+			
+			if (submonitor.isCanceled()) throw new OperationCanceledException();
+			
+			submonitor = new SubProgressMonitor(monitor, 50);
+			Collection<IResource> contracts = ContractReferenceModel.getAllContracts();
+			try {
+				submonitor.beginTask(UIMessages.Builder_creatingContractMarkers, contracts.size());
+				for (IResource contract : contracts) {
+					if (submonitor.isCanceled()) throw new OperationCanceledException();
+					
+					createContractMarkers(contract);
+					submonitor.worked(1);
+				}
+			}
+			finally {
+				submonitor.done();
+			}
 		}
-		submonitor.done();
-		
-		submonitor = new SubProgressMonitor(monitor, 50);
-		Collection<IResource> contracts = ContractReferenceModel.getAllContracts();
-		submonitor.beginTask(UIMessages.Builder_creatingContractMarkers, contracts.size());
-		for (IResource contract : contracts) {
-			createContractMarkers(contract);
-			submonitor.worked(1);
+		finally {
+			monitor.done();
 		}
-		submonitor.done();
-		
-		monitor.done();
-		
 	}
 	
 	static public IType getType(IJavaElement element) throws JavaModelException {
@@ -364,7 +390,10 @@ public class ContractReferenceUtil {
 			IMarker[] markers = type.getCompilationUnit().getCorrespondingResource().findMarkers(
 					IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, true, 
 					IResource.DEPTH_INFINITE);
-			if (markers.length > 0) return true;
+			for (IMarker marker : markers) {
+				if (marker.getAttribute(IMarker.SEVERITY, IMarker.SEVERITY_INFO) == IMarker.SEVERITY_ERROR)
+					return true;
+			}
 			return false;
 		} 
 		catch (JavaModelException e) {
@@ -402,13 +431,19 @@ public class ContractReferenceUtil {
 	private static class ContractResourceVisitor implements IResourceVisitor {
 
 		private IProgressMonitor monitor;
+		private boolean clear;
 		
-		public ContractResourceVisitor(IProgressMonitor monitor) {
+		public ContractResourceVisitor(IProgressMonitor monitor, boolean clear) {
 			this.monitor = monitor;
+			this.clear = clear;
 		}
 		
 		public boolean visit(IResource resource) throws CoreException {
+			if (monitor.isCanceled()) throw new OperationCanceledException();
+			
+			//System.out.println("Checking resource: " + resource.getName());
 			if (resource.getName().endsWith(".java")) {
+				if (clear) ContractReferenceModel.clearResource(resource);
 				checkResourceForContracts(resource);
 				createContractedClassMarkers(resource);
 				monitor.worked(1);

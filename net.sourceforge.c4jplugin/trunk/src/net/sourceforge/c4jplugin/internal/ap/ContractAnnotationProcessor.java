@@ -70,8 +70,9 @@ public class ContractAnnotationProcessor implements AnnotationProcessor {
 								else {
 									// check if the resolved contract has compilation errors
 									IType resolvedType = type.getJavaProject().findType(matches[0][0], matches[0][1]);									
-									if (ContractReferenceUtil.hasJavaErrors(resolvedType))
+									if (ContractReferenceUtil.hasJavaErrors(resolvedType)) {
 										env.getMessager().printWarning(annoValue.getPosition(), NLS.bind(UIMessages.AnnotationProcessor_warning_contractHasErrors, contractValue));
+									}
 								}
 							} catch (JavaModelException e) {}
 						}

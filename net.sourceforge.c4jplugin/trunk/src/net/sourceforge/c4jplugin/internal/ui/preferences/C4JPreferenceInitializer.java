@@ -41,8 +41,8 @@ public class C4JPreferenceInitializer extends AbstractPreferenceInitializer {
 		store.setDefault(IJavaLaunchConfigurationConstants.ID_JAVA_APPLET + "_ask", true);
 		store.setDefault(IJavaLaunchConfigurationConstants.ID_JAVA_APPLICATION + "_ask", true);
 		store.setDefault(IJavaLaunchConfigurationConstants.ID_REMOTE_JAVA_APPLICATION + "_ask", true);
-		store.setDefault("org.eclipse.pde.ui.RuntimeWorkbench" + "_ask", true);
-		store.setDefault("org.eclipse.pde.ui.EquinoxLauncher" + "_ask", true);
+		//store.setDefault("org.eclipse.pde.ui.RuntimeWorkbench" + "_ask", true);
+		//store.setDefault("org.eclipse.pde.ui.EquinoxLauncher" + "_ask", true);
 		store.setDefault("org.eclipse.pde.ui.swtLaunchConfig" + "_ask", true);
 	}
 

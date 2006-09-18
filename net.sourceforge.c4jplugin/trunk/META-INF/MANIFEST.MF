@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: net.sourceforge.c4jplugin;singleton:=true
-Bundle-Version: 0.1.0
+Bundle-Version: 0.1.1
 Bundle-Activator: net.sourceforge.c4jplugin.C4JActivator
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
@@ -17,7 +17,6 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.forms,
  org.eclipse.search,
  org.eclipse.jdt.ui,
- net.sourceforge.c4jplugin.runtime,
  org.eclipse.jdt.debug.ui,
  org.eclipse.debug.ui,
  org.eclipse.debug.core,
@@ -27,6 +26,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.workbench.texteditor,
  org.eclipse.jface.text,
  org.eclipse.core.expressions,
- org.eclipse.help
+ org.eclipse.help,
+ net.sourceforge.c4jplugin.runtime
 Eclipse-LazyStart: true
 Bundle-ClassPath: .

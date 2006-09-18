@@ -18,7 +18,9 @@ import net.sourceforge.c4jplugin.internal.util.C4JUtils;
 import net.sourceforge.c4jplugin.internal.util.ContractReferenceUtil;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.ISaveParticipant;
 import org.eclipse.core.resources.ISavedState;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -26,6 +28,7 @@ import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -35,6 +38,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchListener;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.XMLMemento;
@@ -87,7 +91,13 @@ public class C4JActivator extends AbstractUIPlugin implements ILaunchListener {
 			}
 		}
 		else {
-			refreshContractReferenceModel();
+			IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+			for (IProject project : projects) {
+				if (project.isNatureEnabled(C4JProjectNature.NATURE_ID) && project.isOpen()) {
+					refreshContractReferenceModel();
+					break;
+				}
+			}
 		}
 		
 		DebugPlugin.getDefault().getLaunchManager().addLaunchListener(this);
@@ -162,44 +172,63 @@ public class C4JActivator extends AbstractUIPlugin implements ILaunchListener {
 					catch (CoreException e) {}
 				}
 				
-				monitor.beginTask("C4J:", depProjects.size()*20 + 2);
-				
-				boolean clearProject = true;
-				IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
-				HashSet<IProject> setProjects = new HashSet<IProject>();
-				for (IProject project : projects) {
-					try {
-						if (project.isOpen() && project.isNatureEnabled(C4JProjectNature.NATURE_ID)) {
-							setProjects.add(project);
-							IProject[] refProjects = project.getReferencedProjects();
-							for (IProject refProject : refProjects) {
-								if (refProject.isOpen())
-									setProjects.add(refProject);
+				try {
+					monitor.beginTask("C4J:", depProjects.size()*20 + 2);
+					
+					boolean clearProject = true;
+					IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+					HashSet<IProject> setProjects = new HashSet<IProject>();
+					for (IProject project : projects) {
+						try {
+							if (project.isOpen() && project.isNatureEnabled(C4JProjectNature.NATURE_ID)) {
+								setProjects.add(project);
+								IProject[] refProjects = project.getReferencedProjects();
+								for (IProject refProject : refProjects) {
+									if (refProject.isOpen())
+										setProjects.add(refProject);
+								}
 							}
+						} catch (CoreException e) {}
+					}
+					if (setProjects.size() == depProjects.size()) {
+						clearProject = false;
+						ContractReferenceModel.clearModel();
+						IResourceVisitor visitor = new IResourceVisitor() {
+							public boolean visit(IResource resource) throws CoreException {
+								if (resource.getName().endsWith(".java"))
+									ContractReferenceModel.clearResource(resource);
+								
+								return true;
+							}	
+						};
+						for (IProject project : setProjects) {
+							project.accept(visitor);
 						}
-					} catch (CoreException e) {}
+					}
+					monitor.worked(1);
+					if (monitor.isCanceled()) throw new OperationCanceledException();
+					
+					for (IProject project : depProjects) {
+						ContractReferenceUtil.deleteMarkers(project);
+					}
+					monitor.worked(1);
+					if (monitor.isCanceled()) throw new OperationCanceledException();
+					
+					for (IProject project : depProjects) {
+						if (monitor.isCanceled()) throw new OperationCanceledException();
+						IProgressMonitor subMonitor = new SubProgressMonitor(monitor, 20);
+						ContractReferenceUtil.refreshModel(project, subMonitor, clearProject);
+					}
 				}
-				if (setProjects.size() == depProjects.size()) {
-					clearProject = false;
-					ContractReferenceModel.clearModel();
+				finally {
+					monitor.done();
 				}
-				monitor.worked(1);
-				
-				for (IProject project : depProjects) {
-					ContractReferenceUtil.deleteMarkers(project);
-				}
-				monitor.worked(1);
-				
-				for (IProject project : depProjects) {
-					if (monitor.isCanceled()) break;
-					IProgressMonitor subMonitor = new SubProgressMonitor(monitor, 20);
-					ContractReferenceUtil.refreshModel(project, subMonitor, clearProject);
-				}
-				monitor.done();
 				
 				PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
 					public void run() {
-						((C4JDecorator)PlatformUI.getWorkbench().getDecoratorManager().getBaseLabelProvider(C4JDecorator.ID)).refreshAll();
+						IWorkbench workbench = PlatformUI.getWorkbench();
+						if (workbench != null)
+							((C4JDecorator)workbench.getDecoratorManager().getBaseLabelProvider(C4JDecorator.ID)).refreshAll();
 					}
 				});
 				
