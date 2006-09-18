@@ -154,7 +154,7 @@ public class C4JActivator extends AbstractUIPlugin implements ILaunchListener {
 	}
 	
 	public void refreshContractReferenceModel(final IProject[] projects) {
-		WorkspaceJob wsJob = new WorkspaceJob("C4J Model Job") {
+		WorkspaceJob wsJob = new WorkspaceJob(UIMessages.Builder_jobTitle) {
 			@Override
 			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
 				
@@ -173,7 +173,7 @@ public class C4JActivator extends AbstractUIPlugin implements ILaunchListener {
 				}
 				
 				try {
-					monitor.beginTask("C4J:", depProjects.size()*20 + 2);
+					monitor.beginTask(UIMessages.Builder_startModelJob, depProjects.size()*20 + 2);
 					
 					boolean clearProject = true;
 					IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();

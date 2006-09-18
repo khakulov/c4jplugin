@@ -14,6 +14,8 @@ public class UIMessages extends NLS {
 	
 	// Jobs
 	public static String utils_refresh_explorer_job;
+	public static String Builder_jobTitle;
+	public static String Builder_startModelJob;
 	public static String Builder_startRefreshContractModel;
 	public static String Builder_checkingContractedClasses;
 	public static String Builder_creatingContractMarkers;
