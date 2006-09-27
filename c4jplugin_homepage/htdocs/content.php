@@ -156,13 +156,5 @@ function adapt_c4jlink(category, page) {
 	
 	</div>
 	
-	<?php
-		$link = explode("#", $page);
-		if (count($link) == 2) {
-			echo "<script  language=\"JavaScript\" type=\"text/javascript\">";
-			echo "location.href=\"#".$link[1]."\";</script>";
-		}
-	?>
-	
 	<script language="JavaScript" src="http://c4jplugin.sourceforge.net/tmenu_attributes.js"></script>
 	<script language="JavaScript" src="http://c4jplugin.sourceforge.net/tmenu_code.js"></script>
