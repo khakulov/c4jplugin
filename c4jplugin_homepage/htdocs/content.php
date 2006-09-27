@@ -23,7 +23,7 @@ if (!$page || $page == "") {
 
 <link rel="stylesheet" href="css/custom_layout.css" type="text/css"/>
 <script language="JavaScript" type="text/javascript">
-function adapt_link(category, page) {
+function adapt_c4jlink(category, page) {
 	
 	if (category == "extern") {
 		window.open(page, "_blank");
