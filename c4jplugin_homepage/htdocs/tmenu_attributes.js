@@ -47,7 +47,7 @@ function tmenudata0()
     ---------------------------------------------*/
 
 
-	this.indent = 20;			//The indent distance in pixels for each level of the tree.
+	this.indent = 14;			//The indent distance in pixels for each level of the tree.
 	this.use_hand_cursor = true;		//Use a hand mouse cursor for expandable items, or the default arrow.
 
 

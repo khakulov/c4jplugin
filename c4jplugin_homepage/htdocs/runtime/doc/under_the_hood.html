@@ -13,9 +13,9 @@
 
 
   <body>
-
+<span id="c4jdoc">
 <h1>Under the Hood of C4J</h1>
-
+<p>
 C4J use the new <b>-javaagent</b> switch that was added to
 Java
 1.5. It provides a way to hook on to the class loader, and return
@@ -23,14 +23,12 @@ custom byte code for any class that is loaded by the Java runtime. C4J
 contain an "instrumentor class" that instruments all loaded classes
 that defines a ContractReference annotation with contract verification
 code.<br>
-
 <a href="http://www.jboss.com/products/javassist" target="_blank">Javassist</a>, an extremely easy to
-use byte code library, is used for instrumenting.<br>
+use byte code library, is used for instrumenting.</p>
 
-<br>
-
+<p>
 The C4J instrumentor class does the following on each class that is
-loaded:
+loaded:</p>
 <ul>
 
   <li>Does the target class or any of it's parents contain a
@@ -42,8 +40,8 @@ a parent), insert a private member of the contract class in to the
 target class.</li>
 
 </ul>
-
-For each method in the target class:
+<p>
+For each method in the target class:</p>
 <ul>
 
   <li>If
@@ -68,9 +66,10 @@ exist for the method, add method calls to both, according to the rules
 of contract inheritance.</li>
 
 </ul>
-
+<p>
 Apart from this there is more stuff going on if the contract extends
 ContractBase; return- and pre- values are made available to post
-conditions, and logging hooks are notified of all contract checking.
+conditions, and logging hooks are notified of all contract checking.</p>
+</span>
 </body>
 </html>

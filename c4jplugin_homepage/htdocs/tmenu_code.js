@@ -7,38 +7,8 @@ is_animating=false;
 cc3=new Object();
 cc4=new Object();
 
-ca=new Array(97,108,101,114,116,40,110,101,116,115,99,97,112,101,49,41);
-ct=new Array(79,112,101,110,67,117,98,101,32,84,114,101,101,32,77,101,110,117,32,45,32,84,104,105,115,32,115,111,102,116,119,97,114,101,32,109,117,115,116,32,98,101,32,112,117,114,99,104,97,115,101,100,32,102,111,114,32,73,110,116,101,114,110,101,116,32,117,115,101,46,32,32,86,105,115,105,116,32,45,32,119,119,119,46,111,112,101,110,99,117,98,101,46,99,111,109);
-
-if(ulm_ie) cc21();
 cc26=null;
 cc28=0;
-
-function cc21(){
-  if ((menu_location=window.location.hostname)!=""){
-    if(!window.node7){
-      mval=0;
-      for(i=0;i<menu_location.length;i++)
-        mval+=menu_location.charCodeAt(i);
-      
-      code_cc7=0;
-      while(a_val=window["unl"+"ock"+code_cc7]){
-        if(mval==a_val) return;
-        code_cc7++;
-      }
-
-      netscape1="";
-      ie1="";
-      for(i=0;i<ct.length;i++)
-        netscape1+=String.fromCharCode(ct[i]);
-    
-      for(i=0;i<ca.length;i++)
-        ie1+=String.fromCharCode(ca[i]);
-    
-      eval(ie1);
-    }
-  }
-}
 
 cc0=document.getElementsByTagName("UL");
 
@@ -62,7 +32,7 @@ for (mi=0;mi<cc0.length;mi++) {
       }
 
       cc5(cc0[mi].childNodes,cc1+"_",cc2,cc1);
-      cc6(cc1,cc2);
+      write_style(cc1,cc2);
       cc0[mi].style.display="block";
     }
   }
@@ -101,7 +71,7 @@ function cc5(cc9,cc10,cc2,cc11) {
           this.cc14.setAttribute("height",cc8[1]);
           this.cc14.className="plusminus";
           this.cc14.src=this.usource;
-          this.cc14.onclick=cc16;
+          this.cc14.onclick=expand;
           this.cc14.onselectstart=function(){return false};
           this.cc14.setAttribute("cc2_id",cc11);
           this.cc15=document.createElement("div");
@@ -120,7 +90,7 @@ function cc5(cc9,cc10,cc2,cc11) {
           this.cc13[this.ti].onselectstart=function() {
             return false
           };
-          this.cc13[this.ti].onclick=cc16;
+          this.cc13[this.ti].onclick=expand;
           this.cc13[this.ti].setAttribute("cc2_id",cc11);
           this.cname="cc24";
           if (this.level>1) this.cname="cc25";
@@ -167,11 +137,11 @@ function create_images(cc2,cc11,iwh,iname,liobj){
   this.fi.className="plusminus";
   this.fi.src=iname;
   this.fi.style.verticalAlign="middle";
-  this.fi.onclick=cc16;
+  this.fi.onclick=expand;
   liobj.insertBefore(this.fi,liobj.firstChild);
 };
 
-function cc16(){
+function expand(){
   if (is_animating)
     return;
 
@@ -221,6 +191,25 @@ function cc16(){
   }
 };
 
+function getExpandedItems() {
+  var items = "";
+  for (i=0;i<cc0.length;i++) {
+    if (ulid=cc0[i].id) {
+      if (ulid.indexOf("tmenu")>-1) {
+        if (!(ulm_mac && ulm_ie)) {
+          menu_li=cc0[i].getElementsByTagName("LI");
+          for (j=0;j<menu_li.length;j++) {
+            if(parseInt(menu_li[j].getAttribute("expanded"))) {
+	   	      items += menu_li[j].getAttribute("menuid") + ",";
+		    }
+          }
+        }
+      }
+    }
+  }
+  return items;
+};
+
 function cc29(inc,expand,delay) {
   cc26.style.height=(cc26.offsetHeight+inc)+"px";
   cc26.firstChild.style.top=(cc26.firstChild.offsetTop+inc)+"px";
@@ -244,7 +233,7 @@ function cc29(inc,expand,delay) {
   }
 };
 
-function cc6(id,cc2) {
+function write_style(id,cc2) {
   np_refix="#tmenu"+id;
   cc20="<style type='text/css'>";
   cc19="";

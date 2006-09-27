@@ -6,11 +6,6 @@
 
   <link rel="stylesheet" href="book.css" charset="ISO-8859-1" type="text/css">
 
-  <style>
-td {border-top: solid thin black;}
-img[alt] {background-color:#ffdddd;}
-tr {vertical-align: top;}
-  </style>
   <title>What's New</title>
 
 
@@ -19,7 +14,7 @@ tr {vertical-align: top;}
 
 
   <body>
-
+<span id="c4jdoc">
 <h1>What's new in the C4J Eclipse Plug-in</h1>
 
 <p>Here is a list of new features in each new version:</p>
@@ -31,17 +26,14 @@ tr {vertical-align: top;}
 </ul>
 <br>
 
-<table cellpadding="10" cellspacing="0" width="600">
+<table class="whatsnew" rules=rows>
 
-  <colgroup><col width="20%"><col width="80%"></colgroup>
+  <colgroup><col width="20%"><col width="*"></colgroup>
   <tbody>
 
     <tr>
 
-      <td colspan="2"><a name="0.1"></a>
-      <div style="font-size: 20px; font-weight: bold;">Version 0.1</div>
-
-      </td>
+      <td class="header" colspan="2"><a name="0.1"></a>Version 0.1</td>
 
     </tr>
 
@@ -67,12 +59,13 @@ tr {vertical-align: top;}
 	  methods</b></p></td>
 
       <td>
-      <span style="width:300px;float:left;"><p>You can choose to decorate your contracts and targets (contracted
+      <div style="float:right;"><img src="images/decorators.jpg"/></div>
+      <p>You can choose to decorate your contracts and targets (contracted
 	  classes) and their methods such that you can easily spot them.
 	  Additionally, the decoration of methods gives you a hint if they are
 	  guarded by pre and/or post conditions, if they belong to a target class, or
-	  if they represent pre or post conditions in contracts.</p></span>
-	  <span><img src="images/decorators.jpg"/></span>
+	  if they represent pre or post conditions in contracts.</p>
+	  
 	   </td>
 
     </tr>
@@ -126,6 +119,6 @@ tr {vertical-align: top;}
 
   </tbody>
 </table>
-
+</span>
 </body>
 </html>

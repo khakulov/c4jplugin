@@ -13,34 +13,32 @@
 
 
   <body>
+  	<span id="c4jdoc">
 
 <h1>Overview</h1>
-
+<p>
 This guide is about the Eclipse plug-in <tt>net.sourceforge.c4jplugin.runtime</tt>
 and the C4J Library it encapsulates. Most of this documentation has
 been extracted from the <a href="http://c4j.sourceforge.net">homepage
-of C4J</a>.<br>
-
-<br>
+of C4J</a>.</p>
 
 <h2>What is C4J and Design by Contract (DBC)</h2>
 
-<em>Contracts for Java</em> (C4J) is a <i>Design By
+<p><em>Contracts for Java</em> (C4J) is a <i>Design By
 Contract</i> (DBC, see <a href="http://en.wikipedia.org/wiki/DBC" target="_blank">Wikipedia
 DBC definition</a> and <a href="http://archive.eiffel.com/doc/manuals/technology/contract/" target="_blank">Eiffel DBC docs</a>)
 framework for Java 1.5 and later. The primary goal for C4J is ease of
 use. DBC is about design and quality, aspects of programming that a lot
-programmers don't spend enough time and energy on.<br>
+programmers don't spend enough time and energy on.</p>
 
-Therefore a DBC framework must be simple and painless to use. At the
-same time the framework must be powerful.<br>
+<p>Therefore a DBC framework must be simple and painless to use. At the
+same time the framework must be powerful.</p>
 
-C4J is simple <em>and</em> powerful.<br>
+<p>C4J is simple <em>and</em> powerful.</p>
 
-<br>
-
+<p>
 Two favourite ideas of the author of C4J, underlying the philosophy of
-Design by Contract, are:<br>
+Design by Contract, are:</p>
 
 <ul>
 
@@ -56,19 +54,16 @@ even be real use cases.</li>
 
 </ul>
 
-<br>
-
 <h2>How does it work</h2>
-
+<p>
 Adding class invariants, pre conditions, and post conditions to your
 regular Java objects is easy with C4J. Contracts for a class (the
 target) are implemented in a separate class (the contract). The
 contract is linked to the target at compile time using an annotation,
 and the actual contract verification code is tied to the target using
-instrumentation during class loading at run time.<br>
+instrumentation during class loading at run time.</p>
 
-<br>
-
+<p>
 Contracts implementations have a reference to the instance of the
 target that it is verifying. This reference is used to implement class
 invariants. Pre and post conditions also have access to the target
@@ -76,12 +71,11 @@ reference, as well as the parameters that the target method is invoked
 with. If the contract class extends a C4J ContractBase class, post
 conditions will also have access to method return values, and pre
 invokation values (i.e. values of instance variables in the target
-prior to the method invocation).<br>
+prior to the method invocation).</p>
 
-<br>
-
+<p>
 There are several reasons for defining contracts in plain Java and in a
-separate class:
+separate class:</p>
 <ul>
 
   <li>You don't have to learn any new language constructs.</li>
@@ -102,12 +96,10 @@ all the ugly assertions.</li>
 
 </ul>
 
-<br>
 
-<h2>The
-plug-in <tt>net.sourceforge.c4jplugin.runtime</tt></h2>
-
-<div id="bullets">This plug-in is part of the <a href="http://c4jplugin.sourceforge.net">C4JPlugin
+<h2>The plug-in <tt>net.sourceforge.c4jplugin.runtime</tt></h2>
+<p>
+This plug-in is part of the <a href="http://c4jplugin.sourceforge.net">C4JPlugin
 sourceforge project</a> and acts as a wrapper for the c4j.jar and
 javassist.jar library. In addition, it contains this guide which is
 integrated into the Eclipse help system. This eases the use of C4J for
@@ -116,7 +108,7 @@ plug-in. This additional plug-in extends Eclipse with useful
 capabilities in order to write and manage contracts more easily. A
 description
 of it can be found in the <span style="font-weight: bold;">C4J
-Plug-in User Guide</span> in the Eclipse help system.</div>
-
+Plug-in User Guide</span> in the Eclipse help system.</p>
+</span>
 </body>
 </html>

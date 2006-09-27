@@ -28,6 +28,15 @@
 			<fileset dir="${c4jplugin_doc}" excludes="*.svn*"/>
 		</copy>
 		
+		<copy file="${c4jplugin_doc}/book.css" todir="${html_root}/css/" failonerror="false"/>
+		<copy todir="${html_root}/images" failonerror="false">
+			<fileset dir="${c4jplugin_doc}/images" excludes="*.svn*"/>
+		</copy>
+		
+		<copy todir="${html_root}/images" failonerror="false">
+			<fileset dir="${c4jplugin.runtime_doc}/images" excludes="*.svn*"/>
+		</copy>
+		
 		<copy file="${c4jplugin.runtime}/license.txt" todir="${html_root}/runtime" failonerror="false"/>
 		
 		<copy todir="${html_root}/runtime/doc" failonerror="false">

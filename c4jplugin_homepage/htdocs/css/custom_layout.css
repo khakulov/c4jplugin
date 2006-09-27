@@ -1,0 +1,14 @@
+#main{
+	width: 630px;
+}
+
+#sidebar{
+	width: 245px;
+}
+
+#content table.whatsnew {
+	table-layout: fixed;
+	width: 610px;
+	max-width: 610px;
+	overflow: hidden;
+}

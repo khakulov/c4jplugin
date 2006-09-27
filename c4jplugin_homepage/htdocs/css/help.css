@@ -1,0 +1,22 @@
+#c4jdoc {
+	background: #EEE;
+	color: #000;
+ 	font-size: 80%;
+	line-height: 1.6em;
+ 	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	border-top: 10px solid #DDD;
+}
+
+#top h1{
+		height: 80px;
+		font-family: "Trebuchet MS", sans-serif;
+		font-size: 1.5em;
+		margin: 0 0 0 40px;
+		padding-top: 50px;
+		color: #FFFFFF;
+	}
+	
+#content{
+	margin: 0 0 0 30px;
+	padding: 1em 0 2em 0;
+}
