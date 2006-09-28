@@ -1,5 +1,4 @@
 <?php
-
 $category = $_GET['category'];
 $page = $_GET['page'];
 $expanded = $_GET['expanded'];
@@ -21,7 +20,7 @@ if (!$page || $page == "") {
 
 ?>
 
-<link rel="stylesheet" href="css/custom_layout.css" type="text/css"/>
+<link rel="stylesheet" href="http://c4jplugin.sourceforge.net/css/custom_layout.css" type="text/css"/>
 <script language="JavaScript" type="text/javascript">
 function adapt_c4jlink(category, page) {
 	
@@ -61,10 +60,10 @@ function adapt_c4jlink(category, page) {
 					if ($type == "txt") echo '</pre>';
 				}
 				else if ($category == "c4j_help") {
-					echo '<link rel="stylesheet" href="css/book.css" type="text/css"/>';
+					echo '<link rel="stylesheet" href="http://c4jplugin.sourceforge.net/css/book.css" type="text/css"/>';
 					require $page;
 					if ($type == "txt") echo '</pre>';
-					echo '<link rel="stylesheet" href="css/help.css" type="text/css"/>';
+					echo '<link rel="stylesheet" href="http://c4jplugin.sourceforge.net/css/help.css" type="text/css"/>';
 				}
 			?>
 		</div>
