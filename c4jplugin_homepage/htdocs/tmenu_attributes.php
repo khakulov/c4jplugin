@@ -1,4 +1,6 @@
-
+<?php
+$url_base = $_GET['url_base'];
+?>
 
 /**********************************************************************************************
 
@@ -30,13 +32,13 @@ function tmenudata0()
 							//plus / minus symbols and the text only.
 
 	
-	this.plus_image = "http://c4jplugin.sourceforge.net/images/plus.gif"		//specifies a custom plus image.
-	this.minus_image = "http://c4jplugin.sourceforge.net/images/minus.gif"		//specifies a custom minus image.
+	this.plus_image = "<?php echo $url_base; ?>images/plus.gif"		//specifies a custom plus image.
+	this.minus_image = "<?php echo $url_base; ?>images/minus.gif"		//specifies a custom minus image.
 	this.pm_width_height = "9,9"			//Width & Height  - Note: Both images must be the same dimensions.
 
 
-	this.folder_image = "http://c4jplugin.sourceforge.net/images/folder.gif"		//Automatically applies to all items which may be expanded.
-	this.document_image = "http://c4jplugin.sourceforge.net/images/document.gif"	//Automatically applies to all items which are not expandable.
+	this.folder_image = "<?php echo $url_base; ?>images/folder.gif"		//Automatically applies to all items which may be expanded.
+	this.document_image = "<?php echo $url_base; ?>images/document.gif"	//Automatically applies to all items which are not expandable.
 	this.icon_width_height = "16,14"		//Width & Height  - Note: Both images must be the same dimensions.
 
 

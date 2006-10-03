@@ -6,6 +6,22 @@
 	width: 245px;
 }
 
+#sidebar ul li:before {
+	content: "";
+}
+
+#sidebar ul.custom {
+	padding-left: 20px;
+}
+
+#sidebar div#section ul li ul a:before {
+	content: "";
+}
+
+#sidebar div#section ul li ul a:hover:before {
+	content: "";
+}
+
 #content table.whatsnew {
 	table-layout: fixed;
 	width: 610px;

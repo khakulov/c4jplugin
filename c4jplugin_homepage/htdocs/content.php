@@ -2,6 +2,7 @@
 $category = $_GET['category'];
 $page = $_GET['page'];
 $expanded = $_GET['expanded'];
+$url_base = $_GET['url_base'];
 
 $items = array();
 if ($expanded && strlen($expanded) > 0) {
@@ -20,7 +21,7 @@ if (!$page || $page == "") {
 
 ?>
 
-<link rel="stylesheet" href="http://c4jplugin.sourceforge.net/css/custom_layout.css" type="text/css"/>
+<link rel="stylesheet" href="<?php echo $url_base; ?>css/custom_layout.css" type="text/css"/>
 <script language="JavaScript" type="text/javascript">
 function adapt_c4jlink(category, page) {
 	
@@ -47,7 +48,7 @@ function adapt_c4jlink(category, page) {
 <div id="page">
 	
 	<div id="top">
-		<div id="logo"><img src="http://c4jplugin.sourceforge.net/logo.png"/></div><h1>C4J <br/>Eclipse Plugin</h1>
+		<div id="logo"><img src="<?php echo $url_base; ?>logo.png"/></div><h1>C4J <br/>Eclipse Plugin</h1>
 	</div>
 	
 	<div id="main">
@@ -72,7 +73,7 @@ function adapt_c4jlink(category, page) {
 	<div id="sidebar">
 		<div id="section">
 			<h2>Main</h2>
-			<ul id="tmenu0" style="display:none;">
+			<ul class="custom">
 				<li><a onclick="adapt_link('c4j_main', 'home.html'); return false;" href="home.html">Home</a></li>
 				<li><a onclick="adapt_link('c4j_main', ''); return false;" href="index.php">News</a></li>
 				<li><a href="http://sourceforge.net/projects/c4jplugin" target=_blank>Sourceforge Page</a></li>
@@ -83,11 +84,14 @@ function adapt_c4jlink(category, page) {
 		
 		<div id="section">
 			<h2>C4J Plugin</h2>
-			<ul id="tmenu0" style="display:none;">
-
+			<ul class="custom">
 				<li><a onclick="adapt_link('c4j_main', 'c4jplugin/download.html'); return false;" href="c4jplugin/download.html">Download</a></li>
 				<li><a onclick="adapt_link('c4j_main', 'c4jplugin/todo.html'); return false;" href="c4jplugin/todo.html">Todo</a></li>
-		
+			</ul>
+			
+			<ul id="tmenu0" style="display:none;">
+
+				
 				<li menuid="userguide" <?php if (in_array("userguide", $items)) echo "expanded=1"; ?>><span><b>C4J Plug-in User Guide</b></span>
 					<ul>
 					<li><a onclick="adapt_link('c4j_help', 'c4jplugin/doc/overview.html'); return false;" href="c4jplugin/doc/overview.html">OverView</a></li>
@@ -100,8 +104,10 @@ function adapt_c4jlink(category, page) {
 		
 		<div id="section">
 			<h2>C4J Plugin Runtime</h2>
-			<ul id="tmenu0" style="display:none;">
+			<ul class="custom">
 				<li><a onclick="adapt_link('c4j_main', 'runtime/download.html'); return false;" href="runtime/download.html">Download</a></li>
+			</ul>
+			<ul id="tmenu0" style="display:none;">
 				
 				<li  menuid="libraryguide" <?php if (in_array("libraryguide", $items)) echo "expanded=1"; ?>><span><b>C4J Library Guide</b></span>
 					<ul>
@@ -145,7 +151,7 @@ function adapt_c4jlink(category, page) {
 			<a href="http://sourceforge.net" target=_blank><img src="http://sflogo.sourceforge.net/sflogo.php?group_id=173673&amp;type=2" width="125" height="37" alt="SourceForge.net Logo" /></a>
 		</div>
 		<div id="logo">
-			<a href="http://www.eclipse.org" target=_blank><img src="http://c4jplugin.sourceforge.net/images/eclipse_logo.jpg" alt="Eclipse.org" /></a>
+			<a href="http://www.eclipse.org" target=_blank><img src="<?php echo $url_base; ?>images/eclipse_logo.jpg" alt="Eclipse.org" /></a>
 		</div>
 	</div>
 	
@@ -155,5 +161,5 @@ function adapt_c4jlink(category, page) {
 	
 	</div>
 	
-	<script language="JavaScript" src="http://c4jplugin.sourceforge.net/tmenu_attributes.js"></script>
-	<script language="JavaScript" src="http://c4jplugin.sourceforge.net/tmenu_code.js"></script>
+	<script language="JavaScript" src="<?php echo $url_base; ?>tmenu_attributes.php?url_base=<?php echo $url_base; ?>"></script>
+	<script language="JavaScript" src="<?php echo $url_base; ?>tmenu_code.js"></script>
