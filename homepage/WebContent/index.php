@@ -139,6 +139,7 @@ else if (strncmp($category, "c4j", 3) == 0) {
 	$content = "content.php";
 }
 else if (strncmp($category, "jml", 3) == 0) {
+	//$url_base = "http://localhost/~sascha/jml/";
 	$url_base = "http://jmedialibrary.sourceforge.net/";
 	$content = "content.php";
 }
