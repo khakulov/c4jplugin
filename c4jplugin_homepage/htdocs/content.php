@@ -73,7 +73,7 @@ function adapt_c4jlink(category, page) {
 	<div id="sidebar">
 		<div id="section">
 			<h2>Main</h2>
-			<ul class="custom">
+			<ul class="arrow">
 				<li><a onclick="adapt_link('c4j_main', 'home.html'); return false;" href="home.html">Home</a></li>
 				<li><a onclick="adapt_link('c4j_main', ''); return false;" href="index.php">News</a></li>
 				<li><a href="http://sourceforge.net/projects/c4jplugin" target=_blank>Sourceforge Page</a></li>
@@ -84,7 +84,7 @@ function adapt_c4jlink(category, page) {
 		
 		<div id="section">
 			<h2>C4J Plugin</h2>
-			<ul class="custom">
+			<ul class="arrow">
 				<li><a onclick="adapt_link('c4j_main', 'c4jplugin/download.html'); return false;" href="c4jplugin/download.html">Download</a></li>
 				<li><a onclick="adapt_link('c4j_main', 'c4jplugin/todo.html'); return false;" href="c4jplugin/todo.html">Todo</a></li>
 			</ul>
@@ -104,7 +104,7 @@ function adapt_c4jlink(category, page) {
 		
 		<div id="section">
 			<h2>C4J Plugin Runtime</h2>
-			<ul class="custom">
+			<ul class="arrow">
 				<li><a onclick="adapt_link('c4j_main', 'runtime/download.html'); return false;" href="runtime/download.html">Download</a></li>
 			</ul>
 			<ul id="tmenu0" style="display:none;">

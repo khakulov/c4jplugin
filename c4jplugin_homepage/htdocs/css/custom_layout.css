@@ -6,20 +6,8 @@
 	width: 245px;
 }
 
-#sidebar ul li:before {
-	content: "";
-}
-
-#sidebar ul.custom {
+#sidebar ul.arrow {
 	padding-left: 20px;
-}
-
-#sidebar div#section ul li ul a:before {
-	content: "";
-}
-
-#sidebar div#section ul li ul a:hover:before {
-	content: "";
 }
 
 #content table.whatsnew {
