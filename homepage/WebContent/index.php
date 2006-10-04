@@ -120,8 +120,8 @@ if (!$category || $category == "") {
 	$page = "pages/about.html";
 }
 
-$url_base = "http://localhost/~sascha/homepage/";
-//$url_base = "http://www.mathi.uni-heidelberg.de/~sascha/";
+//$url_base = "http://localhost/~sascha/homepage/";
+$url_base = "http://www.mathi.uni-heidelberg.de/~sascha/";
 $content = "";
 if (strncmp($category, "local", 5) == 0) {
 	switch ($category) {
