@@ -22,6 +22,15 @@ if (!$page || $page == "") {
 ?>
 
 <link rel="stylesheet" href="<?php echo $url_base; ?>css/custom_layout.css" type="text/css"/>
+<!--[if lte IE 6]>
+<style type="text/css">
+#sidebar ul.arrow {
+	padding-left: 30px;
+}
+</style>
+<![endif]-->
+
+
 <script language="JavaScript" type="text/javascript">
 function adapt_c4jlink(category, page) {
 	
