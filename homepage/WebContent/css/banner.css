@@ -1,0 +1,52 @@
+/* Header
+*******************************************************************************/
+#header{
+	height: 90px;
+	background: url(../img/header.jpg) repeat-x left top;
+	border-bottom: #ddd 2px solid;
+}
+
+#banner{
+	height: 90px;
+	background: url(../img/banner.jpg) no-repeat left top;
+}
+/* Navigation
+*******************************************************************************/
+#navigation{
+	background-color: transparent;
+	background: url(../img/nav.gif) repeat-x left top;
+	color: #fff;
+	position: absolute;
+	top: 66px;
+	left: 0px;
+	height: 150px;
+	padding: 0px;
+	padding-left: 50px;
+}
+
+#navgrad{
+	background-color: transparent;
+	background: url(../img/navgrad.png) no-repeat left top;
+	position: absolute;
+	top: 66px;
+	left: 490px;
+	width: 50px;
+	height: 24px;
+	padding: 0px;
+}
+
+#navgrad2 {
+	display: none;
+}
+
+	
+	#search fieldset{
+		border: 0;
+		text-align: right;
+	}
+	
+	#search #q{
+		width: 16em;
+		background: #fff url(images/search.png) no-repeat 2% 50%;
+		padding: 2px 20px;
+	}

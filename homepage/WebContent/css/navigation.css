@@ -1,0 +1,138 @@
+/* ||||||||| Infinite Menu Styles |||||||||||| */
+
+
+	/* --[[ Main Expand Icons ]]-- */
+	#imenus0 .imeam div,#imenus0 .imeamj div {
+		background-image:url(img/main_arrow.gif); 
+		width:7px; 
+		height:5px; 
+		left:0px; 
+		top:5px; 
+		background-repeat:no-repeat;
+		background-position:top left;
+	}
+	
+	#imenus0 li:hover .imeam div, #imenus0 li a.iactive .imeamj  div {
+		background-image:url(img/main_arrow.gif); 
+		background-repeat:no-repeat;
+		background-position:top left;
+	}
+
+
+	/* --[[ Sub Expand Icons ]]-- */
+	#imenus0 ul .imeas div, #imenus0 ul .imeasj div {
+		background-image:url(img/sub_arrow.gif); 
+		width:5px; 
+		height:7px; 
+		left:0px; 
+		top:5px; 
+		background-repeat:no-repeat;
+		background-position:center left;
+	}
+	
+	#imenus0 ul li:hover .imeas div, #imenus0 li a.iactive .imeasj div {
+		background-image:url(img/sub_arrow.gif); 
+		background-repeat:no-repeat;
+		background-position:center left;
+	}
+
+
+	/* --[[ Main Container ]]-- */
+	#imouter0 {
+		background-color:transparent; 
+		border-style:none; 
+		border-color:#6a6a6a; 
+		border-width:0px; 
+		padding:0px; 
+		margin:0px; 
+	}
+
+
+	/* --[[ Sub Container ]]-- */
+	#imenus0 li ul {
+		background-color:transparent;
+		background-image:url(../img/subcontainer.png);
+		border-style:none; 
+		border-color:#cccccc; 
+		border-width:0px; 
+		padding:5px; 
+		margin:0px; 
+		z-index: 10;
+	}
+
+
+	/* --[[ Main Items ]]-- */
+	#imenus0 li a {
+		color:#ffffff; 
+		text-align:left; 
+		font-family:Arial; 
+		font-size:12px; 
+		font-weight:normal; 
+		text-decoration:none; 
+		border-style:solid; 
+		border-color:#dddddd; 
+		border-width:0px; 
+		padding:4px 8px; 
+		margin:0px 15px 0px 0px; 
+	}
+
+		/* [hover] - These settings must be duplicated for IE compatibility.*/
+		#imenus0 li:hover>a {
+			background-color:transparent; 
+			background:url(../img/nav-hover.gif) repeat-x;
+			font-weight: bold;
+			text-decoration:none; 
+		}
+		
+		#imenus0 li a.ihover, .imde #imenus0 a:hover {
+			background-color: transparent; 
+			background:url(../img/nav-hover.gif) repeat-x; 
+			font-weight: bold;
+			text-decoration:none; 
+		}
+
+		/* [active] */
+		#imenus0 li a.iactive {
+			background-color:transparent;
+			font-weight: bold;
+			background:url(../img/nav-hover.gif) repeat-x; 
+		}
+
+		/* [Main Graphic Button Text Content] */
+		#imenus0 .imbuttons {}
+
+
+	/* --[[ Sub Items ]]-- */
+	#imenus0 ul a {
+		background-color:transparent; 
+		color:#ffffff; 
+		text-align:left; 
+		font-size:11px; 
+		font-weight:normal; 
+		text-decoration:none; 
+		border-style:none; 
+		border-color:#000000; 
+		border-width:1px; 
+		padding:3px 5px; 
+	}
+
+		/* [hover] - These settings must be duplicated for IE comptatibility.*/
+		#imenus0 ul li:hover>a {
+			color:#ffffff; 
+			font-weight: bold;
+			text-decoration:none; 
+		}
+		
+		#imenus0 ul li a.ihover {
+			color:#ffffff;
+			font-weight: bold;
+			text-decoration:none; 
+		}
+
+		/* [active] */
+		#imenus0 ul li a.iactive {
+			font-weight: bold;		
+			background-color:transparent;
+			background:url(../img/nav-hover.gif) repeat-x;
+		}
+

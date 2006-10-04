@@ -1,0 +1,98 @@
+.imclear{
+	clear:both;
+	height:0px;
+	visibility:hidden;
+	line-height:0px;
+	font-size:1px;
+}
+
+.imclear div{
+	height:1px;
+	top:-1px;
+	position:relative;
+}
+
+.imcm ul, .imcm li, .imcm div, .imcm span{
+	text-align:left;
+	vertical-align:top;
+	padding:0px;
+	margin:0;
+	list-style:none;
+}
+
+.imsc{
+	position:absolute;
+}
+
+.imsubc{
+	position:absolute;
+	visibility:hidden;
+	background-image:url(ie_css_fix)
+}
+
+.imcm li{
+	list-style:none;
+	font-size:1px;
+	float:left;
+}
+
+.imcm ul ul li{
+	width:100%;
+	float:none !important;
+}
+
+.imcm a{
+	display:block;
+	position:relative;
+}
+
+.imcm ul .imsc,.imcm ul .imsubc {
+	z-index:1;
+}
+
+.imcm ul ul .imsc,.imcm ul ul .imsubc{
+	z-index:2;
+}
+
+.imcm ul ul ul .imsc, .imcm ul ul .imsubc{
+	z-index:3;
+}
+
+.imde ul li:hover .imsubc{
+	visibility:visible;
+}
+
+.imde ul ul li:hover .imsubc{
+	visibility:visible;
+}
+
+.imde ul ul ul li:hover .imsubc{
+	visibility:visible;
+}
+
+.imde li:hover ul .imsubc{
+	visibility:hidden;
+}
+
+.imde li:hover ul ul .imsubc{
+	visibility:hidden;
+}
+
+.imde li:hover ul ul ul  .imsubc{
+	visibility:hidden;
+}
+
+.imea{
+	position:relative;
+	left:0px;
+	font-size:1px;
+	line-height:0px;
+	height:0px;
+	float:right;
+}
+
+.imea div{
+	position:relative;
+	font-size:1px;
+	line-height:0px;
+}

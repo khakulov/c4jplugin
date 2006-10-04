@@ -1,0 +1,368 @@
+/* ***** BEGIN LICENSE BLOCK *****
+ * This file is part of DotClear.
+ * Copyright (c) 2004 Maurice Svay and contributors. All rights
+ * reserved.
+ *
+ * DotClear is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * DotClear is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with DotClear; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * ***** END LICENSE BLOCK *****
+ *
+ * Contributor(s):
+ *  Maurice Svay
+ */
+
+/* Ce fichier d�finit le style visuel pour les diff�rents �l�ments du blog.
+ * Dans l'ordre, vous trouverez les r�gles qui d�finissent l'apparence pour:
+ * - les �l�ments HTML en g�n�ral
+ * - la page
+ * - l'ent�te
+ * - le pr�lude
+ * - le contenu
+ * - la barre de navigation
+ * - le pied de page
+ *
+ * L'agengement des blocs est d�fini dans le fichier layout.css
+ * Pour mettre la barre de navigation � gauche, d�commentez l'appel � 
+ * layout-gauche.css
+ */
+
+/*@import "layout.css";*/
+/*@import "layout-gauche.css";*/
+ 
+/* Les �l�ments HTML en g�n�ral
+*******************************************************************************/
+body{
+	background: #EEE;
+	color: #000;
+ 	font-size: 80%;
+	line-height: 1.6em;
+ 	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6{
+	font-family: "Trebuchet MS", sans-serif;
+}
+
+h1{font-size: 1.5em;}
+h2{font-size: 1.4em;}
+h3{font-size: 1.3em;}
+h4{font-size: 1.2em;}
+h5{font-size: 1.1em;}
+h6{font-size: 1em;}
+
+pre, code{
+	font-size: 1.2em;
+}
+
+pre{
+ 	width: 100%;
+	overflow: auto;
+	border: 1px solid #CCC;
+}
+
+html>body pre {
+	overflow: auto;
+	width: auto;
+}
+
+fieldset{
+	border: none;
+}
+
+label{
+	cursor: pointer;
+}
+
+.field label{
+	display: block;
+}
+
+input{
+	border: 1px solid #999;
+}
+
+textarea{
+	width: 100%;
+	font-size: 1em;
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+}
+
+img {
+	border: 0;
+}
+
+a{
+	color: #000;
+}
+
+a:visited{
+	color: #663;
+}
+
+a:hover{
+	color: #636;
+}
+
+.left{
+	float: left;
+	margin-right: 1em;
+}
+
+.right{
+	float: right;
+	margin-left: 1em;
+}
+
+ul.arrow li:hover:before {
+	content: "\00BB \0020";
+	text-decoration: none;
+	color: #c27d06;
+}
+
+ul.arrow li:before {
+	content: "\00BB \0020";
+	text-decoration: none;
+	color: #aaaaaa;
+}
+
+/* La page
+*******************************************************************************/
+#page{
+	background: #fff url(../img/page.png) repeat-y center top;
+	color: inherit;
+	width: 900px;
+}
+ 
+/* L'ent�te
+*******************************************************************************/
+#top{
+	height: 120px;
+	/*padding-top: 20px;*/
+ 	background: #FFF url(../img/top.png) no-repeat left top;
+}
+	
+	#top div#logo{
+		float: left;
+		padding: 43px 15px 0 50px;
+	}
+
+	#top h1{
+		height: 80px;
+		
+		margin: 0 0 0 40px;
+		padding-top: 50px;
+		color: #FFFFFF;
+	}
+	
+		#top h1 a{
+			text-decoration: none;
+			color: #FFFFFF;
+		}
+		
+
+/* Le pr�lude
+*******************************************************************************/ 
+#prelude{
+ 	background: transparent;
+	color: #DFDFDF;
+	text-align: center;
+}
+ 
+ 	#prelude a{
+ 		color: #DFDFDF;
+		background: transparent;
+ 	}
+	
+	#prelude a:hover{
+		color: #666;
+		background: transparent;
+	}
+	
+/* Le contenu
+*******************************************************************************/
+.tip {
+	border: 1px solid #DDD;
+	margin: 1em 2em;
+	padding: 6px 10px 6px 24px;
+	background: transparent url(../img/tip.png) no-repeat left top;
+	
+}
+
+.downlink {
+	margin: 0 2em;
+	padding: 0px 0px 0px 20px;
+	background: transparent url(../img/downlink.png) no-repeat left center;
+	vertical-align: middle;
+}
+
+.day-date{
+	padding-left: 20px;
+	margin-left: -25px;
+	color: #888;
+	background: transparent url(../img/day-date.png) no-repeat left center;
+	font-style: italic;
+}
+	
+.post-title{
+	color: #F90;
+	background: transparent;
+	margin-bottom: 0;
+}
+
+	.post-title a{
+		color: #F90;
+		background: transparent;
+		text-decoration: none;
+	}
+	
+.post-info{
+	margin-top: 0;
+	color: #FA0;
+	background: transparent;
+	padding-bottom: 1ex;
+	/*border-bottom: 1px solid #FC0;*/
+}
+
+	.post-info a{
+		color: #FA0;
+		background: transparent;
+		text-decoration: none;
+	}
+	
+.post-content{
+	text-align: justify;
+}
+
+.post-content blockquote{
+	border: 1px solid #EEE;
+	margin: 1em 0;
+	padding: 1ex 1em;
+}
+
+.post-info-co{
+	text-align: right;
+}
+
+
+/* La barre de navigation
+*******************************************************************************/
+#sidebar div#logo{
+	text-align: center;
+}
+
+
+#sidebar div#section{
+	border-bottom: 1px solid #F0F0F0;
+	color: inherit;
+}
+
+	#sidebar ul{
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+	
+	#sidebar ul a:hover {
+		text-decoration: underline;
+		color: #c27d06;
+	}
+
+	#sidebar ul a {
+		text-decoration: none;
+		color: #0066aa;
+	}
+
+	
+
+#sidebar h2, #sidebar h3{
+	color: #9ED200;
+	margin: 0 0 1ex 0;
+}
+
+#sidebar h3{
+	font-size: 1em;
+	margin: 0;
+}
+
+#sidebar div#search{
+	background: transparent;
+	color: inherit;
+	line-height: 2.3em;
+}
+	
+	#search fieldset, #search p{
+		margin: 0;
+		padding: 0;
+	}
+
+	#q{
+		padding-left: 18px;
+		background: #fff url(../img/q.png) no-repeat 4px center;
+	}
+	
+#sidebar div#calendar{
+	/*border-top: 1px solid #F0F0F0;*/
+}
+
+	#sidebar div#calendar table{
+		font-size: 0.8em;
+		text-align: center;
+		margin: 0 auto;
+		border-collapse: collapse;
+	}
+	
+	#sidebar div#calendar table caption{
+		margin: 0 auto;
+	}
+	
+	#sidebar div#calendar table th{
+		color: #493;
+		background: transparent;
+	}
+	
+	#sidebar div#calendar table td{
+		width: 14%;
+		line-height: 2em;
+		border: 1px solid #EEE;
+	}
+	
+	#sidebar div#calendar table td a{
+		display: block;
+		background: #EFA;
+		color: #493;
+		font-weight: bold;
+		text-decoration: none;
+	}
+	
+	#sidebar div#calendar table td a:hover{
+		background: #DBB8DC;
+		color: #636;
+	}
+
+/* Le pied de page
+*******************************************************************************/	
+#footer{
+	margin: 0;
+	padding: 1em;
+	border-top: 1px solid #CCC;
+	background: #EEE;
+	color: #666;
+	text-align: center;
+}
+
+#footer a{
+	color: #999;
+}
+

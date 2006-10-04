@@ -1,0 +1,68 @@
+html, body{
+	margin: 0;
+	padding: 0;
+	text-align: center;
+}
+
+#page{
+	width: 900px;
+	margin: 1.5em auto;
+	text-align: left;
+}
+
+#top{
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+}
+
+	#top h1{
+		margin: 0;
+	}
+
+#prelude{
+	position: absolute;
+	width: 900px;
+	top: 7px;
+	left: 50%;
+	margin: 0 0 0 -390px;
+	padding: 0 1ex;
+}
+
+#main{
+	margin: 0;
+	padding: 0;
+	float: left;
+	width: 640px;
+}
+
+#content{
+	margin: 0 0 0 30px;
+	padding: 1em 0 0 0;
+}
+
+.post{
+	margin-bottom: 4em;
+}
+
+#sidebar{
+	float: right;
+	width: 240px;
+	padding-bottom: 4em;
+}
+
+#sidebar div#section{
+	margin: 0 30px 0 0;
+	padding: 1ex 1em;
+}
+
+#sidebar div#logo{
+	margin: 0 30px 0 0;
+	padding: 2em 1em 0 1em;
+}
+	
+#footer{
+	padding: 1ex 1em 1ex 1em;
+	margin : 0;
+	clear: both;
+}
