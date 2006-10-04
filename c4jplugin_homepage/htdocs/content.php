@@ -25,7 +25,7 @@ if (!$page || $page == "") {
 <!--[if lte IE 6]>
 <style type="text/css">
 #sidebar ul.arrow {
-	padding-left: 30px;
+	padding-left: 32px;
 }
 </style>
 <![endif]-->
