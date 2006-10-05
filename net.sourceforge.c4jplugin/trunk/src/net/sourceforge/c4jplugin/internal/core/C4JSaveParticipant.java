@@ -46,7 +46,7 @@ public class C4JSaveParticipant implements ISaveParticipant {
            IPath saveFilePath = getSaveFilePath(saveNumber);
            // if we fail to write, an exception is thrown and we do not update the path
            try {
-				C4JActivator.getDefault().writeState(saveFilePath.toFile());
+				C4JActivator.writeState(saveFilePath.toFile());
 				context.map(new Path(SAVE_FILENAME), saveFileName);
 				context.needSaveNumber();
 			} catch (IOException e) {

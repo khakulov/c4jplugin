@@ -40,7 +40,7 @@ public class RefreshC4JModelAction implements IObjectActionDelegate {
 		}
 		
 		if (c4jProjects.size() > 0)
-			C4JActivator.getDefault().refreshContractReferenceModel(c4jProjects.toArray(new IProject[] {}));
+			C4JActivator.refreshContractReferenceModel(c4jProjects.toArray(new IProject[] {}));
 	}
 
 	public void selectionChanged(IAction action, ISelection selection) {

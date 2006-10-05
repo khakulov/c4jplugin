@@ -67,6 +67,18 @@ public class C4JUtils {
 	private static String c4jrtPath = null;
 	
 	static public void addC4JNature(IProject project) throws CoreException {
+		IWorkbenchWindow window = C4JActivator.getDefault().getWorkbench().getActiveWorkbenchWindow();
+		IJavaProject jproject = JavaCore.create(project);
+		
+		
+		// check if the projects compiler compliance level is 1.5 or higher
+		if (!isJava5Project(jproject)) {
+			MessageDialog.openInformation(window.getShell(), 
+					UIMessages.DialogMsg_notJava5Project_title,
+					UIMessages.DialogMsg_notJava5Project_msg);
+			return;
+		}
+		
 		// add the C4J Nature
 		IProjectDescription description = project.getDescription();
 		String[] prevNatures = description.getNatureIds();
@@ -100,8 +112,6 @@ public class C4JUtils {
 		}
 		
 		// Enabling annotation processing
-		IWorkbenchWindow window = C4JActivator.getDefault().getWorkbench().getActiveWorkbenchWindow();
-		IJavaProject jproject = JavaCore.create(project);
 		if (!AptConfig.isEnabled(jproject) && C4JPreferences.doAptAutoEnable()) {
 			boolean autoEnable = true;
 			if (C4JPreferences.askAptAutoEnable()) {
@@ -184,9 +194,14 @@ public class C4JUtils {
 		ContractReferenceUtil.deleteMarkers(project);
 		
 		// Recalculate contract dependencies
-		C4JActivator.getDefault().refreshContractReferenceModel();
+		C4JActivator.refreshContractReferenceModel();
 		
 		refreshPackageExplorer();
+	}
+	
+	public static boolean isJava5Project(IJavaProject project) {
+		if (project == null) return false;
+		return project.getOption(JavaCore.COMPILER_COMPLIANCE, true).compareTo(JavaCore.VERSION_1_5) >= 0;
 	}
 	
 	public static boolean isC4JLaunchConfig(ILaunchConfiguration launchConfig) {

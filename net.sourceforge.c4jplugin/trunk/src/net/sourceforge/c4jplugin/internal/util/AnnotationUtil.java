@@ -27,7 +27,7 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
  */
 public class AnnotationUtil {
 		
-	static private final String ANNOTATION_CONTRACT_REFERENCE = "ContractReference";
+	static public final String ANNOTATION_CONTRACT_REFERENCE = "net.sourceforge.c4j.ContractReference";
 	
 	static public IResource getContractReference(IResource resource) {
 		try {

@@ -26,6 +26,9 @@ public class UIMessages extends NLS {
 	public static String AnnotationProcessor_warning_contractHasErrors;
 	
 	// Dialogs
+	public static String DialogMsg_notJava5Project_title;
+	public static String DialogMsg_notJava5Project_msg;
+	
 	public static String PluginImportDialog_importConfirmTitle;
 	public static String PluginImportDialog_importConfirmMsg;
 	public static String PluginImportDialog_importConfirmToggleMsg;

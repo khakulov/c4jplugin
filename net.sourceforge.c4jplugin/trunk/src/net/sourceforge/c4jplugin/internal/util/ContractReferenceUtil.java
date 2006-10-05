@@ -37,6 +37,11 @@ import org.eclipse.osgi.util.NLS;
 
 public class ContractReferenceUtil {
 	
+	static public boolean isTarget(IResource resource) {
+		if (resource == null) return false;
+		return AnnotationUtil.getContractReference(resource) != null;
+	}
+	
 	static public void deleteMarkers(IProject project) throws CoreException {
 		project.deleteMarkers(IClassInvariantMarker.ID, true, IResource.DEPTH_INFINITE);
 		project.deleteMarkers(IContractedClassInvariantMarker.ID, true, IResource.DEPTH_INFINITE);

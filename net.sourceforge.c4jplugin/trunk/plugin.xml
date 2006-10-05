@@ -322,5 +322,16 @@
             file="toc.xml"
             primary="true"/>
    </extension>
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <wizard
+            canFinishEarly="false"
+            category="org.eclipse.jdt.ui.java"
+            class="net.sourceforge.c4jplugin.internal.wizards.NewContractWizard"
+            hasPages="true"
+            icon="icons/new_contract.gif"
+            id="net.sourceforge.c4jplugin.wizards.NewContractWizard"
+            name="%newContractWizardName"/>
+   </extension>
 
 </plugin>

@@ -23,6 +23,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -94,7 +95,9 @@ public class C4JDecorator extends LabelProvider implements ILightweightLabelDeco
 			IResource resource = null;
 			try {
 				if (!jproject.getProject().isNatureEnabled(C4JProjectNature.NATURE_ID)) return;
-				resource = method.getCompilationUnit().getCorrespondingResource();
+				ICompilationUnit cu = method.getCompilationUnit();
+				if (cu == null) return;
+				resource = cu.getCorrespondingResource();
 			} catch (CoreException e1) {}
 			
 			if (resource == null) return;

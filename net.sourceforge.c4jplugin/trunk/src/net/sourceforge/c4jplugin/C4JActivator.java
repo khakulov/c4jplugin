@@ -127,18 +127,26 @@ public class C4JActivator extends AbstractUIPlugin implements ILaunchListener {
 		return plugin;
 	}
 
-	public void writeState(File file) throws IOException {
-		XMLMemento memento = XMLMemento.createWriteRoot("contractMapping");
+	public static void log(IStatus status) {
+		getDefault().getLog().log(status);
+	}
+	
+	public static void log(Throwable e) {
+		log(new Status(IStatus.ERROR, PLUGIN_ID, IStatus.ERROR, "Error", e)); //$NON-NLS-1$
+	}
+	
+	public static void writeState(File file) throws IOException {
+		XMLMemento memento = XMLMemento.createWriteRoot("contractMapping"); //$NON-NLS-1$
 		ContractReferenceModel.saveModel(memento);
 		memento.save(new FileWriter(file));
 	}
 	
-	public void readState(File file) throws FileNotFoundException, WorkbenchException, CoreException {
+	public static void readState(File file) throws FileNotFoundException, WorkbenchException, CoreException {
 		IMemento memento = XMLMemento.createReadRoot(new FileReader(file));
 		ContractReferenceModel.loadModel(memento);
 	}
 	
-	public void refreshContractReferenceModel() {
+	public static void refreshContractReferenceModel() {
 		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		
 		// get all open c4j projects
@@ -153,7 +161,7 @@ public class C4JActivator extends AbstractUIPlugin implements ILaunchListener {
 		refreshContractReferenceModel(vecProjects.toArray(new IProject[] {}));
 	}
 	
-	public void refreshContractReferenceModel(final IProject[] projects) {
+	public static void refreshContractReferenceModel(final IProject[] projects) {
 		WorkspaceJob wsJob = new WorkspaceJob(UIMessages.Builder_jobTitle) {
 			@Override
 			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
