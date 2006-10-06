@@ -10,15 +10,16 @@ public class WizardMessages extends NLS {
 		
 	}
 
-	public static String NewContractWizardPageOne_error_junit4NotOnbuildpath;
+	public static String NewContractLabelProvider_empty_condition;
+	public static String NewContractLabelProvider_nonnull_args;
+	public static String NewContractLabelProvider_nonnull_nonempty_args;
+	public static String NewContractLabelProvider_nonnull_nonempty_return;
+	public static String NewContractLabelProvider_nonnull_return;
+	
+	public static String NewContractWizardPageOne_error_c4jNotOnbuildpath;
 	public static String NewContractWizardPageOne_error_java5required;
 	public static String NewContractWizardPageOne_linkedtext_java5required;
-	public static String NewContractWizardPageOne_linkedtext_junit3_notonbuildpath;
-	public static String NewContractWizardPageOne_not_yet_implemented_string;
-	
-	public static String CheckedTableSelectionDialog_emptyListMessage;
-	public static String CheckedTableSelectionDialog_selectAll;
-	public static String CheckedTableSelectionDialog_deselectAll;
+	public static String NewContractWizardPageOne_linkedtext_c4j_notonbuildpath;
 	
 	public static String NewContractWizardPageOne_title;
 	public static String NewContractWizardPageOne_description;
@@ -33,8 +34,12 @@ public class WizardMessages extends NLS {
 	public static String NewContractWizardPageOne_error_class_to_test_not_valid;
 	public static String NewContractWizardPageOne_error_class_to_test_not_exist;
 	public static String NewContractWizardPageOne_warning_class_to_test_not_visible;
-	public static String NewContractWizardPageOne_comment_class_to_test;
-	public static String NewContractWizardPageOne_error_junitNotOnbuildpath;
+	public static String NewContractWizardPageOne_comment_class_to_contract_pre;
+	public static String NewContractWizardPageOne_comment_class_to_contract_post;
+	
+	public static String NewContractWizardPageTwo_columnheader_methods;
+	public static String NewContractWizardPageTwo_columnheader_post;
+	public static String NewContractWizardPageTwo_columnheader_pre;
 	
 	public static String NewContractWizardPageTwo_selected_methods_label_one;
 	public static String NewContractWizardPageTwo_selected_methods_label_many;

@@ -45,9 +45,9 @@ public class NewContractWizardPageTwo extends WizardPage {
 	private final static String STORE_USE_TASKMARKER= PAGE_NAME + ".USE_TASKMARKER"; //$NON-NLS-1$
 	private final static String STORE_CREATE_FINAL_METHOD_STUBS= PAGE_NAME + ".CREATE_FINAL_METHOD_STUBS"; //$NON-NLS-1$
 
-	private final String PROP_METHOD_COL = "methods";
-	private final String PROP_PRE_COL = "pre";
-	private final String PROP_POST_COL = "post";
+	private final String PROP_METHOD_COL = "methods"; //$NON-NLS-1$
+	private final String PROP_PRE_COL = "pre"; //$NON-NLS-1$
+	private final String PROP_POST_COL = "post"; //$NON-NLS-1$
 	
 	private IType fClassToContract;
 
@@ -57,7 +57,7 @@ public class NewContractWizardPageTwo extends WizardPage {
 	private Button fSelectAllButton;
 	private Button fDeselectAllButton;
 	private Label fSelectedMethodsLabel;
-	private Object[] fCheckedObjects;
+	private Object[] fCheckedObjects = new Object[] {};
 	private boolean fCreateFinalStubs;
 	private boolean fCreateTasks;
 	
@@ -148,20 +148,17 @@ public class NewContractWizardPageTwo extends WizardPage {
 		
 		fMethodsTree.getTree().setHeaderVisible(true);
 		TreeColumn colMember = new TreeColumn(fMethodsTree.getTree(), SWT.NONE);
-		colMember.setText("Methods");
+		colMember.setText(WizardMessages.NewContractWizardPageTwo_columnheader_methods);
 		
 		TreeColumn colPre = new TreeColumn(fMethodsTree.getTree(), SWT.NONE);
-		colPre.setText("Pre Condition");
+		colPre.setText(WizardMessages.NewContractWizardPageTwo_columnheader_pre);
 		
 		TreeColumn colPost = new TreeColumn(fMethodsTree.getTree(), SWT.NONE);
-		colPost.setText("Post Condition");
+		colPost.setText(WizardMessages.NewContractWizardPageTwo_columnheader_post);
 		
-		colMember.setWidth(300);
+		colMember.setWidth(250);
 		colPre.setWidth(150);
 		colPost.setWidth(150);
-		//colMember.pack();
-		//colPre.pack();
-		//colPost.pack();
 		
 		ComboBoxCellEditor cellEditorPre = new ComboBoxCellEditor(fMethodsTree.getTree(), NewContractLabelProvider.preCondLabels);
 		ComboBoxCellEditor cellEditorPost = new ComboBoxCellEditor(fMethodsTree.getTree(), NewContractLabelProvider.postCondLabels);

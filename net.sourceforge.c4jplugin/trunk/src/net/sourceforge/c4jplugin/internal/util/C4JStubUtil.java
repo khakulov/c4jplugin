@@ -1,6 +1,7 @@
 package net.sourceforge.c4jplugin.internal.util;
 
 import net.sourceforge.c4jplugin.internal.wizards.NewContractLabelProvider;
+import net.sourceforge.c4jplugin.internal.wizards.WizardMessages;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.Flags;
@@ -23,11 +24,12 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.core.formatter.IndentManipulation;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.ui.CodeGeneration;
+import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage.ImportsManager;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
@@ -40,6 +42,9 @@ public class C4JStubUtil {
 		public boolean callSuper;
 		public boolean methodOverwrites;
 		public boolean noBody;
+		
+		public boolean taskTag;
+		public boolean finalize;
 		
 		public int preCondition = -1;
 		public int postCondition = -1;
@@ -95,26 +100,20 @@ public class C4JStubUtil {
 		
 		int lastParam= paramTypes.length -1;		
 		
-		String comment= null;
 		if (settings.createComments) {
-			if (method.isConstructor()) {
-				comment= CodeGeneration.getMethodComment(compilationUnit, destTypeName, method.getElementName(), paramNames, new String[]{}, null, null, "\n"); //$NON-NLS-1$
-			} else {
-				if (settings.methodOverwrites) {
-					comment= CodeGeneration.getMethodComment(compilationUnit, destTypeName, method.getElementName(), paramNames, new String[]{}, null, method, "\n"); //$NON-NLS-1$
-				} else {
-					comment= CodeGeneration.getMethodComment(compilationUnit, destTypeName, method.getElementName(), paramNames, new String[]{}, null, null, "\n"); //$NON-NLS-1$
-				}
+			if (!method.isConstructor()) {
+				boolean precond = true;
+				if (settings.postCondition > 0) precond = false;
+				appendMethodComment(buf, method, precond);
 			}
 		}
-		if (comment != null) {
-			buf.append(comment).append('\n');
-		}
 		
-		buf.append("public void ");
 		
-		if (settings.preCondition >= 0) buf.append("pre_");
-		else if (settings.postCondition >= 0) buf.append("post_");
+		if (settings.finalize) buf.append("final "); //$NON-NLS-1$
+		buf.append("public void "); //$NON-NLS-1$
+		
+		if (settings.preCondition >= 0) buf.append("pre_"); //$NON-NLS-1$
+		else if (settings.postCondition >= 0) buf.append("post_"); //$NON-NLS-1$
 		
 		buf.append(method.getElementName());
 		
@@ -154,7 +153,7 @@ public class C4JStubUtil {
 			}
 			
 			// PRE condition code
-			if (settings.preCondition >= 0) {
+			if (settings.preCondition > 1) {
 				if (settings.preCondition == NewContractLabelProvider.PRE_COND_NONNULL) {
 					for (int i = 0; i < paramTypes.length; i++) {
 						String paramTypeSig = paramTypes[i];
@@ -175,7 +174,7 @@ public class C4JStubUtil {
 							
 							String simpleTypeName = Signature.getSimpleName(Signature.toString(paramTypeSig));
 							if ("String".equals(simpleTypeName)) { //$NON-NLS-1$
-								buf.append(" && ").append(paramNames[i]).append(".length() > 0"); //$NON-NLS-1$ $NON-NLS-2$
+								buf.append(" && ").append(paramNames[i]).append(".length() > 0"); //$NON-NLS-1$ //$NON-NLS-2$ $NON-NLS-2$
 							}
 							
 							buf.append(";\n\t"); //$NON-NLS-1$
@@ -184,7 +183,7 @@ public class C4JStubUtil {
 				}
 			}
 			// POST condition code
-			else if (settings.postCondition >= 0) {
+			else if (settings.postCondition > 1) {
 				if (settings.postCondition == NewContractLabelProvider.POST_COND_NONNULL) {
 					if (!isBuiltInType(method.getReturnType()))
 						buf.append("\tassert getReturnValue() != null;\n\t"); //$NON-NLS-1$
@@ -201,12 +200,48 @@ public class C4JStubUtil {
 					}
 				}
 			}
+			else if (settings.taskTag) {
+				String taskTag = getTodoTaskTag(compilationUnit.getJavaProject());
+				if (taskTag != null) {
+					buf.append("\t// ").append(taskTag).append("\n\t"); //$NON-NLS-1$ $NON-NLS-2$
+				}
+			}
 			buf.append("}\n\n");			 //$NON-NLS-1$
 		}
 		return buf.toString();
 	}
 	
-	private static boolean isBuiltInType(String typeName) {
+	private static void appendMethodComment(StringBuffer buffer, IMethod method, boolean precond) throws JavaModelException {
+		final String delimiter= "\n"; //$NON-NLS-1$
+		final StringBuffer buf= new StringBuffer("{@link "); //$NON-NLS-1$	
+		JavaElementLabels.getTypeLabel(method.getDeclaringType(), JavaElementLabels.T_FULLY_QUALIFIED, buf);
+		buf.append('#');
+		buf.append(method.getElementName());
+		buf.append('(');
+		String[] paramTypes= C4JStubUtil.getParameterTypeNamesForSeeTag(method);
+		for (int i= 0; i < paramTypes.length; i++) {
+			if (i != 0) {
+				buf.append(", "); //$NON-NLS-1$
+			}
+			buf.append(paramTypes[i]);
+			
+		}
+		buf.append(')');
+		buf.append('}');
+		
+		buffer.append("/**");//$NON-NLS-1$
+		buffer.append(delimiter);
+		buffer.append(" * ");//$NON-NLS-1$
+		if (precond)
+			buffer.append(NLS.bind(WizardMessages.NewContractWizardPageOne_comment_class_to_contract_pre, buf.toString()));
+		else
+			buffer.append(NLS.bind(WizardMessages.NewContractWizardPageOne_comment_class_to_contract_post, buf.toString()));
+		buffer.append(delimiter);
+		buffer.append(" */");//$NON-NLS-1$
+		buffer.append(delimiter);
+	}
+	
+	public static boolean isBuiltInType(String typeName) {
 		char first= Signature.getElementType(typeName).charAt(0);
 		return (first != Signature.C_RESOLVED && first != Signature.C_UNRESOLVED);
 	}

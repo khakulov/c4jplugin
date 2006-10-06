@@ -157,11 +157,11 @@ public class NewContractWizard extends Wizard implements INewWizard {
 		
 			String msg = message;
 			if (e.getMessage() != null && e.getMessage().length() > 0)
-				msg += "\n\n" + e.getMessage();
+				msg += "\n\n" + e.getMessage(); //$NON-NLS-1$
 			else {
 				Throwable target = e.getTargetException();
 				if (target.getMessage() != null && target.getMessage().length() > 0)
-					msg += "\n\n" + target.getMessage();
+					msg += "\n\n" + target.getMessage(); //$NON-NLS-1$
 			}
 			
 			C4JActivator.log(e);

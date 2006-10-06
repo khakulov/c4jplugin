@@ -83,15 +83,15 @@ public class ContractReferenceUtil {
 					String name = method.getElementName();
 					String contractType = null;
 					String methodName = null;
-					if (name.startsWith("pre_")) {
+					if (name.startsWith("pre_")) { //$NON-NLS-1$
 						contractType = IMethodMarker.VALUE_PRE_METHOD;
-						methodName = name.substring("pre_".length());
+						methodName = name.substring("pre_".length()); //$NON-NLS-1$
 					}
-					else if (name.startsWith("post_")) {
+					else if (name.startsWith("post_")) { //$NON-NLS-1$
 						contractType = IMethodMarker.VALUE_POST_METHOD;
-						methodName = name.substring("post_".length());
+						methodName = name.substring("post_".length()); //$NON-NLS-1$
 					}
-					else if (name.equals("classInvariant") && method.getSignature().equals("()V")) {
+					else if (name.equals("classInvariant") && method.getSignature().equals("()V")) { //$NON-NLS-1$ //$NON-NLS-2$
 						IMarker methodMarker = contract.createMarker(IClassInvariantMarker.ID);
 						methodMarker.setAttribute(IMarker.LINE_NUMBER, cu.getLineNumber(method.getNameRange().getOffset()));			
 						methodMarker.setAttribute(IMethodMarker.ATTR_CONTRACT_TYPE, IMethodMarker.VALUE_CLASS_INVARIANT);
@@ -105,7 +105,7 @@ public class ContractReferenceUtil {
 						boolean isContracting = false;
 						String methodHandle = null;
 						for (IMarker marker : methodMarkers) {
-							String markerType = marker.getAttribute(IContractedMethodMarker.ATTR_CONTRACT_TYPE, "");
+							String markerType = marker.getAttribute(IContractedMethodMarker.ATTR_CONTRACT_TYPE, ""); //$NON-NLS-1$
 							if (markerType.equals(contractType) ||
 									markerType.equals(IContractedMethodMarker.VALUE_PREPOST_METHOD)) {
 								methodHandle = marker.getAttribute(IContractedMethodMarker.ATTR_HANDLE_IDENTIFIER, null);
@@ -160,16 +160,16 @@ public class ContractReferenceUtil {
 				Vector<IType> typeCache = new Vector<IType>();
 				
 				// checking for class invariants
-				String invariantList = "";
+				String invariantList = ""; //$NON-NLS-1$
 				for (IResource reference : references) {
 					IJavaElement refElement = JavaCore.create(reference);
 					IType refType = getType(refElement);
 					typeCache.add(refType);
 				
-					IMethod methodClassInvariant = refType.getMethod("classInvariant", new String[] {});
+					IMethod methodClassInvariant = refType.getMethod("classInvariant", new String[] {}); //$NON-NLS-1$
 					if (methodClassInvariant != null && methodClassInvariant.exists()) {
 						invariantCounter++;
-						invariantList += " " + reference.getName();
+						invariantList += " " + reference.getName(); //$NON-NLS-1$
 						try {
 							if (markerClassInvariant == null) {
 								markerClassInvariant = resource.createMarker(IContractedClassInvariantMarker.ID);
@@ -180,7 +180,7 @@ public class ContractReferenceUtil {
 				}
 				if (markerClassInvariant != null) {
 					try {
-						if (invariantList.length() > 0) invariantList = "\n\n" + invariantList;
+						if (invariantList.length() > 0) invariantList = "\n\n" + invariantList; //$NON-NLS-1$
 						markerClassInvariant.setAttribute(IMarker.MESSAGE, NLS.bind(UIMessages.MarkerMessage_contracted_classInvariant, invariantCounter) + invariantList);
 					} catch (CoreException e) {}
 				}
@@ -189,18 +189,18 @@ public class ContractReferenceUtil {
 				for (IMethod method : type.getMethods()) {
 					boolean postMethod = false;
 					boolean preMethod = false;
-					String contractList = "";
+					String contractList = ""; //$NON-NLS-1$
 					for (IType refType : typeCache) {
 						boolean refAdded = false;
-						if (refType.getMethod("post_" + method.getElementName(), method.getParameterTypes()).exists()) {
+						if (refType.getMethod("post_" + method.getElementName(), method.getParameterTypes()).exists()) { //$NON-NLS-1$
 							postMethod = true;
-							contractList += " " + refType.getCompilationUnit().getCorrespondingResource().getName();
+							contractList += " " + refType.getCompilationUnit().getCorrespondingResource().getName(); //$NON-NLS-1$
 							refAdded = true;
 						}
-						if (refType.getMethod("pre_" + method.getElementName(), method.getParameterTypes()).exists()) {
+						if (refType.getMethod("pre_" + method.getElementName(), method.getParameterTypes()).exists()) { //$NON-NLS-1$
 							preMethod = true;
 							if (!refAdded) {
-								contractList += " " + refType.getCompilationUnit().getCorrespondingResource().getName();
+								contractList += " " + refType.getCompilationUnit().getCorrespondingResource().getName(); //$NON-NLS-1$
 							}
 						}
 					}
@@ -425,7 +425,7 @@ public class ContractReferenceUtil {
 		int counter = 0;
 		
 		public boolean visit(IResource resource) throws CoreException {
-			if (resource.getName().endsWith(".java")) {
+			if (resource.getName().endsWith(".java")) { //$NON-NLS-1$
 				counter++;
 				return false;
 			}
@@ -447,7 +447,7 @@ public class ContractReferenceUtil {
 			if (monitor.isCanceled()) throw new OperationCanceledException();
 			
 			//System.out.println("Checking resource: " + resource.getName());
-			if (resource.getName().endsWith(".java")) {
+			if (resource.getName().endsWith(".java")) { //$NON-NLS-1$
 				if (clear) ContractReferenceModel.clearResource(resource);
 				checkResourceForContracts(resource);
 				createContractedClassMarkers(resource);

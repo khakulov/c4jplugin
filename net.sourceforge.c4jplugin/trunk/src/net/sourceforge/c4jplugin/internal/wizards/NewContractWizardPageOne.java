@@ -1,5 +1,7 @@
 package net.sourceforge.c4jplugin.internal.wizards;
 
+import java.lang.reflect.InvocationTargetException;
+
 import net.sourceforge.c4jplugin.C4JActivator;
 import net.sourceforge.c4jplugin.internal.core.ContractReferenceModel;
 import net.sourceforge.c4jplugin.internal.util.AnnotationUtil;
@@ -29,9 +31,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
-import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
-import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
 import org.eclipse.jface.dialogs.Dialog;
@@ -53,6 +53,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.actions.WorkspaceModifyOperation;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.dialogs.SelectionDialog;
 
 public class NewContractWizardPageOne extends NewTypeWizardPage {
@@ -66,15 +68,11 @@ public class NewContractWizardPageOne extends NewTypeWizardPage {
 		
 	private static final String COMPLIANCE_PAGE_ID = "org.eclipse.jdt.ui.propertyPages.CompliancePreferencePage"; //$NON-NLS-1$
 	private static final String BUILD_PATH_PAGE_ID = "org.eclipse.jdt.ui.propertyPages.BuildPathsPropertyPage"; //$NON-NLS-1$
-	private static final Object BUILD_PATH_KEY_ADD_ENTRY = "add_classpath_entry"; //$NON-NLS-1$
-	private static final Object BUILD_PATH_BLOCK = "block_until_buildpath_applied"; //$NON-NLS-1$
-
-	private static final String KEY_NO_LINK = "PropertyAndPreferencePage.nolink"; //$NON-NLS-1$
-
+	
 	private final static String CONTRACT_SUFFIX = "Contract"; //$NON-NLS-1$
 	
 	private final static String STORE_CONSTRUCTOR = PAGE_NAME + ".USE_CONSTRUCTOR"; //$NON-NLS-1$
-	private final static String STORE_SUPERCLASS = PAGE_NAME + ".USE_SUPERCLASS"; //$NON_NLS-1$
+	private final static String STORE_SUPERCLASS = PAGE_NAME + ".USE_SUPERCLASS"; //$NON-NLS-1$
 	
 	private Button fConstructorButton;
 	private Button fSuperClassButton;
@@ -161,6 +159,34 @@ public class NewContractWizardPageOne extends NewTypeWizardPage {
 		//restoreWidgetValues();
 		
 		updateStatus(getStatusList());
+	}
+	
+	private void handleLinks(Object data) {
+		
+		IPackageFragmentRoot root= getPackageFragmentRoot();
+		if (root == null) {
+			return; // should not happen. Link shouldn't be visible
+		}
+		final IJavaProject javaProject= root.getJavaProject();
+		
+		if ("c".equals(data)) { // open compliance //$NON-NLS-1$
+			PreferencesUtil.createPropertyDialogOn(getShell(), javaProject, COMPLIANCE_PAGE_ID, new String[] { BUILD_PATH_PAGE_ID, COMPLIANCE_PAGE_ID  }, data).open();
+		}
+		else if ("a".equals(data)) { // enable C4J  //$NON-NLS-1$
+			WorkspaceModifyOperation op = new WorkspaceModifyOperation() {
+				protected void execute(IProgressMonitor monitor)
+						throws CoreException {
+					C4JUtils.addC4JNature(javaProject.getProject());
+				}
+			};
+			try {
+				op.run(null);
+			} catch (InvocationTargetException ex) {
+			} catch (InterruptedException e) {
+			}
+		}
+		
+		updateC4JNatureMessage();
 	}
 		
 	private void createEmptySpace(Composite parent, int span) {
@@ -261,7 +287,7 @@ public class NewContractWizardPageOne extends NewTypeWizardPage {
 		GridData gridData = new GridData(SWT.FILL, SWT.CENTER, false, false);
 		gridData.widthHint = getMaxFieldWidth();
 		fSuperClassButton.setLayoutData(gridData);
-		fSuperClassButton.setText("ContractBase<T>");
+		fSuperClassButton.setText("ContractBase<T>"); //$NON-NLS-1$
 		
 		createEmptySpace(composite, 1);
 	}
@@ -362,7 +388,7 @@ public class NewContractWizardPageOne extends NewTypeWizardPage {
 		fLink.setText("\n\n"); //$NON-NLS-1$
 		fLink.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				//performBuildpathConfiguration(e.text);
+				handleLinks(e.text);
 			}
 		});
 		GridData gd= new GridData(GridData.FILL, GridData.BEGINNING, true, false, 1, 1);
@@ -370,44 +396,6 @@ public class NewContractWizardPageOne extends NewTypeWizardPage {
 		fLink.setLayoutData(gd);
 		updateC4JNatureMessage();
 	}
-	
-//	private void performBuildpathConfiguration(Object data) {
-//		IPackageFragmentRoot root= getPackageFragmentRoot();
-//		if (root == null) {
-//			return; // should not happen. Link shouldn't be visible
-//		}
-//		IJavaProject javaProject= root.getJavaProject();
-//		
-//		if ("a3".equals(data)) { // add and configure JUnit 3 //$NON-NLS-1$
-//			String id= BUILD_PATH_PAGE_ID;
-//			Map input= new HashMap();
-//			IClasspathEntry newEntry= BuildPathSupport.getJUnit3ClasspathEntry();
-//			input.put(BUILD_PATH_KEY_ADD_ENTRY, newEntry);
-//			input.put(BUILD_PATH_BLOCK, Boolean.TRUE);
-//			PreferencesUtil.createPropertyDialogOn(getShell(), javaProject, id, new String[] { id }, input).open();
-//		} else if ("a4".equals(data)) { // add and configure JUnit 4 //$NON-NLS-1$
-//			String id= BUILD_PATH_PAGE_ID;
-//			Map input= new HashMap();
-//			IClasspathEntry newEntry= BuildPathSupport.getJUnit4ClasspathEntry();
-//			input.put(BUILD_PATH_KEY_ADD_ENTRY, newEntry);
-//			input.put(BUILD_PATH_BLOCK, Boolean.TRUE);
-//			PreferencesUtil.createPropertyDialogOn(getShell(), javaProject, id, new String[] { id }, input).open();
-//		} else if ("b".equals(data)) { // open build path //$NON-NLS-1$
-//			String id= BUILD_PATH_PAGE_ID;
-//			Map input= new HashMap();
-//			input.put(BUILD_PATH_BLOCK, Boolean.TRUE);
-//			PreferencesUtil.createPropertyDialogOn(getShell(), javaProject, id, new String[] { id }, input).open();
-//		} else if ("c".equals(data)) { // open compliance //$NON-NLS-1$
-//			String buildPath= BUILD_PATH_PAGE_ID;
-//			String complianceId= COMPLIANCE_PAGE_ID;
-//			Map input= new HashMap();
-//			input.put(BUILD_PATH_BLOCK, Boolean.TRUE);
-//			input.put(KEY_NO_LINK, Boolean.TRUE);
-//			PreferencesUtil.createPropertyDialogOn(getShell(), javaProject, complianceId, new String[] { buildPath, complianceId  }, data).open();
-//		}
-//		
-//		updateBuildPathMessage();
-//	}
 
 	private void updateC4JNatureMessage() {
 		if (fLink == null || fLink.isDisposed()) {
@@ -423,7 +411,7 @@ public class NewContractWizardPageOne extends NewTypeWizardPage {
 					if (!C4JUtils.isJava5Project(project)) {
 						message= WizardMessages.NewContractWizardPageOne_linkedtext_java5required;
 					} else if (project.findType(AnnotationUtil.ANNOTATION_CONTRACT_REFERENCE) == null) {
-						message= NLS.bind(WizardMessages.NewContractWizardPageOne_linkedtext_junit3_notonbuildpath, project.getElementName());
+						message= NLS.bind(WizardMessages.NewContractWizardPageOne_linkedtext_c4j_notonbuildpath, project.getElementName());
 					}
 				}
 			} catch (JavaModelException e) {
@@ -557,11 +545,25 @@ public class NewContractWizardPageOne extends NewTypeWizardPage {
 	}
 
 	public String getSuperClass() {
+		String strSuperClass = "net.sourceforge.c4j.ContractBase<" + Signature.getSimpleName(getClassUnderContractText()) + ">"; //$NON-NLS-1$ //$NON-NLS-2$
 		if (fSuperClassButton != null && fSuperClassButton.getSelection()) {
-			return "net.sourceforge.c4j.ContractBase<" + Signature.getSimpleName(getClassUnderContractText()) + ">";
+			return strSuperClass;
 		}
 		
-		return "";
+		// Also return a superclass value if a method is to be contracted
+		// involving return values (depends on a call to ContractBase.getReturnValue())
+		NewContractMethodElement[] elements = fPage2.getCheckedElements();
+		if (elements.length > 0) {
+			for (NewContractMethodElement element : elements) {
+				int postcond = element.getPostCondition();
+				if (postcond != NewContractLabelProvider.POST_COND_NONE &&
+						postcond != NewContractLabelProvider.POST_COND_EMPTYSTUB) {
+					return strSuperClass;
+				}
+			}
+		}
+		
+		return ""; //$NON-NLS-1$
 	}
 	
 	/**
@@ -669,17 +671,15 @@ public class NewContractWizardPageOne extends NewTypeWizardPage {
 		for (NewContractMethodElement element : elements) {
 			IMethod method = (IMethod)element.getMember();
 			
+			GenStubSettings settings= C4JStubUtil.getCodeGenerationSettings(type.getJavaProject());
+			settings.createComments= isAddComments();
+			settings.callSuper= false;
+			settings.methodOverwrites= false;		
+			settings.taskTag = fPage2.isCreateTasks();
+			settings.finalize = fPage2.getCreateFinalMethodStubsButtonSelection();
+			
 			// PRE - CONDITION
-			if (element.getPreCondition() > 0) {
-				
-	//			if (isJUnit4()) {
-	//				buffer.append('@').append(imports.addImport(JUnitPlugin.JUNIT4_ANNOTATION_NAME)).append(getLineDelimiter());
-	//			}
-				
-				GenStubSettings settings= C4JStubUtil.getCodeGenerationSettings(type.getJavaProject());
-				settings.createComments= isAddComments();
-				settings.callSuper= false;
-				settings.methodOverwrites= false;
+			if (element.getPreCondition() > 0) {			
 				settings.preCondition = element.getPreCondition();
 				String content= C4JStubUtil.genStub(type.getCompilationUnit(), getTypeName(), method, settings, imports);
 				
@@ -688,10 +688,6 @@ public class NewContractWizardPageOne extends NewTypeWizardPage {
 			
 			// POST - CONDITION
 			if (element.getPostCondition() > 0) {
-				GenStubSettings settings= C4JStubUtil.getCodeGenerationSettings(type.getJavaProject());
-				settings.createComments= isAddComments();
-				settings.callSuper= false;
-				settings.methodOverwrites= false;
 				settings.postCondition = element.getPostCondition();
 				String content= C4JStubUtil.genStub(type.getCompilationUnit(), getTypeName(), method, settings, imports);
 				
@@ -709,46 +705,9 @@ public class NewContractWizardPageOne extends NewTypeWizardPage {
 		return getPackageFragment().findRecommendedLineSeparator();
 	}
 
-	private void appendContractMethodBody(StringBuffer buffer, ICompilationUnit targetCu, boolean preCond) throws CoreException {
-		final String delimiter= getLineDelimiter();
-		buffer.append('{').append(delimiter);
-		String todoTask= ""; //$NON-NLS-1$
-		if (fPage2.isCreateTasks()) {
-			String todoTaskTag= C4JStubUtil.getTodoTaskTag(targetCu.getJavaProject());
-			if (todoTaskTag != null) {
-				todoTask= " // " + todoTaskTag; //$NON-NLS-1$
-			}
-		}
-		buffer.append(todoTask).append(delimiter);
-		buffer.append('}').append(delimiter);
-	}
+	
 
-	private void appendMethodComment(StringBuffer buffer, IMethod method) throws JavaModelException {
-		final String delimiter= getLineDelimiter();
-		final StringBuffer buf= new StringBuffer("{@link "); //$NON-NLS-1$	
-		JavaElementLabels.getTypeLabel(method.getDeclaringType(), JavaElementLabels.T_FULLY_QUALIFIED, buf);
-		buf.append('#');
-		buf.append(method.getElementName());
-		buf.append('(');
-		String[] paramTypes= C4JStubUtil.getParameterTypeNamesForSeeTag(method);
-		for (int i= 0; i < paramTypes.length; i++) {
-			if (i != 0) {
-				buf.append(", "); //$NON-NLS-1$
-			}
-			buf.append(paramTypes[i]);
-			
-		}
-		buf.append(')');
-		buf.append('}');
-		
-		buffer.append("/**");//$NON-NLS-1$
-		buffer.append(delimiter);
-		buffer.append(" * ");//$NON-NLS-1$
-		buffer.append(NLS.bind(WizardMessages.NewContractWizardPageOne_comment_class_to_test, buf.toString()));
-		buffer.append(delimiter);
-		buffer.append(" */");//$NON-NLS-1$
-		buffer.append(delimiter);
-	}
+	
 	
 
 //	private List getOverloadedMethods(List<IMethod> allMethods) {
@@ -787,7 +746,7 @@ public class NewContractWizardPageOne extends NewTypeWizardPage {
 	
 	/**
 	 * The method is called when the container has changed to validate if the project
-	 * is suited for the JUnit test class. Clients can override to modify or remove that validation.
+	 * is suited for the C4J contract class.
 	 * 
 	 * @return the status of the validation
 	 */
@@ -803,7 +762,7 @@ public class NewContractWizardPageOne extends NewTypeWizardPage {
 						return status;
 					}
 					if (project.findType(AnnotationUtil.ANNOTATION_CONTRACT_REFERENCE) == null) {
-						status.setWarning(WizardMessages.NewContractWizardPageOne_error_junit4NotOnbuildpath); 
+						status.setWarning(WizardMessages.NewContractWizardPageOne_error_c4jNotOnbuildpath); 
 						return status;
 					}		
 				}
@@ -868,7 +827,7 @@ public class NewContractWizardPageOne extends NewTypeWizardPage {
 	private class C4JStatus extends Status {
 		
 		public C4JStatus() {
-			this(IStatus.OK, "ok");
+			this(IStatus.OK, "ok"); //$NON-NLS-1$
 		}
 		
 		public C4JStatus(int severity, String msg) {

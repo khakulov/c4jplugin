@@ -8,15 +8,17 @@ public class NewContractLabelProvider extends JavaElementLabelProvider
 										implements ITableLabelProvider {
 
 	public final static int PRE_COND_NONE = 0;
-	public final static int PRE_COND_NONNULL = 1;
-	public final static int PRE_COND_NONEMPTY = 2;
+	public final static int PRE_COND_EMPTYSTUB = 1;
+	public final static int PRE_COND_NONNULL = 2;
+	public final static int PRE_COND_NONEMPTY = 3;
 	
 	public final static int POST_COND_NONE = 0;
-	public final static int POST_COND_NONNULL = 1;
-	public final static int POST_COND_NONEMPTY = 2;
+	public final static int POST_COND_EMPTYSTUB = 1;
+	public final static int POST_COND_NONNULL = 2;
+	public final static int POST_COND_NONEMPTY = 3;
 	
-	public final static String[] preCondLabels = {"", "Non-null args", "Non-null and non-empty args"};
-	public final static String[] postCondLabels = {"", "Non-null return", "Non-null and non-empty return"};
+	public final static String[] preCondLabels = {"", WizardMessages.NewContractLabelProvider_empty_condition, WizardMessages.NewContractLabelProvider_nonnull_args, WizardMessages.NewContractLabelProvider_nonnull_nonempty_args}; //$NON-NLS-1$
+	public final static String[] postCondLabels = {"", WizardMessages.NewContractLabelProvider_empty_condition, WizardMessages.NewContractLabelProvider_nonnull_return, WizardMessages.NewContractLabelProvider_nonnull_nonempty_return}; //$NON-NLS-1$
 	
 	public NewContractLabelProvider() {
 		super(SHOW_DEFAULT | SHOW_RETURN_TYPE);
@@ -37,9 +39,11 @@ public class NewContractLabelProvider extends JavaElementLabelProvider
 		case 0:
 			return super.getText(item.getMember());
 		case 1:
-			return preCondLabels[item.getPreCondition()];
+			if (item.getPreCondition() >= 0)
+				return preCondLabels[item.getPreCondition()];
 		case 2:
-			return postCondLabels[item.getPostCondition()];
+			if (item.getPostCondition() >= 0)
+				return postCondLabels[item.getPostCondition()];
 		}
 		return null;
 	}
