@@ -8,6 +8,7 @@ import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.sourceforge.c4jplugin.C4JActivator;
+import net.sourceforge.c4jplugin.internal.exceptions.OldContractModelException;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -21,50 +22,51 @@ import org.eclipse.ui.IMemento;
 
 public class ContractReferenceModel {
 	
+	static private final String MODEL_VERSION = "0.2.0";
+	
 	// session properties
 	static private final QualifiedName QN_CONTRACTED_PROPERTY = new QualifiedName(C4JActivator.PLUGIN_ID, "isContracted");
 	static private final QualifiedName QN_CONTRACT_PROPERTY = new QualifiedName(C4JActivator.PLUGIN_ID, "isContract");
-
-	static private ConcurrentHashMap<IResource, Collection<IResource>> mapClassContracts = new ConcurrentHashMap<IResource, Collection<IResource>>();
-	static private ConcurrentHashMap<IResource, Collection<IResource>> mapContractClasses = new ConcurrentHashMap<IResource, Collection<IResource>>();
+	static private final QualifiedName QN_DIRECTCONTRACT_PROPERTY = new QualifiedName(C4JActivator.PLUGIN_ID, "directContract");
+	static private final QualifiedName QN_TARGET_PROPERTY = new QualifiedName(C4JActivator.PLUGIN_ID, "target");
+	
+	static private ConcurrentHashMap<IResource, Collection<IResource>> mapClassToContracts = new ConcurrentHashMap<IResource, Collection<IResource>>();
+	//static private ConcurrentHashMap<IResource, Collection<IResource>> mapContractToClasses = new ConcurrentHashMap<IResource, Collection<IResource>>();
+	
+	//static private ConcurrentHashMap<IResource, IResource> mapTargetToContract = new ConcurrentHashMap<IResource, IResource>();
+	//static private ConcurrentHashMap<IResource, IResource> mapContractToTarget = new ConcurrentHashMap<IResource, IResource>();
+	
+	static private IResourceVisitor clearSessionProperties  = new IResourceVisitor() {
+		public boolean visit(IResource resource) throws CoreException {
+			if (resource.getName().endsWith(".java"))
+				clearSessionProperties(resource);
+			return true;
+		}
+	};
 	
 	private ContractReferenceModel() {
 		
 	}
 	
-	synchronized static public void loadModel(final IMemento memento) throws CoreException {
+	synchronized static public void loadModel(final IMemento memento) throws CoreException, OldContractModelException {
 		clearModel();
 		
 		final IWorkspaceRoot wsRoot = ResourcesPlugin.getWorkspace().getRoot();
+		String rootID = memento.getID();
+		if (rootID == null) rootID = "0.1.0";
+		
+		if (rootID.compareTo(MODEL_VERSION) < 0)
+			throw new OldContractModelException(CoreMessages.ContractReferenceModel_oldModel, rootID);
+		
 		IMemento[] children = memento.getChildren("contractedClass");
+		if (children == null) return;
+		
 		for (IMemento child : children) {
 			String classPath = child.getID();
 			IResource resource = wsRoot.findMember(new Path(classPath));
 			if (resource != null && resource.exists()) {
-				String contracts = child.getTextData();
-				
-				HashSet<IResource> setContracts = new HashSet<IResource>();
-				for (String contract : contracts.split(":")) {
-					IResource resourceContract = wsRoot.findMember(new Path(contract));
-					if (resourceContract != null && resourceContract.exists()) {
-						setContracts.add(resourceContract);
-					}
-				}
-				
-				if (setContracts.size() > 0) {
-					mapClassContracts.put(resource, setContracts);
-					resource.setSessionProperty(QN_CONTRACTED_PROPERTY, true);
-					
-					for (IResource contract : setContracts) {
-						Collection<IResource> setContractedClasses = mapContractClasses.get(contract);
-						if (setContractedClasses == null) {
-							setContractedClasses = new HashSet<IResource>();
-							mapContractClasses.put(contract, setContractedClasses);
-							contract.setSessionProperty(QN_CONTRACT_PROPERTY, true);
-						}
-						setContractedClasses.add(resource);
-					}
-				}
+				loadDirectContract(resource, child, wsRoot);
+				loadSuperContracts(resource, child, wsRoot);
 			}
 		}
 		
@@ -82,38 +84,118 @@ public class ContractReferenceModel {
 		});
 	}
 	
+	private static void loadDirectContract(IResource target, IMemento memento, IWorkspaceRoot wsRoot) 
+													throws CoreException {
+		IMemento mDirectContract = memento.getChild("directContract");
+		if (mDirectContract != null) {
+			String directContract = mDirectContract.getID();
+			if (directContract != null) {
+				IResource resourceDirectContract = wsRoot.findMember(new Path(directContract));
+				if (resourceDirectContract != null && resourceDirectContract.exists()) {
+					target.setSessionProperty(QN_CONTRACTED_PROPERTY, true);
+					target.setSessionProperty(QN_DIRECTCONTRACT_PROPERTY, resourceDirectContract);
+					
+					resourceDirectContract.setSessionProperty(QN_CONTRACT_PROPERTY, true);
+					resourceDirectContract.setSessionProperty(QN_TARGET_PROPERTY, target);
+					
+					Collection<IResource> contracts = mapClassToContracts.get(target);
+					if (contracts == null) {
+						contracts = new HashSet<IResource>();
+						mapClassToContracts.put(target, contracts);
+					}
+					contracts.add(resourceDirectContract);
+				}
+			}
+		}
+	}
+	
+	private static void loadSuperContracts(IResource target, IMemento memento, IWorkspaceRoot wsRoot) 
+											throws CoreException {
+		IMemento[] children = memento.getChildren("superContract");
+		if (children == null || children.length == 0) return;
+		
+		Collection<IResource> setContracts = new HashSet<IResource>();
+		for (IMemento child : children) {
+			String superContract = child.getID();
+			IResource resourceSuperContract = wsRoot.findMember(new Path(superContract));
+			if (resourceSuperContract != null && resourceSuperContract.exists()) {
+				setContracts.add(resourceSuperContract);
+				resourceSuperContract.setSessionProperty(QN_CONTRACT_PROPERTY, true);
+			}
+		}
+		
+		if (setContracts.size() > 0) {
+			target.setSessionProperty(QN_CONTRACTED_PROPERTY, true);
+			
+			Collection<IResource> contracts = mapClassToContracts.get(target);
+			if (contracts == null) {
+				contracts = new HashSet<IResource>();
+				mapClassToContracts.put(target, contracts);
+			}
+			contracts.addAll(setContracts);
+		}
+	}
+	
 	synchronized static public void saveModel(IMemento memento) {
-		for (IResource resource : mapClassContracts.keySet()) {
-			Collection<IResource> contracts = mapClassContracts.get(resource);
-			String strContracts = "";
-			for (IResource contract : contracts) {
-				strContracts += contract.getFullPath() + ":";
+		
+		memento.putString(IMemento.TAG_ID, MODEL_VERSION);
+		
+		for (IResource target : mapClassToContracts.keySet()) {
+			IMemento mTarget = memento.createChild("contractedClass");
+			mTarget.putString(IMemento.TAG_ID, target.getFullPath().toString());
+			
+			IResource directContract = getDirectContract(target);
+			if (directContract != null) {
+				IMemento mDirectContract = mTarget.createChild("directContract");
+				mDirectContract.putString(IMemento.TAG_ID, directContract.getFullPath().toString());
 			}
-			strContracts = strContracts.substring(0, strContracts.length()-1);
-			IMemento child = memento.createChild("contractedClass", resource.getFullPath().toString());
-			child.putTextData(strContracts);
+			
+			Collection<IResource> contracts = mapClassToContracts.get(target);
+			if (contracts != null) {
+				for (IResource contract : contracts) {
+					if (directContract != null && contract.equals(directContract)) continue;
+					IMemento mSuperContract = mTarget.createChild("superContract");
+					mSuperContract.putString(IMemento.TAG_ID, contract.getFullPath().toString());
+				}
+			}
 		}
 	}
 	
+	/**
+	 * Completely resets the model.
+	 *
+	 */
 	synchronized static public void clearModel() {
-		mapClassContracts.clear();
-		mapContractClasses.clear();
+		mapClassToContracts.clear();
+		
+		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+		
+		for (IProject project : projects) {
+			try {
+				//if (project.isNatureEnabled(C4JProjectNature.NATURE_ID))
+					project.accept(clearSessionProperties);
+			} catch (CoreException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
-	synchronized static public void clearModel(IProject project) {
-		for (IResource resource : mapClassContracts.keySet()) {
+	/**
+	 * Clears the project specific model data. This may leave projects
+	 * which depend on <em>project</em> in an inconsistent state. It is
+	 * the responsibility of the caller to track down dependencies.
+	 * 
+	 * @param project
+	 */
+	synchronized static public void clearModel(IProject project) {	
+		
+		for (IResource resource : mapClassToContracts.keySet()) {
 			if (resource.getProject().equals(project)) {
-				mapClassContracts.remove(resource);
+				mapClassToContracts.remove(resource);
 			}
 		}
-		
-		for (IResource contract : mapContractClasses.keySet()) {
-			if (contract.getProject().equals(project)) {
-				mapContractClasses.remove(contract);
-			}
-		}
-		
-		for (Collection<IResource> references : mapClassContracts.values()) {
+				
+		for (Collection<IResource> references : mapClassToContracts.values()) {
 			Iterator<IResource> iter = references.iterator();
 			while (iter.hasNext()) {
 				IResource reference = iter.next();
@@ -122,31 +204,40 @@ public class ContractReferenceModel {
 			}
 		}
 		
-		for (Collection<IResource> contractedClasses : mapContractClasses.values()) {
-			Iterator<IResource> iter = contractedClasses.iterator();
-			while (iter.hasNext()) {
-				IResource contracted = iter.next();
-				if (contracted.getProject().equals(project))
-					iter.remove();
-			}
+		try {
+			project.accept(clearSessionProperties);
+		} catch (CoreException e) {
+			e.printStackTrace();
 		}
 	}
 	
-	synchronized static public void clearResource(IResource resource) {
-		clearResource(resource, QN_CONTRACTED_PROPERTY);
-		clearResource(resource, QN_CONTRACT_PROPERTY);
+	synchronized static private void clearSessionProperties(IResource resource) {
+		clearSessionProperty(resource, QN_CONTRACTED_PROPERTY);
+		clearSessionProperty(resource, QN_CONTRACT_PROPERTY);
+		clearSessionProperty(resource, QN_TARGET_PROPERTY);
+		clearSessionProperty(resource, QN_DIRECTCONTRACT_PROPERTY);
 	}
 	
-	synchronized static public void clearResource(IResource resource, QualifiedName property) {
+	synchronized static private void clearSessionProperty(IResource resource, QualifiedName property) {
 		try {
 			resource.setSessionProperty(property, null);
 		}
 		catch (CoreException e) {}
 	}
 	
+	synchronized static public IResource getDirectContract(IResource target) {
+		try {
+			IResource direct = (IResource)target.getSessionProperty(QN_DIRECTCONTRACT_PROPERTY);
+			return direct;
+		} catch (CoreException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
 	synchronized static public Boolean isContracted(IResource resource, boolean checkAgainstModel) {
 		if (checkAgainstModel) {
-			return mapClassContracts.containsKey(resource);
+			return mapClassToContracts.containsKey(resource);
 		}
 		return isContracted(resource);
 	}
@@ -160,171 +251,203 @@ public class ContractReferenceModel {
 		return contracted;
 	}
 	
+	synchronized static public Boolean isTarget(IResource resource) {
+		IResource directContract = getDirectContract(resource);
+		return directContract != null;
+	}
+	
+	/**
+	 * Returns true if <em>resource</em> is a contract. Calling
+	 * <em>checkAgainstModel = false</em> is the same as calling
+	 * <em>isContract(resource)</em> and is usuallay a lot faster
+	 * than using true.
+	 * 
+	 * @param resource
+	 * @param checkAgainstModel
+	 * @return
+	 */
 	synchronized static public boolean isContract(IResource resource, boolean checkAgainstModel) {
 		if (checkAgainstModel) {
-			return mapContractClasses.containsKey(resource);
+			for (Collection<IResource> contracts : mapClassToContracts.values()) {
+				if (contracts.contains(resource)) return true;
+			}
+			return false;
 		}
 		return isContract(resource);
 	}
 	
 	synchronized static public boolean isContract(IResource resource) {
-		Boolean contract = null;
+		Object contract = null;
 		try {
-			contract = (Boolean)resource.getSessionProperty(QN_CONTRACT_PROPERTY);
+			contract = resource.getSessionProperty(QN_CONTRACT_PROPERTY);
 		} catch (CoreException e) {}
 		
 		if (contract == null) return false;
-		return contract;
+		return (Boolean)contract;
 	}
 	
+	/**
+	 * Removes the contract <em>contract</em> from the model. This may leave
+	 * the classes which have been contracted by this contract in an inconsistent
+	 * state. Use the returned collection to update the affected classes.
+	 * 
+	 * @param contract
+	 * @return All classes which where contracted by the removed contract
+	 * (includes subtypes as well)
+	 */
 	synchronized static public Collection<IResource> removeContract(IResource contract) {
 		Collection<IResource> contractedClasses = getContractedClasses(contract);
 		for (IResource contractedClass : contractedClasses) {
-			Collection<IResource> contracts = mapClassContracts.get(contractedClass);
-			contracts.remove(contract);
-			if (contracts.size() == 0) {
-				mapClassContracts.remove(contractedClass);
-				clearResource(contractedClass, QN_CONTRACTED_PROPERTY);
+			Collection<IResource> contracts = mapClassToContracts.get(contractedClass);
+			if (contracts.remove(contract)) {
+				IResource directContract = getDirectContract(contractedClass);
+				if (directContract != null && directContract.equals(contract)) {
+					clearSessionProperty(contractedClass, QN_DIRECTCONTRACT_PROPERTY);
+				}
+				if (contracts.size() == 0)
+					clearSessionProperty(contractedClass, QN_CONTRACTED_PROPERTY);
 			}
 		}
-		mapContractClasses.remove(contract);
+		
+		clearSessionProperties(contract);
 		
 		return contractedClasses;
 	}
 	
+	/**
+	 * Removes the contracted class from the model. This may leave its
+	 * contracts and subtypes in an inconsistent state.
+	 * 
+	 * @param resource
+	 * @return Returns the contracts which guarded this class.
+	 */
 	synchronized static public Collection<IResource> removeContractedClass(IResource resource) {
-		Collection<IResource> contracts = getContractReferences(resource);
+		Collection<IResource> contracts = getContracts(resource);
+		
 		for (IResource contract : contracts) {
-			Collection<IResource> contracted = mapContractClasses.get(contract);
-			contracted.remove(resource);
-			if (contracted.size() == 0) {
-				mapContractClasses.remove(contract);
-				clearResource(contract, QN_CONTRACT_PROPERTY);
-			}
+			IResource target = getTarget(contract);
+			if (target.equals(resource))
+				clearSessionProperties(contract);
 		}
-		mapClassContracts.remove(resource);
+		
+		mapClassToContracts.remove(resource);
+		clearSessionProperties(resource);
 		
 		return contracts;
 	}
 	
-	synchronized static public boolean addContractReference(IResource resource, IResource contract) {
-		if (contract == null) {
-			try {
-				resource.setSessionProperty(QN_CONTRACTED_PROPERTY, false);
-			} catch (CoreException e) {}
-			return false;
-		}
-		else {
-			try {
-				contract.setSessionProperty(QN_CONTRACT_PROPERTY, true);
-			} catch (CoreException e) {}
-		}
-		
-		Collection<IResource> contracts = mapClassContracts.get(resource);
-		Collection<IResource> contractedClasses = mapContractClasses.get(contract);
-		try {
-			if (contracts == null) {
-				contracts = new HashSet<IResource>();
-				resource.setSessionProperty(QN_CONTRACTED_PROPERTY, true);
-				mapClassContracts.put(resource, contracts);
-			}
-			
-			if (contractedClasses == null) {
-				contractedClasses = new HashSet<IResource>();
-				mapContractClasses.put(contract, contractedClasses);
-			}
-			
-			return contracts.add(contract) && contractedClasses.add(resource);
-		} catch (CoreException e) {}
-		
-		return false;
+	/**
+	 * The caller should update the state of the subtypes of <em>resource</em>
+	 * and the added super-contracts.
+	 * 
+	 * @param resource
+	 * @param contracts
+	 * @return
+	 */
+	synchronized static public void addSuperContracts(IResource resource, Collection<IResource> contracts) {
+		addContracts(resource, contracts);
 	}
 	
-	synchronized static public boolean addContractReferences(IResource resource, Collection<IResource> contracts) {
-		if (contracts == null || contracts.size() == 0) {
-			try {
-				resource.setSessionProperty(QN_CONTRACTED_PROPERTY, false);
-			} catch (CoreException e) {}
-			return false;
-		}
-		else {
-			try {
-				for (IResource contract : contracts)
-					contract.setSessionProperty(QN_CONTRACT_PROPERTY, true);
-			} catch (CoreException e) {}
-		}
-		
-		Collection<IResource> allContracts = mapClassContracts.get(resource);
+	/**
+	 * The caller should update the state of the subtypes of <em>target</em>
+	 * and the added direct contract.
+	 * 
+	 * @param target
+	 * @param contract
+	 */
+	synchronized static public void addDirectContract(IResource target, IResource contract) {
 		try {
+			contract.setSessionProperty(QN_TARGET_PROPERTY, target);
+			target.setSessionProperty(QN_DIRECTCONTRACT_PROPERTY, contract);
+			
+			Collection<IResource> contracts = new Vector<IResource>();
+			contracts.add(contract);
+			
+			addContracts(target, contracts);
+		} catch (CoreException e) {}
+		
+	}
+	
+	synchronized static private void addContracts(IResource resource, Collection<IResource> contracts) {
+		if (contracts == null || contracts.size() == 0) return;
+		
+		try {
+			for (IResource contract : contracts)
+				contract.setSessionProperty(QN_CONTRACT_PROPERTY, true);
+		} catch (CoreException e) {}
+		
+		Collection<IResource> allContracts = mapClassToContracts.get(resource);
+		try {
+			resource.setSessionProperty(QN_CONTRACTED_PROPERTY, true);
 			if (allContracts == null) {
 				allContracts = new HashSet<IResource>();
-				resource.setSessionProperty(QN_CONTRACTED_PROPERTY, true);
-				mapClassContracts.put(resource, allContracts);
+				mapClassToContracts.put(resource, allContracts);
 			}
 			
-			boolean addedContract = false;
-			for (IResource contract : contracts) {
-				Collection<IResource> contractedClasses = mapContractClasses.get(contract);
-				if (contractedClasses == null) {
-					contractedClasses = new HashSet<IResource>();
-					mapContractClasses.put(contract, contractedClasses);
-				}
-				addedContract |= contractedClasses.add(resource);
-			}
-			
-			return allContracts.addAll(contracts) && addedContract;
+			allContracts.addAll(contracts);
 		} catch (CoreException e) {}
-		
-		return false;
 	}
 	
-	synchronized static public void clearContractReferences(IResource resource) {
-		Collection<IResource> allContracts = mapClassContracts.get(resource);
-		if (allContracts == null) {
-			return;
-		}
-		
-		for (IResource contract : allContracts) {
-			Collection<IResource> contractedClasses = mapContractClasses.get(contract);
-			if (contractedClasses != null) {
-				contractedClasses.remove(resource);
-				if (contractedClasses.size() == 0) {
-					mapContractClasses.remove(contract);
-					clearResource(contract, QN_CONTRACT_PROPERTY);
-				}
-			}
-		}
-		
-		clearResource(resource, QN_CONTRACTED_PROPERTY);
-		mapClassContracts.remove(resource);
-	}
-	
-	synchronized static public boolean setContractReferences(IResource resource, Collection<IResource> contracts) {
-		clearContractReferences(resource);
-		if (contracts == null || contracts.size() == 0) return true;
-		return addContractReferences(resource, contracts);
-	}
-	
-	synchronized static public Collection<IResource> getContractReferences(IResource resource) {
-		Collection<IResource> contractReferences = mapClassContracts.get(resource);
+	/**
+	 * Returns all contracts for <em>resource</em>
+	 * 
+	 * @param resource
+	 * @return
+	 */
+	synchronized static public Collection<IResource> getContracts(IResource resource) {
+		Collection<IResource> contractReferences = mapClassToContracts.get(resource);
 		
 		if (contractReferences == null)
 			return Collections.emptyList();
 		
-		return new Vector<IResource>(contractReferences);
+		return Collections.unmodifiableCollection(contractReferences);
 	}
 	
+	/**
+	 * Returns all classes which are contracted by <em>contract</em>
+	 * @param contract
+	 * @return
+	 */
 	synchronized static public Collection<IResource> getContractedClasses(IResource contract) {
-		Collection<IResource> contractedClasses = mapContractClasses.get(contract);
+		Collection<IResource> contractedClasses = new HashSet<IResource>();
 		
-		if (contractedClasses == null)
-			return Collections.emptyList();
+		for (IResource contractedClass : mapClassToContracts.keySet()) {
+			Collection<IResource> contracts = mapClassToContracts.get(contractedClass);
+			if (contracts.contains(contract))
+				contractedClasses.add(contractedClass);
+		}
 		
-		return new Vector<IResource>(contractedClasses);
+		return Collections.unmodifiableCollection(contractedClasses);
+	}
+	
+	/**
+	 * Returns the target for the given contract, i. e. the class which
+	 * directly references this contract.
+	 * 
+	 * @param contract
+	 * @return The target or null in case something went wrong
+	 */
+	synchronized static public IResource getTarget(IResource contract) {
+		try {
+			IResource target = (IResource)contract.getSessionProperty(QN_TARGET_PROPERTY);
+			return target;
+		} catch (CoreException e) {}
+		
+		return null;
 	}
 	
 	synchronized static public Collection<IResource> getAllContracts() {
-		return Collections.unmodifiableCollection(mapContractClasses.keySet());
+		Collection<IResource> allContracts = new HashSet<IResource>();
+		
+		for (Collection<IResource> contracts : mapClassToContracts.values()) {
+			allContracts.addAll(contracts);
+		}
+		
+		return Collections.unmodifiableCollection(allContracts);
+	}
+	
+	synchronized static public Collection<IResource> getAllContractedClasses() {
+		return Collections.unmodifiableCollection(mapClassToContracts.keySet());
 	}
 	
 }

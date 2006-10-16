@@ -3,6 +3,7 @@ package net.sourceforge.c4jplugin.internal.util;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Vector;
 
 import net.sourceforge.c4jplugin.internal.core.ContractReferenceModel;
@@ -37,11 +38,6 @@ import org.eclipse.osgi.util.NLS;
 
 public class ContractReferenceUtil {
 	
-	static public boolean isTarget(IResource resource) {
-		if (resource == null) return false;
-		return AnnotationUtil.getContractReference(resource) != null;
-	}
-	
 	static public void deleteMarkers(IProject project) throws CoreException {
 		project.deleteMarkers(IClassInvariantMarker.ID, true, IResource.DEPTH_INFINITE);
 		project.deleteMarkers(IContractedClassInvariantMarker.ID, true, IResource.DEPTH_INFINITE);
@@ -62,6 +58,7 @@ public class ContractReferenceUtil {
 	static public void createContractMarkers(IResource contract) {
 		if (!ContractReferenceModel.isContract(contract)) return;
 		
+		System.out.println("creating contract markers");
 		IJavaElement jelement = JavaCore.create(contract);
 		try {
 			IType type = getType(jelement);
@@ -70,8 +67,9 @@ public class ContractReferenceUtil {
 				parser.setSource(type.getCompilationUnit());
 				CompilationUnit cu = (CompilationUnit)parser.createAST(null);
 				
-				// cache all IContractedMethodMarker makers
+				// cache all IContractedMethodMarker makers of the target
 				Vector<IMarker> methodMarkers = new Vector<IMarker>();
+				
 				for (IResource contractedRes : ContractReferenceModel.getContractedClasses(contract)) {
 					IMarker[] markers = contractedRes.findMarkers(IContractedMethodMarker.ID, true, IResource.DEPTH_ZERO);
 					methodMarkers.addAll(Arrays.asList(markers));
@@ -104,6 +102,8 @@ public class ContractReferenceUtil {
 						// check for methods which are guarded by it
 						boolean isContracting = false;
 						String methodHandle = null;
+						// checks all methods in sources which are located inside
+						// the current workspace
 						for (IMarker marker : methodMarkers) {
 							String markerType = marker.getAttribute(IContractedMethodMarker.ATTR_CONTRACT_TYPE, ""); //$NON-NLS-1$
 							if (markerType.equals(contractType) ||
@@ -116,17 +116,46 @@ public class ContractReferenceUtil {
 								if (Arrays.equals(contractedMethod.getParameterTypes(), method.getParameterTypes()) &&
 										contractedMethod.getElementName().equals(methodName)) {
 									// yes, create a marker for the contract method
-									IMarker methodMarker = contract.createMarker(IMethodMarker.ID);
-									methodMarker.setAttribute(IMethodMarker.ATTR_CONTRACT_TYPE, contractType);
-									methodMarker.setAttribute(IMarker.LINE_NUMBER, cu.getLineNumber(method.getNameRange().getOffset()));
-									methodMarker.setAttribute(IMethodMarker.ATTR_HANDLE_IDENTIFIER, method.getHandleIdentifier());
-									methodMarker.setAttribute(IMarker.MESSAGE, UIMessages.MarkerMessage_contract_methodIsContracting);
 									isContracting = true;
 									break;
 								}
 							}
 						}
+						
+						// try the supertype hierarchy of the contracts target
+						boolean bSuperMethod = false;
 						if (!isContracting) {
+							IResource target = ContractReferenceModel.getTarget(contract);
+							if (target != null) {
+								IType typeTarget = getType(JavaCore.create(target));
+								if (typeTarget != null) {
+									IType[] superTypes = typeTarget.newSupertypeHierarchy(null).getAllSupertypes(typeTarget);
+									for (IType superType : superTypes) {
+										for (IMethod superMethod : superType.getMethods()) {
+											if (Arrays.equals(superMethod.getParameterTypes(), method.getParameterTypes()) &&
+													superMethod.getElementName().equals(methodName)) {
+												isContracting = true;
+												bSuperMethod = true;
+												break;
+											}
+										}
+										if (isContracting) break;
+									}
+								}
+							}
+						}
+						
+						if (isContracting) {
+							IMarker methodMarker = contract.createMarker(IMethodMarker.ID);
+							methodMarker.setAttribute(IMethodMarker.ATTR_CONTRACT_TYPE, contractType);
+							methodMarker.setAttribute(IMarker.LINE_NUMBER, cu.getLineNumber(method.getNameRange().getOffset()));
+							methodMarker.setAttribute(IMethodMarker.ATTR_HANDLE_IDENTIFIER, method.getHandleIdentifier());
+							if (bSuperMethod)
+								methodMarker.setAttribute(IMarker.MESSAGE, UIMessages.MarkerMessage_contract_methodIsContracting_super);
+							else
+								methodMarker.setAttribute(IMarker.MESSAGE, UIMessages.MarkerMessage_contract_methodIsContracting);
+						}
+						else {	
 							// the method contract is not enforced on any method
 							IMarker methodMarker = contract.createMarker(IProblemMarker.ID);
 							methodMarker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_WARNING);
@@ -143,7 +172,7 @@ public class ContractReferenceUtil {
 	}
 	
 	static public void createContractedClassMarkers(IResource resource) {
-		Collection<IResource> references = ContractReferenceModel.getContractReferences(resource);
+		Collection<IResource> references = ContractReferenceModel.getContracts(resource);
 		if (references == null || references.size() == 0) return;
 		
 		IJavaElement jelement = JavaCore.create(resource);
@@ -233,14 +262,23 @@ public class ContractReferenceUtil {
 		} catch (JavaModelException e) {}
 	}
 	
+	/**
+	 * Checks the given resource for contracts. Does nothing if the resource
+	 * is already known to the underlying model (remove it first if you want
+	 * to force a recheck).
+	 * 
+	 * @param resource
+	 * @return All contracts for the given resource
+	 */
 	static public Collection<IResource> checkResourceForContracts(IResource resource) {
 		try {
 			//System.out.println("Checking for contracts: " + resource.getName());
 			Boolean contracted = ContractReferenceModel.isContracted(resource);
 			if (contracted != null && contracted == true)
-				return ContractReferenceModel.getContractReferences(resource);
+				return ContractReferenceModel.getContracts(resource);
 			else if (contracted != null && contracted == false)
 				return Collections.emptyList();
+			
 			
 			//System.out.println("Creating Java Element from resource");
 			IJavaElement javaElement = JavaCore.create(resource);
@@ -248,16 +286,16 @@ public class ContractReferenceUtil {
 			if (type != null) {
 				
 				//System.out.println("Trying to get direct contract reference");
-				Vector<IResource> contractReferences = new Vector<IResource>();
 				IResource ref = AnnotationUtil.getContractReference(resource);
 				if (ref != null) {
 					// we found a class which is directly contracted
 					//System.out.println("Found direct contract " + ref.getName());
-					contractReferences.add(ref);
+					ContractReferenceModel.addDirectContract(resource, ref);
 				}
 				
 				//System.out.println("Searching for super contracts");
 				// search all super types for contracts
+				Vector<IResource> contractReferences = new Vector<IResource>();
 				IType[] superTypes = type.newSupertypeHierarchy(null).getSupertypes(type);
 				for (IType superType : superTypes) {
 					IResource superResource = superType.getResource();
@@ -271,20 +309,18 @@ public class ContractReferenceUtil {
 						contractReferences.addAll(checkResourceForContracts(superResource));
 					}
 					else if (contracted == true) {
-						contractReferences.addAll(ContractReferenceModel.getContractReferences(superResource));
+						contractReferences.addAll(ContractReferenceModel.getContracts(superResource));
 					}
 				}
 				
 				if (contractReferences.size() > 0) {
-					// this type is contracted
+					// this type has supercontracts
 					//System.out.println("Resource " + resource.getName() + " has " + contractReferences.size() + " contracts");
-					ContractReferenceModel.setContractReferences(resource, contractReferences);
-					return contractReferences;
+					ContractReferenceModel.addSuperContracts(resource, contractReferences);
 				}
-				else {
-					//System.out.println("Resource " + resource.getName() + " has no contracts");
-					ContractReferenceModel.setContractReferences(resource, null);
-				}
+				
+				if (ref != null) contractReferences.add(ref);
+				return contractReferences;
 			}
 		} 
 		catch (JavaModelException e) {
@@ -294,7 +330,13 @@ public class ContractReferenceUtil {
 		return Collections.emptyList();
 	}
 	
-	static public Collection<IResource> checkAllSubtypes(IResource resource, boolean clean) {
+	/**
+	 * Checks all subtypes of <em>resource</em> for contracts.
+	 * 
+	 * @param resource
+	 * @return All subtypes for which contracts have changed
+	 */
+	static public Collection<IResource> checkAllSubtypes(IResource resource) {
 		Vector<IResource> resources = new Vector<IResource>();
 		try {
 			IType type = getType(JavaCore.create(resource));
@@ -305,10 +347,11 @@ public class ContractReferenceUtil {
 			for (IType subType : subTypes) {
 				IResource subResource = subType.getCompilationUnit().getCorrespondingResource();
 				Boolean wasContracted = ContractReferenceModel.isContracted(subResource);
-				if (clean) {
-					deleteMarkers(subResource);
-					ContractReferenceModel.clearResource(subResource);
-				}
+				
+				deleteMarkers(subResource);
+				ContractReferenceModel.removeContractedClass(subResource);
+				//ContractReferenceModel.clearSessionProperties(subResource);
+				
 				boolean isContracted = !checkResourceForContracts(subResource).isEmpty();
 				if ((wasContracted != null && wasContracted == true) != isContracted) {
 					resources.add(subType.getResource());
@@ -339,7 +382,7 @@ public class ContractReferenceUtil {
 			if (monitor.isCanceled()) throw new OperationCanceledException();
 			
 			IProgressMonitor submonitor = new SubProgressMonitor(monitor, 50);
-			IResourceVisitor contractVisitor = new ContractResourceVisitor(submonitor, clear);
+			ContractResourceVisitor contractVisitor = new ContractResourceVisitor(submonitor);
 			try {
 				submonitor.beginTask(UIMessages.Builder_checkingContractedClasses, sourceCount);
 				project.accept(contractVisitor);
@@ -354,10 +397,12 @@ public class ContractReferenceUtil {
 			if (submonitor.isCanceled()) throw new OperationCanceledException();
 			
 			submonitor = new SubProgressMonitor(monitor, 50);
-			Collection<IResource> contracts = ContractReferenceModel.getAllContracts();
+			Collection<IResource> contracts = contractVisitor.getContracts();
+			System.out.println("found " + contracts.size() + " contracts:");
 			try {
 				submonitor.beginTask(UIMessages.Builder_creatingContractMarkers, contracts.size());
 				for (IResource contract : contracts) {
+					System.out.println(contract.getName());
 					if (submonitor.isCanceled()) throw new OperationCanceledException();
 					
 					createContractMarkers(contract);
@@ -436,11 +481,14 @@ public class ContractReferenceUtil {
 	private static class ContractResourceVisitor implements IResourceVisitor {
 
 		private IProgressMonitor monitor;
-		private boolean clear;
+		private Collection<IResource> contracts = new HashSet<IResource>();
 		
-		public ContractResourceVisitor(IProgressMonitor monitor, boolean clear) {
+		public ContractResourceVisitor(IProgressMonitor monitor) {
 			this.monitor = monitor;
-			this.clear = clear;
+		}
+		
+		public Collection<IResource> getContracts() {
+			return contracts;
 		}
 		
 		public boolean visit(IResource resource) throws CoreException {
@@ -448,8 +496,7 @@ public class ContractReferenceUtil {
 			
 			//System.out.println("Checking resource: " + resource.getName());
 			if (resource.getName().endsWith(".java")) { //$NON-NLS-1$
-				if (clear) ContractReferenceModel.clearResource(resource);
-				checkResourceForContracts(resource);
+				contracts.addAll(checkResourceForContracts(resource));
 				createContractedClassMarkers(resource);
 				monitor.worked(1);
 				return false;

@@ -110,28 +110,24 @@ public class ResourceChangeListener implements IResourceChangeListener {
 		
 		synchronized private void handleRemovedContract(IResource contract) {
 			Collection<IResource> changedResources = ContractReferenceModel.removeContract(contract);
+			for (IResource changedResource : changedResources) {
+				ContractReferenceModel.removeContractedClass(changedResource);
+				ContractReferenceUtil.checkResourceForContracts(changedResource);
+			}
 			visitedResources.addAll(changedResources);
 		}
 		
 		synchronized private void handleRemovedContractedClass(IResource resource) {
 			Collection<IResource> changedContracts = ContractReferenceModel.removeContractedClass(resource);
-			for (IResource changedContract : changedContracts) {
-				Collection<IResource> contractedClasses = ContractReferenceModel.getContractedClasses(changedContract);
-				for (IResource contractedClass : contractedClasses) {
-					ContractReferenceModel.clearResource(contractedClass);
-					ContractReferenceUtil.checkResourceForContracts(contractedClass);
-				}
-				visitedResources.addAll(contractedClasses);
-			}
+			visitedResources.addAll(ContractReferenceUtil.checkAllSubtypes(resource));
 			allContracts.addAll(changedContracts);
 		}
 		
 		synchronized private void handleChangedContract(IResource contract) {
 			Collection<IResource> contractedClasses = ContractReferenceModel.getContractedClasses(contract);
-			ContractReferenceModel.clearResource(contract);
 			
 			for (IResource contractedClass : contractedClasses) {
-				ContractReferenceModel.clearResource(contractedClass);
+				ContractReferenceModel.removeContractedClass(contractedClass);
 				ContractReferenceUtil.checkResourceForContracts(contractedClass);
 			}
 			allContracts.add(contract);
@@ -139,8 +135,7 @@ public class ResourceChangeListener implements IResourceChangeListener {
 		}
 		
 		synchronized private void handleChangedResource(IResource resource) throws CoreException {
-			Collection<IResource> oldContracts = ContractReferenceModel.getContractReferences(resource);
-			ContractReferenceModel.clearResource(resource);
+			Collection<IResource> oldContracts = ContractReferenceModel.removeContractedClass(resource);
 			Collection<IResource> contracts = ContractReferenceUtil.checkResourceForContracts(resource);
 			visitedResources.add(resource);
 			
@@ -152,7 +147,7 @@ public class ResourceChangeListener implements IResourceChangeListener {
 			
 			if (bChanged) {
 				// yes, check all subtypes
-				visitedResources.addAll(ContractReferenceUtil.checkAllSubtypes(resource, true));
+				visitedResources.addAll(ContractReferenceUtil.checkAllSubtypes(resource));
 			}
 			
 			allContracts.addAll(oldContracts);

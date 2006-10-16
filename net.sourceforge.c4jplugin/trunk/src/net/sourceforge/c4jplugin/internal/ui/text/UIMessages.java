@@ -104,6 +104,7 @@ public class UIMessages extends NLS {
 	
 	// Marker Messages
 	public static String MarkerMessage_contract_methodIsContracting;
+	public static String MarkerMessage_contract_methodIsContracting_super;
 	public static String MarkerMessage_contract_classInvariant;
 	public static String MarkerMessage_contracted_classInvariant;
 	public static String MarkerMessage_contracted_preMethod;

@@ -112,8 +112,8 @@ public class C4JStubUtil {
 		if (settings.finalize) buf.append("final "); //$NON-NLS-1$
 		buf.append("public void "); //$NON-NLS-1$
 		
-		if (settings.preCondition >= 0) buf.append("pre_"); //$NON-NLS-1$
-		else if (settings.postCondition >= 0) buf.append("post_"); //$NON-NLS-1$
+		if (settings.preCondition > 0) buf.append("pre_"); //$NON-NLS-1$
+		else if (settings.postCondition > 0) buf.append("post_"); //$NON-NLS-1$
 		
 		buf.append(method.getElementName());
 		

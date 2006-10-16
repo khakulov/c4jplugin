@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: net.sourceforge.c4jplugin;singleton:=true
-Bundle-Version: 0.1.1
+Bundle-Version: 0.2.0
 Bundle-Activator: net.sourceforge.c4jplugin.C4JActivator
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
@@ -30,3 +30,5 @@ Require-Bundle: org.eclipse.ui,
  net.sourceforge.c4jplugin.runtime
 Eclipse-LazyStart: true
 Bundle-ClassPath: .
+Export-Package: net.sourceforge.c4jplugin.internal.core,
+ net.sourceforge.c4jplugin.internal.exceptions

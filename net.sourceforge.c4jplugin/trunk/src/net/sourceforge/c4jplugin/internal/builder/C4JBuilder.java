@@ -6,8 +6,6 @@ import net.sourceforge.c4jplugin.internal.core.ContractReferenceModel;
 import net.sourceforge.c4jplugin.internal.util.ContractReferenceUtil;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -30,15 +28,6 @@ public class C4JBuilder extends IncrementalProjectBuilder {
 		IProject project = getProject();
 		ContractReferenceUtil.deleteMarkers(project);
 		ContractReferenceModel.clearModel(project);
-		project.accept(new IResourceVisitor() {
-			public boolean visit(IResource resource) throws CoreException {
-				if (resource.getName().endsWith(".java"))
-					ContractReferenceModel.clearResource(resource);
-				
-				return true;
-			}
-			
-		});
 	}
 	
 }

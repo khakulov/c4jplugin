@@ -7,7 +7,6 @@ import net.sourceforge.c4jplugin.internal.core.ContractReferenceModel;
 import net.sourceforge.c4jplugin.internal.util.AnnotationUtil;
 import net.sourceforge.c4jplugin.internal.util.C4JStubUtil;
 import net.sourceforge.c4jplugin.internal.util.C4JUtils;
-import net.sourceforge.c4jplugin.internal.util.ContractReferenceUtil;
 import net.sourceforge.c4jplugin.internal.util.C4JStubUtil.GenStubSettings;
 
 import org.eclipse.core.runtime.CoreException;
@@ -148,7 +147,7 @@ public class NewContractWizardPageOne extends NewTypeWizardPage {
 			}
 			if (classToContract != null) {
 				try {
-					if (!ContractReferenceUtil.isTarget(classToContract.getCompilationUnit().getCorrespondingResource()))
+					if (!ContractReferenceModel.isTarget(classToContract.getCompilationUnit().getCorrespondingResource()))
 						setClassUnderContract(classToContract.getFullyQualifiedName('.'));
 				} catch (JavaModelException e) {
 					// ignore
@@ -501,7 +500,7 @@ public class NewContractWizardPageOne extends NewTypeWizardPage {
 				status.setError(WizardMessages.NewContractWizardPageOne_error_class_to_test_not_exist); 
 				return status;
 			}
-			if (ContractReferenceUtil.isTarget(type.getCompilationUnit().getCorrespondingResource())) {
+			if (ContractReferenceModel.isTarget(type.getCompilationUnit().getCorrespondingResource())) {
 				status.setError(NLS.bind(WizardMessages.NewContractWizardPageOne_error_class_to_contract_is_target, classToContractName)); 
 			}
 			if (ContractReferenceModel.isContract(type.getCompilationUnit().getCorrespondingResource())) {
@@ -688,6 +687,7 @@ public class NewContractWizardPageOne extends NewTypeWizardPage {
 			
 			// POST - CONDITION
 			if (element.getPostCondition() > 0) {
+				settings.preCondition = -1;
 				settings.postCondition = element.getPostCondition();
 				String content= C4JStubUtil.genStub(type.getCompilationUnit(), getTypeName(), method, settings, imports);
 				

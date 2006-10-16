@@ -6,6 +6,8 @@ public class CoreMessages extends NLS {
 
 private static final String BUNDLE_NAME = CoreMessages.class.getName();
 	
+	public static String ContractReferenceModel_oldModel;
+
 	private CoreMessages() {
 		
 	}

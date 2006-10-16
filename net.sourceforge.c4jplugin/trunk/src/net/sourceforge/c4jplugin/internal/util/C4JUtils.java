@@ -61,11 +61,6 @@ public class C4JUtils {
 
 	private static int previousExecutionTime;
 	
-	/**
-	 * Computed classpath to c4j.jar
-	 */
-	private static String c4jrtPath = null;
-	
 	static public void addC4JNature(IProject project) throws CoreException {
 		IWorkbenchWindow window = C4JActivator.getDefault().getWorkbench().getActiveWorkbenchWindow();
 		IJavaProject jproject = JavaCore.create(project);

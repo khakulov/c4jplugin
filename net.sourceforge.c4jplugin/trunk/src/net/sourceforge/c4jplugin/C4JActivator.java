@@ -12,15 +12,14 @@ import net.sourceforge.c4jplugin.internal.core.C4JSaveParticipant;
 import net.sourceforge.c4jplugin.internal.core.ContractReferenceModel;
 import net.sourceforge.c4jplugin.internal.core.ResourceChangeListener;
 import net.sourceforge.c4jplugin.internal.decorators.C4JDecorator;
+import net.sourceforge.c4jplugin.internal.exceptions.OldContractModelException;
 import net.sourceforge.c4jplugin.internal.nature.C4JProjectNature;
 import net.sourceforge.c4jplugin.internal.ui.text.UIMessages;
 import net.sourceforge.c4jplugin.internal.util.C4JUtils;
 import net.sourceforge.c4jplugin.internal.util.ContractReferenceUtil;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
-import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.ISaveParticipant;
 import org.eclipse.core.resources.ISavedState;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -83,9 +82,14 @@ public class C4JActivator extends AbstractUIPlugin implements ILaunchListener {
 			try {
 				readState(file);
 			}
+			catch (OldContractModelException e) {
+				//Shell shell = getWorkbench().getActiveWorkbenchWindow().getShell();
+				//MessageDialog.openInformation(shell, "C4J Plugin", e.getMessage());
+				log(e);
+				refreshContractReferenceModel();
+			}
 			catch (Exception e) {
-				C4JActivator.getDefault().getLog().log(
-						new Status(IStatus.ERROR, C4JActivator.PLUGIN_ID, 
+				log(new Status(IStatus.ERROR, C4JActivator.PLUGIN_ID, 
 								IStatus.OK, UIMessages.LogMessage_readingStateFailed, e));
 				refreshContractReferenceModel();
 			}
@@ -141,7 +145,8 @@ public class C4JActivator extends AbstractUIPlugin implements ILaunchListener {
 		memento.save(new FileWriter(file));
 	}
 	
-	public static void readState(File file) throws FileNotFoundException, WorkbenchException, CoreException {
+	public static void readState(File file) throws FileNotFoundException, 
+							WorkbenchException, CoreException, OldContractModelException {
 		IMemento memento = XMLMemento.createReadRoot(new FileReader(file));
 		ContractReferenceModel.loadModel(memento);
 	}
@@ -149,11 +154,11 @@ public class C4JActivator extends AbstractUIPlugin implements ILaunchListener {
 	public static void refreshContractReferenceModel() {
 		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		
-		// get all open c4j projects
+		// get all c4j projects
 		Vector<IProject> vecProjects = new Vector<IProject>();
 		for (IProject project : projects) {
 			try {
-				if (project.isOpen() && project.isNatureEnabled(C4JProjectNature.NATURE_ID))
+				if (project.isNatureEnabled(C4JProjectNature.NATURE_ID))
 					vecProjects.add(project);
 			} catch (CoreException e) {}
 		}
@@ -166,63 +171,33 @@ public class C4JActivator extends AbstractUIPlugin implements ILaunchListener {
 			@Override
 			public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
 				
-				// add projects which are referenced by this projects
-				HashSet<IProject> depProjects = new HashSet<IProject>();
-				for (IProject project : projects) {
-					depProjects.add(project);
-					try {
-						IProject[] refProjects = project.getReferencedProjects();
-						for (IProject refProject : refProjects) {
-							if (refProject.isOpen())
-								depProjects.add(refProject);
-						}
-					}
-					catch (CoreException e) {}
-				}
-				
 				try {
-					monitor.beginTask(UIMessages.Builder_startModelJob, depProjects.size()*20 + 2);
+					monitor.beginTask(UIMessages.Builder_startModelJob, projects.length*20 + 2);
 					
 					boolean clearProject = true;
 					IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 					HashSet<IProject> setProjects = new HashSet<IProject>();
 					for (IProject project : projects) {
 						try {
-							if (project.isOpen() && project.isNatureEnabled(C4JProjectNature.NATURE_ID)) {
+							if (project.isNatureEnabled(C4JProjectNature.NATURE_ID)) {
 								setProjects.add(project);
-								IProject[] refProjects = project.getReferencedProjects();
-								for (IProject refProject : refProjects) {
-									if (refProject.isOpen())
-										setProjects.add(refProject);
-								}
 							}
 						} catch (CoreException e) {}
 					}
-					if (setProjects.size() == depProjects.size()) {
+					if (setProjects.size() == projects.length) {
 						clearProject = false;
 						ContractReferenceModel.clearModel();
-						IResourceVisitor visitor = new IResourceVisitor() {
-							public boolean visit(IResource resource) throws CoreException {
-								if (resource.getName().endsWith(".java"))
-									ContractReferenceModel.clearResource(resource);
-								
-								return true;
-							}	
-						};
-						for (IProject project : setProjects) {
-							project.accept(visitor);
-						}
 					}
 					monitor.worked(1);
 					if (monitor.isCanceled()) throw new OperationCanceledException();
 					
-					for (IProject project : depProjects) {
+					for (IProject project : projects) {
 						ContractReferenceUtil.deleteMarkers(project);
 					}
 					monitor.worked(1);
 					if (monitor.isCanceled()) throw new OperationCanceledException();
 					
-					for (IProject project : depProjects) {
+					for (IProject project : projects) {
 						if (monitor.isCanceled()) throw new OperationCanceledException();
 						IProgressMonitor subMonitor = new SubProgressMonitor(monitor, 20);
 						ContractReferenceUtil.refreshModel(project, subMonitor, clearProject);
