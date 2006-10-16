@@ -18,13 +18,14 @@ td.Value {
 </head>
 
 <body>
+	<span id="c4jdoc">
 <h1>C4J Arguments</h1>
+<p>
 The C4J library c4j.jar which is passed to the -javaagent switch understands the 
-following arguments (see the end of the list for an example):
-<br><br>
+following arguments (see the end of the list for an example):</p>
 <table style="margin-left:20px;" summary="c4j.jar javaagent arguments">
 	<tr>
-		<td class="Argument">verbose</td><td class="Value">={ true | false }</td>
+		<td class="Argument">verbose</td><td class="Value">={&nbsp;true&nbsp;|&nbsp;false&nbsp;}</td>
 		<td>If true, prints more information about classes that fail to load</td>
 	</tr>
 	<tr>
@@ -32,14 +33,15 @@ following arguments (see the end of the list for an example):
 		<td>Writes the instrumented classes to the specified directory</td>
 	</tr>
 </table>
-<br>
+
 <h3>Example</h3>
+<p>
 Using the &quot;c4j_library&quot; variable contributed by the 
 <tt>net.sourceforge.c4jplugin.runtime</tt> plug-in, the following example tells
 C4J to print more information about failed attempts to load contracts and to write the
-instrumented target classes to the directory &quot;d:/dev/&quot;:
-<br>
-<p  style="margin-left:20px;">
-<b>-javaagent:${c4j_library}=verbose=true,classfiledir=d:/dev/</b></p>
+instrumented target classes to the directory &quot;d:/dev/&quot;:</p>
+<p  class="Code">
+-javaagent:${c4j_library}=verbose=true,classfiledir=d:/dev/</p>
+</span>
 </body>
 </html>

@@ -1,4 +1,4 @@
-P.Code {
+#c4jdoc P.Code {
 	display: block;
 	text-align: left;
 	text-indent: 0.00pt;
@@ -15,7 +15,7 @@ P.Code {
 	text-transform: none;
 	font-family: "Courier New", Courier, monospace;
 }
-H6.CaptionFigColumn {
+#c4jdoc H6.CaptionFigColumn {
 	display: block;
 	text-align: left;
 	text-indent: 0.000000pt;
@@ -31,7 +31,7 @@ H6.CaptionFigColumn {
 	vertical-align: baseline;
 	text-transform: none;
 }
-P.Note {
+#c4jdoc P.Note {
 	display: block;
 	text-align: left;
 	text-indent: 0pt;
@@ -47,14 +47,14 @@ P.Note {
 	vertical-align: baseline;
 	text-transform: none;
 }
-EM.UILabel {
+#c4jdoc EM.UILabel {
 	font-weight: Bold;
 	font-style: normal;
 	text-decoration: none;
 	vertical-align: baseline;
 	text-transform: none;
 }
-EM.CodeName {
+#c4jdoc EM.CodeName {
 	font-weight: Bold;
 	font-style: normal;
 	text-decoration: none;
@@ -63,50 +63,68 @@ EM.CodeName {
 	font-family: "Courier New", Courier, monospace;
 }
 
-body, html { border: 0px }
+#c4jdoc { 
+	border: 0px;
+	font-family: Arial, Helvetica sans-serif;
+	color: #000000;
+	font-size: 10pt; 
+	background: #FFFFFF; 
+	margin-bottom: 1em; }
 
 
-/* following font face declarations need to be removed for DBCS */
+#c4jdoc pre				{ font-family: "Courier New", Courier, monospace;}
 
-body, h1, h2, h3, h4, h5, h6, p, table, td, caption, th, ul, ol, dl, li, dd, dt {font-family: Arial, Helvetica, sans-serif; color: #000000}
-pre				{ font-family: "Courier New", Courier, monospace;}
 
-/* end font face declarations */
-
-/* following font size declarations should be OK for DBCS */
-body, h1, h2, h3, h4, h5, h6, p, table, td, caption, th, ul, ol, dl, li, dd, dt {font-size: 10pt; }
-pre				{ font-size: 10pt}
-
-/* end font size declarations */
-
-body	     { background: #FFFFFF; margin-bottom: 1em }
-h1           { font-size: 18pt; margin-top: 5px; margin-bottom: 10px; }	
-h2           { font-size: 14pt; margin-top: 25px; margin-bottom: 8px; }
-h3           { font-size: 11pt; margin-top: 20px; margin-bottom: 5px; }
-h4           { font-size: 10pt; margin-top: 20px; margin-bottom: 3px; font-style: italic }
-p            { margin-top: 10px; margin-bottom: 10px; }
-pre          { margin-left: 15px; font-size: 9pt; color: #4444CC } 
-a:link	     { color: #0000FF }
-a:hover	     { color: #000080 }
-a:visited    { text-decoration: underline }
-ul	     { margin-top: 10px; margin-bottom: 10px; }
-li	     { margin-top: 5px; margin-bottom: 5px; } 
-li p	     { margin-top: 5px; margin-bottom: 5px; }
-ol	     { margin-top: 10px; margin-bottom: 10px; }
-dl	     { margin-top: 10px; margin-bottom: 10px; }
-dt	     { margin-top: 5px; margin-bottom: 5px; font-weight: bold; }
-dd	     { margin-top: 5px; margin-bottom: 5px; }
-strong	     { font-weight: bold}
-em	     { font-style: italic}
-var	     { font-style: italic}
-div.revision { border-left-style: solid; border-left-width: thin; 
+#c4jdoc h1           { font-size: 18pt; margin-top: 5px; margin-bottom: 10px; }	
+#c4jdoc h2           { font-size: 14pt; margin-top: 25px; margin-bottom: 8px; }
+#c4jdoc h3           { font-size: 11pt; margin-top: 20px; margin-bottom: 5px; }
+#c4jdoc h4           { font-size: 10pt; margin-top: 20px; margin-bottom: 3px; font-style: italic }
+#c4jdoc p            { margin-top: 10px; margin-bottom: 10px; }
+#c4jdoc pre          { margin-left: 15px; font-size: 9pt; color: #4444CC } 
+#c4jdoc a:link	     { color: #0000FF }
+#c4jdoc a:hover	     { color: #000080 }
+#c4jdoc a:visited    { text-decoration: underline }
+#c4jdoc ul	     { margin-top: 10px; margin-bottom: 10px; }
+#c4jdoc li	     { margin-top: 5px; margin-bottom: 5px; } 
+#c4jdoc li p	     { margin-top: 5px; margin-bottom: 5px; }
+#c4jdoc ol	     { margin-top: 10px; margin-bottom: 10px; }
+#c4jdoc dl	     { margin-top: 10px; margin-bottom: 10px; }
+#c4jdoc dt	     { margin-top: 5px; margin-bottom: 5px; font-weight: bold; }
+#c4jdoc dd	     { margin-top: 5px; margin-bottom: 5px; }
+#c4jdoc strong	     { font-weight: bold}
+#c4jdoc em	     { font-style: italic}
+#c4jdoc var	     { font-style: italic}
+#c4jdoc div.revision { border-left-style: solid; border-left-width: thin; 
 				   border-left-color: #7B68EE; padding-left:5px; }
-th	     { font-weight: bold }
+#c4jdoc th	     { font-weight: bold }
 
-a.command-link {
+#c4jdoc a.command-link {
 }
-a.command-link img {
+#c4jdoc a.command-link img {
 	border-width: 0px;
 	border-style: none;
 	vertical-align: middle;
+}
+
+table.whatsnew[rules=rows] {
+	border-collapse: collapse;
+}
+
+table.whatsnew[rules=rows] tr {
+	border-top: solid thin;
+}
+
+table.whatsnew td {
+	margin: 0;
+	padding: 8px;
+	vertical-align: top;
+}
+
+.whatsnew img[alt] {
+	background-color:#ffdddd;
+}
+
+.whatsnew .header {
+	font-size: 20px;
+	font-weight: bold;
 }

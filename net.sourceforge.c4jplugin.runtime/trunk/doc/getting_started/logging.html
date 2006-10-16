@@ -9,13 +9,16 @@
   </head>
 
   <body>
+  	<span id="c4jdoc">
   <h1>Logging</h1>
+  <p>
   C4J comes with a logging mechanism which enables you to log class invariant, post, and
   pre condition checks. A logger class must implement the interface
-  <a href="../javadoc/net/sourceforge/c4j/Logger.html">Logger</a> and can then be
-  registered via <tt>ContractBase.addLogger(Logger logger)</tt>.
-  <br><br>
-  Here is an example:
+  <a onclick="if (!adapt_link) return true; adapt_link('extern','runtime/doc/javadoc/net/sourceforge/c4j/Logger.html'); return false;" href="../javadoc/net/sourceforge/c4j/Logger.html">Logger</a> and can then be
+  registered via <tt>ContractBase.addLogger(Logger logger)</tt>.</p>
+  
+  <p>
+  Here is an example:</p>
   <pre>public class ContractLogger implements Logger {
     void classInvariantCheck(String className) {
         System.out.println("Verifying class invariant of: " + className);
@@ -38,5 +41,6 @@ public class SomeContract extends ContractBase&lt;Some&gt; {
 	
     ...
 }</pre>
+</span>
   </body>
 </html>
