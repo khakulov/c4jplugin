@@ -475,6 +475,10 @@ DAMAGES.
        END OF TERMS AND CONDITIONS
    </license>
 
+   <url>
+      <update label="C4J Plugin Update Site" url="http://c4jplugin.sourceforge.net/update/"/>
+   </url>
+
    <requires>
       <import plugin="org.eclipse.help"/>
       <import plugin="org.eclipse.core.runtime"/>
