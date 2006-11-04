@@ -11,6 +11,8 @@ private static final String BUNDLE_NAME = Messages.class.getName();
 	}
 	
 	public static String c4jRuntimeContainerName;
+	public static String c4jRuntimeVariableError;
+	public static String c4jClasspathVariableError;
 	
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

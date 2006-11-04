@@ -15,7 +15,7 @@ public class C4JRuntimeContainerInitializer extends
 	public void initialize(IPath containerPath, IJavaProject project) throws CoreException {
 		int size = containerPath.segmentCount();
 		if (size > 0) {
-			if (containerPath.segment(0).equals(C4JRuntimeContainer.C4JRT_CONTAINER)) {
+			if (containerPath.segment(0).equals(C4JRuntime.C4JRT_CONTAINER)) {
 				C4JRuntimeContainer container = new C4JRuntimeContainer();
 				JavaCore.setClasspathContainer(containerPath,
 				new IJavaProject[] { project },

@@ -49,13 +49,13 @@ A: PLUG-IN EXPORT AND SF RELEASE
 - In the MANIFEST.MF file (in the Overview tab) click on "Export Wizard" at
   the bottom-right corner of the page. In the list of "Available Plug-ins
   and Fragments" choose only the net.sourceforge.c4jplugin.runtime plug-in (the
-  new version number should be visible). In the "Destination" tab, choose an
-  empty temporary directory. In the "Options" tab, make sure none of the
-  options is selected. Click "Finish". This will create a "plugins" folder
-  in your chosen destination directory.
+  new version number should be visible). In the "Destination" tab, choose "Archive
+  file" and enter "net.sourceforge.c4jplugin.runtime_<version_number>.zip" in
+  the browse dialog for the filename. In the "Options" tab, make sure none of the
+  options is selected. Click "Finish". This will create the zip file in the
+  specified directory.
   
-- Zip the newly created "plugins" folder in the destination directory. Make
-  sure the directory structure inside the zip file is:
+- Make sure the directory structure inside the zip file is:
   
     plugins/
       net.sourceforge.c4jplugin.runtime_<version_number>/
@@ -64,8 +64,6 @@ A: PLUG-IN EXPORT AND SF RELEASE
         net/
         c4j.jar
         ...
-        
-  Rename the zip file to "net.sourceforge.c4jplugin.runtime_<version_number>.zip".
   
 - Release the file "net.sourceforge.c4jplugin.runtime_<version_number>.zip" on
   sourceforge. If only the last segment in the version number changed, add the
@@ -122,7 +120,7 @@ B: BUILD ECLIPSE UPDATE SITE AND UPDATE HOMEPAGE
   manager finds the new version.
 
 - Commit the "c4jplugin_homepage" project. This should write the changed docs, if
-  any, and the file "site.xml".
+  any, and the file "site.xml", "news.html" and "download.html".
   
 - Copy the two .jar files above into the same location (via scp or sftp) of the
   c4jplugin projects web space (shell.sourceforge.net:/home/groups/c/c4/c4jplugin/)

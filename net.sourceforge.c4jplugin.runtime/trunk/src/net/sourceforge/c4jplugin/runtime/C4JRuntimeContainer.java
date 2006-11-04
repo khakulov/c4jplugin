@@ -14,18 +14,15 @@ import org.osgi.framework.Bundle;
 
 public class C4JRuntimeContainer implements IClasspathContainer {
 
-	static public String C4JRT_CONTAINER = "net.sourceforge.c4jplugin.runtime.C4JRT_CONTAINER";
-	
 	private IClasspathEntry[] fClasspathEntries;
 
-	private static String c4jrtPath = null;
+	private static IPath c4jrtPath = null;
 
 	public IClasspathEntry[] getClasspathEntries() {
 		if (fClasspathEntries == null) {
-			String path = getC4JRtClasspath();
+			if (c4jrtPath == null) getC4JRtClasspath();
 			fClasspathEntries = new IClasspathEntry[1];
-			IPath p = new Path(path);
-			fClasspathEntries[0] = JavaCore.newLibraryEntry(p, null, null, false);
+			fClasspathEntries[0] = JavaCore.newLibraryEntry(c4jrtPath, null, null, false);
 		}
 		return fClasspathEntries;
 	}
@@ -39,29 +36,27 @@ public class C4JRuntimeContainer implements IClasspathContainer {
 	}
 
 	public IPath getPath() {
-		return new Path(C4JRT_CONTAINER);
+		return new Path(C4JRuntime.C4JRT_CONTAINER);
 	}
 
 	/**
 	 * Get the c4j.jar classpath entry. This is usually in
 	 * plugins/net.sourceforge.c4jplugin.runtime_ <VERSION>/c4j.jar
 	 */
-	public static String getC4JRtClasspath() {
+	public static IPath getC4JRtClasspath() {
 		if (c4jrtPath == null) {
 			Bundle runtime = Platform
-					.getBundle("net.sourceforge.c4jplugin.runtime");
+					.getBundle(C4JRuntime.ID_PLUGIN);
 			if (runtime != null) {
-				URL installLoc = runtime.getEntry("c4j.jar"); //$NON-NLS-1$
+				URL installLoc = runtime.getEntry(C4JRuntime.C4J_LIBRARY_NAME); //$NON-NLS-1$
 				if (installLoc == null) {
 					// maybe it's a JARed bundle
 					IPath path = new Path(runtime.getLocation().split("@")[1]); //$NON-NLS-1$
-					IPath full = new Path(Platform.getInstallLocation()
+					c4jrtPath = new Path(Platform.getInstallLocation()
 							.getURL().getFile()).append(path);
-					c4jrtPath = full.toString();
 				} else {
 					try {
-						c4jrtPath = FileLocator.resolve(installLoc)
-								.getFile();
+						c4jrtPath = new Path(FileLocator.resolve(installLoc).getPath());
 					} catch (IOException e) {}
 				}
 			}
