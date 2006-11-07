@@ -2,6 +2,11 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="description" content="Homepage of the C4J Eclipse Plug-in. This is a 
+DBC tool for Eclipse, using the DBC library C4J."/>
+<meta name="keywords" content="DBC, Design by Contract, Eclipse, Plugin, Java, 
+Code Quality, Bertrand Meyer"/>
+<meta name="author" content="Sascha Zelzer"/>
 <title>C4J Eclipse Plugin</title>
 <link rel="stylesheet" href="http://www.mathi.uni-heidelberg.de/~sascha/css/layout.css" type="text/css"/>
 <link rel="stylesheet" href="http://www.mathi.uni-heidelberg.de/~sascha/css/style.css" type="text/css"/>
