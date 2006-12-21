@@ -3,9 +3,11 @@ package net.sourceforge.c4jplugin.internal.util;
 import java.util.ArrayList;
 
 import net.sourceforge.c4jplugin.C4JActivator;
+import net.sourceforge.c4jplugin.internal.core.ContractReferenceModel;
 import net.sourceforge.c4jplugin.internal.nature.C4JProjectNature;
 import net.sourceforge.c4jplugin.internal.ui.preferences.C4JPreferences;
 import net.sourceforge.c4jplugin.internal.ui.text.UIMessages;
+import net.sourceforge.c4jplugin.runtime.C4JRuntime;
 import net.sourceforge.c4jplugin.runtime.C4JRuntimeContainer;
 
 import org.eclipse.core.resources.IFile;
@@ -186,6 +188,7 @@ public class C4JUtils {
 			}
 		}
 		
+		ContractReferenceModel.clearModel(project);
 		ContractReferenceUtil.deleteMarkers(project);
 		
 		// Recalculate contract dependencies
@@ -329,7 +332,7 @@ public class C4JUtils {
 		try {
 			IClasspathEntry[] originalCP = javaProject.getRawClasspath();
 			IClasspathEntry c4jrtLIB = JavaCore.newContainerEntry(new Path(
-					C4JRuntimeContainer.C4JRT_CONTAINER), false);
+					C4JRuntime.C4JRT_CONTAINER), false);
 			// Update the raw classpath with the new c4jCP entry.
 			int originalCPLength = originalCP.length;
 			IClasspathEntry[] newCP = new IClasspathEntry[originalCPLength + 1];
@@ -623,7 +626,7 @@ public class C4JUtils {
 			for (IClasspathEntry originalCP : originalCPs) {
 				IPath path = originalCP.getPath();
 				if (!(originalCP.getEntryKind() == IClasspathEntry.CPE_CONTAINER && 
-						path.segment(0).equals(C4JRuntimeContainer.C4JRT_CONTAINER))) {
+						path.segment(0).equals(C4JRuntime.C4JRT_CONTAINER))) {
 					tempCP.add(originalCP);
 				}
 			}// end for

@@ -23,12 +23,6 @@ public class C4JPreferencePage extends PreferencePage implements
 		Label labelTitle = new Label(comp, SWT.NONE);
 		labelTitle.setText(UIMessages.PreferencesMain_title);
 		
-		Label labelHint = new Label(comp, SWT.WRAP);
-		GridData gridData = new GridData(SWT.FILL, SWT.CENTER, true, false);
-		gridData.verticalIndent = 15;
-		labelHint.setLayoutData(gridData);
-		labelHint.setText(UIMessages.PreferencesMain_hint);
-		
 		return comp;
 	}
 

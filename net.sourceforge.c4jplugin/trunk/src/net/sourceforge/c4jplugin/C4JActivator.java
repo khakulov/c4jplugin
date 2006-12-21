@@ -36,8 +36,10 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchListener;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.XMLMemento;
@@ -53,6 +55,8 @@ public class C4JActivator extends AbstractUIPlugin implements ILaunchListener {
 	public static final String PLUGIN_ID = "net.sourceforge.c4jplugin";
 	
 	public static final String RUNTIME_PLUGIN_ID = "net.sourceforge.c4jplugin.runtime";
+	
+	public static final String ID_CONTRACT_HIERARCHY = "net.sourceforge.c4jplugin.contracthierarchy";
 	
 	// The shared instance
 	private static C4JActivator plugin;
@@ -76,10 +80,10 @@ public class C4JActivator extends AbstractUIPlugin implements ILaunchListener {
 		ISaveParticipant saveParticipant = new C4JSaveParticipant();
 		ISavedState lastState = ResourcesPlugin.getWorkspace().addSaveParticipant(this, saveParticipant);
 
-		if (lastState != null) {    
-			String saveFileName = lastState.lookup(new Path(C4JSaveParticipant.SAVE_FILENAME)).toString();
-			File file = getStateLocation().append(saveFileName).toFile();
+		if (lastState != null) {   
 			try {
+				String saveFileName = lastState.lookup(new Path(C4JSaveParticipant.SAVE_FILENAME)).toString();
+				File file = getStateLocation().append(saveFileName).toFile();
 				readState(file);
 			}
 			catch (OldContractModelException e) {
@@ -97,7 +101,7 @@ public class C4JActivator extends AbstractUIPlugin implements ILaunchListener {
 		else {
 			IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 			for (IProject project : projects) {
-				if (project.isNatureEnabled(C4JProjectNature.NATURE_ID) && project.isOpen()) {
+				if (project.isOpen() && project.isNatureEnabled(C4JProjectNature.NATURE_ID)) {
 					refreshContractReferenceModel();
 					break;
 				}
@@ -130,9 +134,25 @@ public class C4JActivator extends AbstractUIPlugin implements ILaunchListener {
 	public static C4JActivator getDefault() {
 		return plugin;
 	}
+	
+	public static IWorkbenchWindow getActiveWorkbenchWindow() {
+		return getDefault().getWorkbench().getActiveWorkbenchWindow();
+	}
+	
+	public static Shell getActiveWorkbenchShell() {
+		 IWorkbenchWindow window= getActiveWorkbenchWindow();
+		 if (window != null) {
+		 	return window.getShell();
+		 }
+		 return null;
+	}
 
 	public static void log(IStatus status) {
 		getDefault().getLog().log(status);
+	}
+	
+	public static void logErrorMessage(String message) {
+		log(new Status(IStatus.ERROR, PLUGIN_ID, IStatus.OK, message, null));
 	}
 	
 	public static void log(Throwable e) {
@@ -154,12 +174,13 @@ public class C4JActivator extends AbstractUIPlugin implements ILaunchListener {
 	public static void refreshContractReferenceModel() {
 		IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		
-		// get all c4j projects
+		// get all open c4j projects
 		Vector<IProject> vecProjects = new Vector<IProject>();
 		for (IProject project : projects) {
 			try {
-				if (project.isNatureEnabled(C4JProjectNature.NATURE_ID))
+				if (project.isOpen() && project.isNatureEnabled(C4JProjectNature.NATURE_ID)) {
 					vecProjects.add(project);
+				}
 			} catch (CoreException e) {}
 		}
 		
@@ -175,11 +196,11 @@ public class C4JActivator extends AbstractUIPlugin implements ILaunchListener {
 					monitor.beginTask(UIMessages.Builder_startModelJob, projects.length*20 + 2);
 					
 					boolean clearProject = true;
-					IProject[] projects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
+					IProject[] allProjects = ResourcesPlugin.getWorkspace().getRoot().getProjects();
 					HashSet<IProject> setProjects = new HashSet<IProject>();
-					for (IProject project : projects) {
+					for (IProject project : allProjects) {
 						try {
-							if (project.isNatureEnabled(C4JProjectNature.NATURE_ID)) {
+							if (project.isOpen() && project.isNatureEnabled(C4JProjectNature.NATURE_ID)) {
 								setProjects.add(project);
 							}
 						} catch (CoreException e) {}
@@ -207,13 +228,14 @@ public class C4JActivator extends AbstractUIPlugin implements ILaunchListener {
 					monitor.done();
 				}
 				
-				PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
-					public void run() {
-						IWorkbench workbench = PlatformUI.getWorkbench();
-						if (workbench != null)
-							((C4JDecorator)workbench.getDecoratorManager().getBaseLabelProvider(C4JDecorator.ID)).refreshAll();
-					}
-				});
+				final IWorkbench workbench = PlatformUI.getWorkbench();
+				if (workbench != null) {
+					workbench.getDisplay().asyncExec(new Runnable() {
+						public void run() {
+								((C4JDecorator)workbench.getDecoratorManager().getBaseLabelProvider(C4JDecorator.ID)).refreshAll();
+						}
+					});
+				}
 				
 				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 				return Status.OK_STATUS;

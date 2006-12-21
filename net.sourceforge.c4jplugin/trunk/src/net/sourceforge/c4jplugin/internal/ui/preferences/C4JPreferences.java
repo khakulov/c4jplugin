@@ -12,6 +12,9 @@ import org.osgi.service.prefs.BackingStoreException;
 
 public class C4JPreferences {
 		
+	// Contract Hierarchy
+	public static final String OPEN_CONTRACT_HIERARCHY_IN_PERSPECTIVE = C4JActivator.PLUGIN_ID + ".preferences.openContractHierarchyInPerspective";
+	
 	// Automation Preferences
 	// ------------------------------------
 	public static final String ASK_PDE_AUTO_IMPORT = C4JActivator.PLUGIN_ID + ".preferences.askPdeAutoImport"; //$NON-NLS-1$
@@ -32,6 +35,24 @@ public class C4JPreferences {
 	public static final String DECORATION_CONTRACT_METHODS = C4JActivator.PLUGIN_ID + ".preferences.decorationContractMethods";
 	public static final String DECORATION_POSITION = C4JActivator.PLUGIN_ID + ".preferences.decorationPosition";
 	
+	
+	static public void setOpenContractHierarchyInPerspective(boolean openInPerspective) {
+		IPreferenceStore store = C4JActivator.getDefault()
+			.getPreferenceStore();
+		store.setValue(OPEN_CONTRACT_HIERARCHY_IN_PERSPECTIVE, openInPerspective);
+	}
+	
+	static public boolean defaultOpenContractHierarchyInPerspective() {
+		IPreferenceStore store = C4JActivator.getDefault()
+		.getPreferenceStore();
+		return store.getDefaultBoolean(OPEN_CONTRACT_HIERARCHY_IN_PERSPECTIVE);
+	}
+	
+	static public boolean doOpenContractHierarchyInPerspective() {
+		IPreferenceStore store = C4JActivator.getDefault()
+			.getPreferenceStore();
+		return store.getBoolean(OPEN_CONTRACT_HIERARCHY_IN_PERSPECTIVE);
+	}
 	
 	/**
 	 * Helper set method

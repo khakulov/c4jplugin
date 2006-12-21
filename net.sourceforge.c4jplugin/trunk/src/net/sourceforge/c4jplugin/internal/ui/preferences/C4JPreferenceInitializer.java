@@ -13,6 +13,8 @@ public class C4JPreferenceInitializer extends AbstractPreferenceInitializer {
 	public void initializeDefaultPreferences() {
 		IPreferenceStore store = C4JActivator.getDefault().getPreferenceStore();
 		
+		store.setDefault(C4JPreferences.OPEN_CONTRACT_HIERARCHY_IN_PERSPECTIVE, false);
+		
 		store.setDefault(C4JPreferences.ASK_PDE_AUTO_IMPORT, true);
 		store.setDefault(C4JPreferences.DO_PDE_AUTO_IMPORT, true);
 		store.setDefault(C4JPreferences.ASK_PDE_AUTO_REMOVE_IMPORT, true);

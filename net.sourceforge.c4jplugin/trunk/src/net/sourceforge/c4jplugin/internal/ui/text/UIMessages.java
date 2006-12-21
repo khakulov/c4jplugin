@@ -12,6 +12,15 @@ public class UIMessages extends NLS {
 	
 	public static String Msg_error;
 	
+	public static String ExceptionDialog_seeErrorLogMessage;
+	
+	// Contract Hierarchy
+	public static String OpenContractHierarchyUtil_selectionDialog_title;
+	public static String OpenContractHierarchyUtil_selectionDialog_message;
+	public static String OpenContractHierarchyUtil_error_open_perspective;
+	public static String OpenContractHierarchyUtil_error_open_editor;
+	public static String OpenContractHierarchyUtil_error_open_view;
+	
 	// Jobs
 	public static String utils_refresh_explorer_job;
 	public static String Builder_jobTitle;
@@ -75,7 +84,6 @@ public class UIMessages extends NLS {
 	public static String PreferencesLaunch_buttonConfirmNone;
 	
 	public static String PreferencesMain_title;
-	public static String PreferencesMain_hint;
 	
 	public static String PreferencesAutomation_title;
 	public static String PreferencesAutomation_descr;
