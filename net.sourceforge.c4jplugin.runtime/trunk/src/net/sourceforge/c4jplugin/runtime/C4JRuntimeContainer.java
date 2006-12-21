@@ -13,8 +13,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.osgi.framework.Bundle;
 
 public class C4JRuntimeContainer implements IClasspathContainer {
-
-	public static String C4JRT_CONTAINER = C4JRuntime.C4JRT_CONTAINER;
 	
 	private IClasspathEntry[] fClasspathEntries;
 
