@@ -21,7 +21,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 
 /**
- * Refocuses the type hierarchy on a type selection from a all types dialog.
+ * Refocuses the contract hierarchy on a type selection from a all types dialog.
  */
 public class FocusOnTypeAction extends Action {
 			

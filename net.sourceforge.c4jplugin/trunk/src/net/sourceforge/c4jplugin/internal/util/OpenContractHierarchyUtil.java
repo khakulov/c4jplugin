@@ -108,7 +108,7 @@ public class OpenContractHierarchyUtil {
 		if (part != null) {
 			part.clearNeededRefresh(); // avoid refresh of old hierarchy on 'becomes visible'
 		}		
-		part= (ContractHierarchyViewPart) page.showView(JavaUI.ID_TYPE_HIERARCHY);
+		part= (ContractHierarchyViewPart) page.showView(C4JActivator.ID_CONTRACT_HIERARCHY);
 		part.setInputElement(input);
 		if (input instanceof IMember) {
 			if (page.getEditorReferences().length == 0) {

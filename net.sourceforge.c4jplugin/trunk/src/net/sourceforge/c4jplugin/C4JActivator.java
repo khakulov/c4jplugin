@@ -112,6 +112,7 @@ public class C4JActivator extends AbstractUIPlugin implements ILaunchListener {
 		
 		resourceChangeListener = new ResourceChangeListener();
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_BUILD);
+	
 	}
 
 	/*
@@ -232,7 +233,10 @@ public class C4JActivator extends AbstractUIPlugin implements ILaunchListener {
 				if (workbench != null) {
 					workbench.getDisplay().asyncExec(new Runnable() {
 						public void run() {
+							try {
 								((C4JDecorator)workbench.getDecoratorManager().getBaseLabelProvider(C4JDecorator.ID)).refreshAll();
+							}
+							catch (NullPointerException exc) {}
 						}
 					});
 				}

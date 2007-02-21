@@ -14,40 +14,6 @@
       </builder>
    </extension>
    <extension
-         point="org.eclipse.jdt.apt.core.annotationProcessorFactory">
-      <factories enableDefault="true">
-         <factory class="net.sourceforge.c4jplugin.internal.ap.ContractAnnotationProcessorFactory"/>
-      </factories>
-   </extension>
-   <extension
-         point="org.eclipse.ui.decorators">
-      <decorator
-            adaptable="true"
-            class="net.sourceforge.c4jplugin.internal.decorators.C4JDecorator"
-            id="net.sourceforge.c4j.plugin.decorators.C4JDecorator"
-            label="%decoratorLabelC4J"
-            lightweight="true"
-            state="true">
-         <enablement>
-            <or>
-               <objectClass
-                     name="org.eclipse.jdt.core.IMethod">
-               </objectClass>
-               <and>
-               <objectState
-                     name="projectNature"
-                     value="net.sourceforge.c4jplugin.c4jnature">
-               </objectState>
-               <objectClass
-                     name="org.eclipse.core.resources.IFile">
-               </objectClass>
-            </and>
-            </or>
-         </enablement>
-         <description>%decoratorDescrC4J</description>
-      </decorator>
-   </extension>
-   <extension
          id="c4jbuilder"
          name="%c4jBuilderName"
          point="org.eclipse.core.resources.builders">
@@ -57,6 +23,35 @@
                class="net.sourceforge.c4jplugin.internal.builder.C4JBuilder">
          </run>
       </builder>
+   </extension>
+   <extension
+         point="org.eclipse.jdt.apt.core.annotationProcessorFactory">
+      <factories enableDefault="true">
+         <factory class="net.sourceforge.c4jplugin.internal.ap.ContractAnnotationProcessorFactory"/>
+      </factories>
+   </extension>
+   <extension
+         point="org.eclipse.ui.actionSets">
+      <actionSet
+            description="%NavigateActionSet.description"
+            id="net.sourceforge.c4jplugin.NavigateActionSet"
+            label="%NavigateActionSet.label"
+            visible="true">
+         <action
+               class="net.sourceforge.c4jplugin.internal.ui.actions.OpenContractHierarchyWindowDelegate"
+               definitionId="net.sourceforge.c4jplugin.commands.open.contract.hierarchy"
+               id="net.sourceforge.c4jplugin.internal.actions.opencontracthierarchy"
+               label="%openContractHierarchyAction"
+               menubarPath="navigate/open.ext"
+               state="false"
+               style="push">
+            <enablement>
+               <objectState
+                     name="projectNature"
+                     value="net.sourceforge.c4jplugin.c4jnature"/>
+            </enablement>
+         </action>
+      </actionSet>
    </extension>
    <extension
          point="org.eclipse.ui.popupMenus">
@@ -155,12 +150,6 @@
                id="net.sourceforge.c4jplugin.internal.actions.opentarget"
                label="%openTargetAction"
                menubarPath="net.sourceforge.c4jplugin.internal.popup.c4jtools/editorgroupopen"/>
-     	 <action
-             class="net.sourceforge.c4jplugin.internal.ui.actions.OpenContractHierarchyDelegate"
-             definitionId="net.sourceforge.c4jplugin.commands.open.contract.hierarchy"
-             id="net.sourceforge.c4jplugin.internal.actions.opencontracthierarchy"
-             label="%openContractHierarchyAction"
-             menubarPath="group.open"/>
           <action
                class="net.sourceforge.c4jplugin.internal.ui.actions.OpenDirectContractAction"
                id="net.sourceforge.c4jplugin.internal.actions.opendirectcontract"
@@ -172,6 +161,23 @@
                label="%contractMethodAction"
                menubarPath="net.sourceforge.c4jplugin.internal.popup.c4jtools/editorgroupnew"/>
          </objectContribution>
+      <objectContribution
+            adaptable="true"
+            id="iprojectcontributions"
+            objectClass="org.eclipse.jdt.core.IJavaElement">
+          <action
+                class="net.sourceforge.c4jplugin.internal.ui.actions.OpenContractHierarchyDelegate"
+                definitionId="net.sourceforge.c4jplugin.commands.open.contract.hierarchy"
+                id="net.sourceforge.c4jplugin.internal.actions.popup.opencontracthierarchy"
+                label="%openContractHierarchyAction"
+                menubarPath="group.open">
+             <enablement>
+                <objectState
+                      name="projectNature"
+                      value="net.sourceforge.c4jplugin.c4jnature"/>
+             </enablement>
+          </action>
+      </objectContribution>
    </extension>
    <extension
          point="org.eclipse.core.runtime.preferences">
@@ -201,6 +207,49 @@
             class="net.sourceforge.c4jplugin.internal.ui.preferences.C4JLaunchPreferencePage"
             id="net.sourceforge.c4jplugin.internal.ui.preferences.C4JLaunchPreferencePage"
             name="%preferencePageLaunch"/>   </extension>
+   <extension
+         point="org.eclipse.ui.decorators">
+      <decorator
+            adaptable="true"
+            class="net.sourceforge.c4jplugin.internal.decorators.C4JDecorator"
+            id="net.sourceforge.c4j.plugin.decorators.C4JDecorator"
+            label="%decoratorLabelC4J"
+            lightweight="true"
+            state="true">
+         <enablement>
+            <or>
+               <objectClass
+                     name="org.eclipse.jdt.core.IMethod">
+               </objectClass>
+               <and>
+               <objectState
+                     name="projectNature"
+                     value="net.sourceforge.c4jplugin.c4jnature">
+               </objectState>
+               <objectClass
+                     name="org.eclipse.core.resources.IFile">
+               </objectClass>
+            </and>
+            </or>
+         </enablement>
+         <description>%decoratorDescrC4J</description>
+      </decorator>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            categoryId="org.eclipse.ui.category.navigate"
+            id="net.sourceforge.c4jplugin.commands.open.contract.hierarchy"
+            name="Open Contract Hierarchy"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="net.sourceforge.c4jplugin.commands.open.contract.hierarchy"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="F6"/>
+   </extension>
    <extension
          id="contractedclassinvariantmarker"
          name="%c4jContractedClassInvariantMarker"
@@ -379,20 +428,6 @@
             id="net.sourceforge.c4jplugin.contracthierarchy"
             name="%contractHierarchyView"/>
    </extension>
-   <extension
-         point="org.eclipse.ui.commands">
-      <command
-            categoryId="org.eclipse.ui.category.navigate"
-            id="net.sourceforge.c4jplugin.commands.open.contract.hierarchy"
-            name="Open Contract Hierarchy"/>
-   </extension>
-   <extension
-         point="org.eclipse.ui.bindings">
-      <key
-            commandId="net.sourceforge.c4jplugin.commands.open.contract.hierarchy"
-            contextId="org.eclipse.ui.contexts.window"
-            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-            sequence="F5"/>
-   </extension>
+   
 
 </plugin>

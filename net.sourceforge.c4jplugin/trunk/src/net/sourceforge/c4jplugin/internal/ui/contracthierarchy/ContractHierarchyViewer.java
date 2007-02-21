@@ -165,7 +165,7 @@ public abstract class ContractHierarchyViewer extends ProblemTreeViewer {
 	
 	/*
 	 * @see StructuredViewer#setContentProvider
-	 * Content provider must be of type TypeHierarchyContentProvider
+	 * Content provider must be of type ContractHierarchyContentProvider
 	 */
 	public void setContentProvider(IContentProvider cp) {
 		Assert.isTrue(cp instanceof ContractHierarchyContentProvider);
