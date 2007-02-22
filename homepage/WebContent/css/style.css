@@ -207,6 +207,30 @@ ul.arrow li:before {
 	vertical-align: middle;
 }
 
+.investigating {
+	padding: 0px 0px 0px 20px;
+	background: transparent url(../img/investigating.gif) no-repeat left center;
+	vertical-align: middle;
+}
+
+.inprogress {
+	padding: 0px 0px 0px 20px;
+	background: transparent url(../img/small_progress.gif) no-repeat left center;
+	vertical-align: middle;
+}
+
+.completed {
+	padding: 0px 0px 0px 20px;
+	background: transparent url(../img/small_check.gif) no-repeat left center;
+	vertical-align: middle;
+}
+
+.dropped {
+	padding: 0px 0px 0px 20px;
+	background: transparent url(../img/small_x.gif) no-repeat left center;
+	vertical-align: middle;
+}
+
 .day-date{
 	padding-left: 20px;
 	margin-left: -25px;
