@@ -207,6 +207,10 @@ ul.arrow li:before {
 	vertical-align: middle;
 }
 
+.nothing {
+	padding: 0px 0px 0px 20px;
+}
+
 .investigating {
 	padding: 0px 0px 0px 20px;
 	background: transparent url(../img/glass.gif) no-repeat left center;
