@@ -20,6 +20,9 @@ public final class ContractHierarchyMessages extends NLS {
 		// Do not instantiate
 	}
 
+	public static String hierarchy_creating;
+	public static String hierarchy_creatingOnType;
+	
 	public static String ToggleLinkingAction_label;
 	public static String ToggleLinkingAction_description;
 	public static String ToggleLinkingAction_tooltip;

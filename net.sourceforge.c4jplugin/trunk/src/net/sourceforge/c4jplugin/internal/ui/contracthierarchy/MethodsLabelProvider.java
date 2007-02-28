@@ -14,9 +14,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.swt.SWT;
@@ -61,12 +59,12 @@ public class MethodsLabelProvider extends AppearanceAwareLabelProvider {
 		if (kind != IJavaElement.METHOD) {
 			return declaringType;
 		}
-		ITypeHierarchy hierarchy= fHierarchy.getHierarchy();
+		IContractHierarchy hierarchy= fHierarchy.getContractHierarchy();
 		if (hierarchy == null) {
 			return declaringType;
 		}
 		IMethod method= (IMethod) element;
-		MethodOverrideTester tester= new MethodOverrideTester(declaringType, hierarchy);
+		ConditionOverrideTester tester= new ConditionOverrideTester(declaringType, hierarchy);
 		IMethod res= tester.findDeclaringMethod(method, true);
 		if (res == null || method.equals(res)) {
 			return declaringType;

@@ -19,12 +19,10 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
 import org.eclipse.jdt.internal.ui.actions.SelectAllAction;
@@ -483,7 +481,7 @@ public class ContractHierarchyViewPart extends ViewPart {
 		} else {
 			fInputElement= inputElement;
 			try {
-				fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(inputElement, C4JActivator.getDefault().getWorkbench().getActiveWorkbenchWindow());
+				fHierarchyLifeCycle.ensureRefreshedContractHierarchy(inputElement, C4JActivator.getDefault().getWorkbench().getActiveWorkbenchWindow());
 				// fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(inputElement, getSite().getWorkbenchWindow());
 			} catch (InvocationTargetException e) {
 				ExceptionHandler.handle(e, getSite().getShell(), ContractHierarchyMessages.TypeHierarchyViewPart_exception_title, ContractHierarchyMessages.TypeHierarchyViewPart_exception_message); 
@@ -634,9 +632,9 @@ public class ContractHierarchyViewPart extends ViewPart {
 			public void keyReleased(KeyEvent event) {
 				if (event.stateMask == 0) {
 					if (event.keyCode == SWT.F5) {
-						ITypeHierarchy hierarchy= fHierarchyLifeCycle.getHierarchy();
+						IContractHierarchy hierarchy= fHierarchyLifeCycle.getContractHierarchy();
 						if (hierarchy != null) {
-							fHierarchyLifeCycle.typeHierarchyChanged(hierarchy);
+							fHierarchyLifeCycle.contractHierarchyChanged(hierarchy);
 							doTypeHierarchyChangedOnViewers(null);
 						}
 						updateHierarchyViewer(false);
@@ -1351,13 +1349,13 @@ public class ContractHierarchyViewPart extends ViewPart {
 	}
 	
 	protected void doTypeHierarchyChangedOnViewers(IType[] changedTypes) {
-		if (fHierarchyLifeCycle.getHierarchy() == null || !fHierarchyLifeCycle.getHierarchy().exists()) {
+		if (fHierarchyLifeCycle.getContractHierarchy() == null || !fHierarchyLifeCycle.getContractHierarchy().exists()) {
 			clearInput();
 		} else {
 			if (changedTypes == null) {
 				// hierarchy change
 				try { 
-					fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(fInputElement, getSite().getWorkbenchWindow());
+					fHierarchyLifeCycle.ensureRefreshedContractHierarchy(fInputElement, getSite().getWorkbenchWindow());
 				} catch (InvocationTargetException e) {
 					ExceptionHandler.handle(e, getSite().getShell(), ContractHierarchyMessages.TypeHierarchyViewPart_exception_title, ContractHierarchyMessages.TypeHierarchyViewPart_exception_message); 
 					clearInput();

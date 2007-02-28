@@ -13,7 +13,6 @@ package net.sourceforge.c4jplugin.internal.ui.contracthierarchy;
 import java.util.List;
 
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbenchPart;
 
@@ -64,37 +63,15 @@ public class SubTypeHierarchyViewer extends ContractHierarchyViewer {
 			super(lifeCycle);
 		}
 		
-		protected final void getTypesInHierarchy(IType type, List<IType> res) {
-			ITypeHierarchy hierarchy= getHierarchy();
+		protected final void getContractsInHierarchy(IType type, List<IType> res) {
+			IContractHierarchy hierarchy= getHierarchy();
 			if (hierarchy != null) {
-				IType[] types= hierarchy.getSubtypes(type);
-				if (isObject(type)) {
-					for (int i= 0; i < types.length; i++) {
-						IType curr= types[i];
-						if (!isAnonymousFromInterface(curr)) {
-							res.add(curr);
-						}
-					}
-				} else {
-					for (int i= 0; i < types.length; i++) {
-						res.add(types[i]);
-					}
+				IType[] types= hierarchy.getSubcontracts(type);
+				for (IType subtype : types) {
+					res.add(subtype);
 				}
 			}
-			
 		}
-		
-		protected IType getParentType(IType type) {
-			ITypeHierarchy hierarchy= getHierarchy();
-			if (hierarchy != null) {
-				return hierarchy.getSuperclass(type);
-				// dont handle interfaces
-			}
-			return null;
-		}
-
-}
-	
-	
+	}
 	
 }

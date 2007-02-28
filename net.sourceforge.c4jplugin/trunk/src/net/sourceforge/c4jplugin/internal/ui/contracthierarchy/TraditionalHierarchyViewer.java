@@ -10,12 +10,9 @@
  *******************************************************************************/
 package net.sourceforge.c4jplugin.internal.ui.contracthierarchy;
 
-import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IWorkbenchPart;
 
@@ -72,7 +69,7 @@ public class TraditionalHierarchyViewer extends ContractHierarchyViewer {
 		}
 		
 		public int getExpandLevel() {
-			ITypeHierarchy hierarchy= getHierarchy();
+			IContractHierarchy hierarchy= getHierarchy();
 			if (hierarchy != null) {
 				IType input= hierarchy.getType();
 				if (input != null) {
@@ -84,91 +81,49 @@ public class TraditionalHierarchyViewer extends ContractHierarchyViewer {
 			return 2;
 		}
 		
-		private int getDepth(ITypeHierarchy hierarchy, IType input) {
-			int count= 0;
-			IType superType= hierarchy.getSuperclass(input);
-			while (superType != null) {
-				count++;
-				superType= hierarchy.getSuperclass(superType);
+		private int getDepth(IContractHierarchy hierarchy, IType input) {
+			return getDepth0(hierarchy, input);
+		}
+		
+		private int getDepth0(IContractHierarchy hierarchy, IType type) {
+			IType[] supercontracts = hierarchy.getSupercontracts(type);
+			if (supercontracts != null) {
+				int max = 0;
+				for (IType supercontract : supercontracts) {
+					int depth = getDepth0(hierarchy, supercontract);
+					if (depth > max)
+						max = depth;
+				}
+				return max+1;
 			}
-			return count;
+			else return 0;
 		}
 		
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyContentProvider#getRootTypes(java.util.List)
 		 */
 		protected final void getRootTypes(List<IType> res) {
-			ITypeHierarchy hierarchy= getHierarchy();
+			IContractHierarchy hierarchy= getHierarchy();
 			if (hierarchy != null) {
-				IType input= hierarchy.getType();
-				if (input == null) {
-					IType[] classes= hierarchy.getRootClasses();
-					for (IType clazz : classes) {
-						res.add(clazz);
-					}
-					IType[] interfaces= hierarchy.getRootInterfaces();
-					for (IType interfaze : interfaces) {
-						res.add(interfaze);
-					}
-				} else {
-					if (Flags.isInterface(hierarchy.getCachedFlags(input))) {
-						res.add(input);
-					} else if (isAnonymousFromInterface(input)) {
-						res.add(hierarchy.getSuperInterfaces(input)[0]);
-					} else {
-						IType[] roots= hierarchy.getRootClasses();
-						for (IType root : roots) {
-							if (isObject(root)) {
-								res.add(root);
-								return;
-							}
-						}
-						res.addAll(Arrays.asList(roots)); // something wrong with the hierarchy
-					}
+				IType[] classes= hierarchy.getRootContracts();
+				for (IType clazz : classes) {
+					res.add(clazz);
 				}
 			}
 		}
 				
 		/*
-		 * @see TypeHierarchyContentProvider.getTypesInHierarchy
+		 * @see ContractHierarchyContentProvider.getTypesInHierarchy
 		 */	
-		protected final void getTypesInHierarchy(IType type, List<IType> res) {
-			ITypeHierarchy hierarchy= getHierarchy();
+		protected final void getContractsInHierarchy(IType type, List<IType> res) {
+			IContractHierarchy hierarchy= getHierarchy();
 			if (hierarchy != null) {
-				IType[] types= hierarchy.getSubtypes(type);
-				if (isObject(type)) {
-					for (IType curr : types) {
-						if (!isAnonymousFromInterface(curr)) { // no anonymous classes on 'Object' -> will be children of interface
-							res.add(curr);
-						}
-					}
-				} else {
-					boolean isHierarchyOnType= (hierarchy.getType() != null);
-					boolean isClass= !Flags.isInterface(hierarchy.getCachedFlags(type));
-					if (isClass || isHierarchyOnType) {
-						for (IType curr : types) {
-							res.add(curr);
-						}
-					} else {
-						for (IType curr : types) {
-							// no classes implementing interfaces, only if anonymous
-							if (Flags.isInterface(hierarchy.getCachedFlags(curr)) || isAnonymous(curr)) {
-								res.add(curr);
-							}
-						}
-					}
+				IType[] types= hierarchy.getSubcontracts(type);
+				for (IType curr : types) {
+					res.add(curr);
 				}
 			}
 		}
-
-		protected IType getParentType(IType type) {
-			ITypeHierarchy hierarchy= getHierarchy();
-			if (hierarchy != null) {
-				return hierarchy.getSuperclass(type);
-				// don't handle interfaces
-			}
-			return null;
-		}	
-			
+		
 	}
 }

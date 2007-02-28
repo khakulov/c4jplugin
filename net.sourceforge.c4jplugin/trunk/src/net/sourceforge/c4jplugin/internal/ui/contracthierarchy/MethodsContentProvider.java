@@ -17,7 +17,6 @@ import net.sourceforge.c4jplugin.C4JActivator;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.IWorkingCopyProvider;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -86,9 +85,9 @@ public class MethodsContentProvider implements IStructuredContentProvider, IWork
 
 			List<Object> res= new ArrayList<Object>();
 			try {
-				ITypeHierarchy hierarchy= fHierarchyLifeCycle.getHierarchy();
+				IContractHierarchy hierarchy= fHierarchyLifeCycle.getContractHierarchy();
 				if (fShowInheritedMethods && hierarchy != null) {
-					IType[] allSupertypes= hierarchy.getAllSupertypes(type);
+					IType[] allSupertypes= hierarchy.getAllSupercontracts(type);
 					// sort in from last to first: elements with same name
 					// will show up in hierarchy order 
 					for (int i= allSupertypes.length - 1; i >= 0; i--) {

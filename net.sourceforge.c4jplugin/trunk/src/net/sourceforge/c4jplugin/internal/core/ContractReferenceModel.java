@@ -226,11 +226,13 @@ public class ContractReferenceModel {
 	}
 	
 	synchronized static public IResource getDirectContract(IResource target) {
+		if (target == null) return null;
+		
 		try {
 			IResource direct = (IResource)target.getSessionProperty(QN_DIRECTCONTRACT_PROPERTY);
 			return direct;
 		} catch (CoreException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 			return null;
 		}
 	}

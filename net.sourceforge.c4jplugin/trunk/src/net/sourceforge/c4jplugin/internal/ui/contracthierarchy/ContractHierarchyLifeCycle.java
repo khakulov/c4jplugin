@@ -17,6 +17,7 @@ import java.util.List;
 import net.sourceforge.c4jplugin.C4JActivator;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IClassFile;
@@ -24,26 +25,21 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.IRegion;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.ITypeHierarchyChangedListener;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-
+import org.eclipse.jdt.internal.core.JavaModelStatus;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
 /**
  * Manages a type hierarchy, to keep it refreshed, and to allow it to be shared.
  */
-public class ContractHierarchyLifeCycle implements ITypeHierarchyChangedListener, IElementChangedListener {
+public class ContractHierarchyLifeCycle implements IContractHierarchyChangedListener, IElementChangedListener {
 	
 	private boolean fHierarchyRefreshNeeded;
-	private ITypeHierarchy fHierarchy;
+	private IContractHierarchy fHierarchy;
 	private IJavaElement fInputElement;
 	private boolean fIsSuperTypesOnly;
 	
@@ -60,8 +56,12 @@ public class ContractHierarchyLifeCycle implements ITypeHierarchyChangedListener
 		fChangeListeners= new ArrayList<IContractHierarchyLifeCycleListener>(2);
 	}
 	
-	public ITypeHierarchy getHierarchy() {
+	public IContractHierarchy getContractHierarchy() {
 		return fHierarchy;
+	}
+	
+	public ITypeHierarchy getTypeHierarchy() {
+		return fHierarchy.getTypeHierarchy();
 	}
 	
 	public IJavaElement getInputElement() {
@@ -71,7 +71,7 @@ public class ContractHierarchyLifeCycle implements ITypeHierarchyChangedListener
 	
 	public void freeHierarchy() {
 		if (fHierarchy != null) {
-			fHierarchy.removeTypeHierarchyChangedListener(this);
+			fHierarchy.removeContractHierarchyChangedListener(this);
 			JavaCore.removeElementChangedListener(this);
 			fHierarchy= null;
 			fInputElement= null;
@@ -95,7 +95,7 @@ public class ContractHierarchyLifeCycle implements ITypeHierarchyChangedListener
 		}
 	}
 			
-	public void ensureRefreshedTypeHierarchy(final IJavaElement element, IRunnableContext context) throws InvocationTargetException, InterruptedException {
+	public void ensureRefreshedContractHierarchy(final IJavaElement element, IRunnableContext context) throws InvocationTargetException, InterruptedException {
 		if (element == null || !element.exists()) {
 			freeHierarchy();
 			return;
@@ -121,15 +121,17 @@ public class ContractHierarchyLifeCycle implements ITypeHierarchyChangedListener
 		}
 	}
 	
-	private ITypeHierarchy createTypeHierarchy(IJavaElement element, IProgressMonitor pm) throws JavaModelException {
+	private IContractHierarchy createContractHierarchy(IJavaElement element, IProgressMonitor pm) throws JavaModelException {
 		if (element.getElementType() == IJavaElement.TYPE) {
 			IType type= (IType) element;
 			if (fIsSuperTypesOnly) {
-				return type.newSupertypeHierarchy(pm);
+				return new ContractHierarchy(type, pm, false);
 			} else {
-				return type.newTypeHierarchy(pm);
+				return new ContractHierarchy(type, pm);
 			}
-		} else {
+		}
+		else throw new JavaModelException(new JavaModelStatus(IStatus.ERROR, "Input for contract hierarchy ist not a java type"));
+		/*else {
 			IRegion region= JavaCore.newRegion();
 			if (element.getElementType() == IJavaElement.JAVA_PROJECT) {
 				// for projects only add the contained source folders
@@ -153,7 +155,7 @@ public class ContractHierarchyLifeCycle implements ITypeHierarchyChangedListener
 			}
 			IJavaProject jproject= element.getJavaProject();
 			return jproject.newTypeHierarchy(region, pm);
-		}
+		}*/
 	}
 	
 	
@@ -162,11 +164,11 @@ public class ContractHierarchyLifeCycle implements ITypeHierarchyChangedListener
 		// to ensure the order of the two listeners always remove / add listeners on operations
 		// on type hierarchies
 		if (fHierarchy != null) {
-			fHierarchy.removeTypeHierarchyChangedListener(this);
+			fHierarchy.removeContractHierarchyChangedListener(this);
 			JavaCore.removeElementChangedListener(this);
 		}
 		if (hierachyCreationNeeded) {
-			fHierarchy= createTypeHierarchy(element, pm);
+			fHierarchy= createContractHierarchy(element, pm);
 			if (pm != null && pm.isCanceled()) {
 				throw new OperationCanceledException();
 			}
@@ -174,7 +176,7 @@ public class ContractHierarchyLifeCycle implements ITypeHierarchyChangedListener
 		} else {
 			fHierarchy.refresh(pm);
 		}
-		fHierarchy.addTypeHierarchyChangedListener(this);
+		fHierarchy.addContractHierarchyChangedListener(this);
 		JavaCore.addElementChangedListener(this);
 		fHierarchyRefreshNeeded= false;
 	}		
@@ -182,7 +184,7 @@ public class ContractHierarchyLifeCycle implements ITypeHierarchyChangedListener
 	/*
 	 * @see ITypeHierarchyChangedListener#typeHierarchyChanged
 	 */
-	public void typeHierarchyChanged(ITypeHierarchy typeHierarchy) {
+	public void contractHierarchyChanged(IContractHierarchy typeHierarchy) {
 	 	fHierarchyRefreshNeeded= true;
  		fireChange(null);
 	}		
@@ -263,7 +265,7 @@ public class ContractHierarchyLifeCycle implements ITypeHierarchyChangedListener
 	}
 	
 	private void processTypeDelta(IType type, ArrayList<IType> changedTypes) {
-		if (getHierarchy().contains(type)) {
+		if (getTypeHierarchy().contains(type) || getContractHierarchy().contains(type)) {
 			changedTypes.add(type);
 		}
 	}

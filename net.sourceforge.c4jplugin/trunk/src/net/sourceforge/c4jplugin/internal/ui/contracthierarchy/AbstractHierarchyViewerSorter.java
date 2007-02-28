@@ -13,11 +13,7 @@ package net.sourceforge.c4jplugin.internal.ui.contracthierarchy;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
-import org.eclipse.jdt.internal.ui.viewsupport.SourcePositionSorter;
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
@@ -39,7 +35,7 @@ public abstract class AbstractHierarchyViewerSorter extends ViewerComparator {
 		fSourcePositonSorter= new SourcePositionSorter();
 	}
 	
-	protected abstract ITypeHierarchy getHierarchy(IType type);
+	protected abstract IContractHierarchy getHierarchy(IType type);
 	public abstract boolean isSortByDefiningType();
 	public abstract boolean isSortAlphabetically();
 	
@@ -128,9 +124,9 @@ public abstract class AbstractHierarchyViewerSorter extends ViewerComparator {
 		}
 	
 		IType declaringType= method.getDeclaringType();
-		ITypeHierarchy hierarchy= getHierarchy(declaringType);
+		IContractHierarchy hierarchy= getHierarchy(declaringType);
 		if (hierarchy != null) {
-			MethodOverrideTester tester= new MethodOverrideTester(declaringType, hierarchy);
+			ConditionOverrideTester tester= new ConditionOverrideTester(declaringType, hierarchy);
 			IMethod res= tester.findDeclaringMethod(method, true);
 			if (res != null) {
 				return res.getDeclaringType();
@@ -141,9 +137,9 @@ public abstract class AbstractHierarchyViewerSorter extends ViewerComparator {
 	
 
 	private int compareInHierarchy(IType def1, IType def2) {
-		if (JavaModelUtil.isSuperType(getHierarchy(def1), def2, def1)) {
+		if (getHierarchy(def1).isSupercontract(def2, def1)) {
 			return 1;
-		} else if (JavaModelUtil.isSuperType(getHierarchy(def2), def1, def2)) {
+		} else if (getHierarchy(def2).isSupercontract(def1, def2)) {
 			return -1;
 		}
 		// interfaces after classes

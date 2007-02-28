@@ -16,7 +16,6 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
@@ -147,7 +146,7 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 	}
 
 	private ImageDescriptor getTypeImageDescriptor(IType type) {
-		ITypeHierarchy hierarchy= fHierarchy.getHierarchy();
+		IContractHierarchy hierarchy= fHierarchy.getContractHierarchy();
 		if (hierarchy == null) {
 			return new JavaElementImageDescriptor(JavaPluginImages.DESC_OBJS_CLASS, 0, JavaElementImageProvider.BIG_SIZE);
 		}

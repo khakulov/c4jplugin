@@ -11,7 +11,6 @@
 package net.sourceforge.c4jplugin.internal.ui.contracthierarchy;
 
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
 
 /**
   */
@@ -32,9 +31,9 @@ public class HierarchyViewerSorter extends AbstractHierarchyViewerSorter {
 	 * @see net.sourceforge.c4jplugin.internal.ui.contracthierarchy.AbstractHierarchyViewerSorter#getTypeKind(org.eclipse.jdt.core.IType)
 	 */
 	protected int getTypeFlags(IType type) {
-		ITypeHierarchy hierarchy= getHierarchy(type);
+		IContractHierarchy hierarchy= getHierarchy(type);
 		if (hierarchy != null) {
-			return fHierarchy.getHierarchy().getCachedFlags(type);
+			return fHierarchy.getContractHierarchy().getCachedFlags(type);
 		}
 		return 0;
 	}
@@ -57,8 +56,8 @@ public class HierarchyViewerSorter extends AbstractHierarchyViewerSorter {
 	/* (non-Javadoc)
 	 * @see net.sourceforge.c4jplugin.internal.ui.contracthierarchy.AbstractHierarchyViewerSorter#getHierarchy(org.eclipse.jdt.core.IType)
 	 */
-	protected ITypeHierarchy getHierarchy(IType type) {
-		return fHierarchy.getHierarchy(); // hierarchy contains all types shown
+	protected IContractHierarchy getHierarchy(IType type) {
+		return fHierarchy.getContractHierarchy(); // hierarchy contains all types shown
 	}
 
 }

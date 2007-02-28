@@ -58,7 +58,7 @@ public class ContractReferenceUtil {
 	static public void createContractMarkers(IResource contract) {
 		if (!ContractReferenceModel.isContract(contract)) return;
 		
-		System.out.println("creating contract markers");
+		//System.out.println("creating contract markers");
 		IJavaElement jelement = JavaCore.create(contract);
 		try {
 			IType type = getType(jelement);

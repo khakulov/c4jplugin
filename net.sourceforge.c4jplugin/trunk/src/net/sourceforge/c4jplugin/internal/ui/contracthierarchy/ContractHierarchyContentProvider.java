@@ -18,10 +18,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
 import org.eclipse.jdt.ui.IWorkingCopyProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -29,8 +26,8 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
 /**
- * Base class for content providers for type hierarchy viewers.
- * Implementors must override 'getTypesInHierarchy'.
+ * Base class for content providers for contract hierarchy viewers.
+ * Implementors must override 'getContractsInHierarchy'.
  * Java delta processing is also performed by the content provider
  */
 public abstract class ContractHierarchyContentProvider implements ITreeContentProvider, IWorkingCopyProvider {
@@ -42,7 +39,7 @@ public abstract class ContractHierarchyContentProvider implements ITreeContentPr
 	protected TreeViewer fViewer;
 
 	private ViewerFilter fWorkingSetFilter;
-	private MethodOverrideTester fMethodOverrideTester;
+	private ConditionOverrideTester fMethodOverrideTester;
 	private IContractHierarchyLifeCycleListener fTypeHierarchyLifeCycleListener;
 	
 	
@@ -71,47 +68,48 @@ public abstract class ContractHierarchyContentProvider implements ITreeContentPr
 		fMemberFilter= memberFilter;
 	}	
 
-	private boolean initializeMethodOverrideTester(IMethod filterMethod, IType typeToFindIn) {
-		IType filterType= filterMethod.getDeclaringType();
-		ITypeHierarchy hierarchy= fTypeHierarchy.getHierarchy();
+	private boolean initializeConditionOverrideTester(IMethod filterCondition, IType typeToFindIn) {
+		IType filterType= filterCondition.getDeclaringType();
+		IContractHierarchy hierarchy= fTypeHierarchy.getContractHierarchy();
 		
-		boolean filterOverrides= JavaModelUtil.isSuperType(hierarchy, typeToFindIn, filterType);
+		boolean filterOverrides= hierarchy.isSupercontract(typeToFindIn, filterType);
 		IType focusType= filterOverrides ? filterType : typeToFindIn;
 		
 		if (fMethodOverrideTester == null || !fMethodOverrideTester.getFocusType().equals(focusType)) {
-			fMethodOverrideTester= new MethodOverrideTester(focusType, hierarchy);
+			fMethodOverrideTester= new ConditionOverrideTester(focusType, hierarchy);
 		}
 		return filterOverrides;
 	}
 	
 	private void addCompatibleMethods(IMethod filterMethod, IType typeToFindIn, List children) throws JavaModelException {
-		boolean filterMethodOverrides= initializeMethodOverrideTester(filterMethod, typeToFindIn);
+		boolean filterMethodOverrides= initializeConditionOverrideTester(filterMethod, typeToFindIn);
 		IMethod[] methods= typeToFindIn.getMethods();
 		for (int i= 0; i < methods.length; i++) {
 			IMethod curr= methods[i];
-			if (isCompatibleMethod(filterMethod, curr, filterMethodOverrides) && !children.contains(curr)) {
+			if (isCompatibleCondition(filterMethod, curr, filterMethodOverrides) && !children.contains(curr)) {
 				children.add(curr);
 			}
 		}
 	}
 	
-	private boolean hasCompatibleMethod(IMethod filterMethod, IType typeToFindIn) throws JavaModelException {
-		boolean filterMethodOverrides= initializeMethodOverrideTester(filterMethod, typeToFindIn);
+	private boolean hasCompatibleCondition(IMethod filterMethod, IType typeToFindIn) throws JavaModelException {
+		boolean filterMethodOverrides= initializeConditionOverrideTester(filterMethod, typeToFindIn);
 		IMethod[] methods= typeToFindIn.getMethods();
 		for (int i= 0; i < methods.length; i++) {
-			if (isCompatibleMethod(filterMethod, methods[i], filterMethodOverrides)) {
+			if (isCompatibleCondition(filterMethod, methods[i], filterMethodOverrides)) {
 				return true;
 			}
 		}
 		return false;
 	}
 	
-	private boolean isCompatibleMethod(IMethod filterMethod, IMethod method, boolean filterOverrides) throws JavaModelException {
-		if (filterOverrides) {
-			return fMethodOverrideTester.isSubsignature(filterMethod, method);
-		} else {
-			return fMethodOverrideTester.isSubsignature(method, filterMethod);
-		}
+	private boolean isCompatibleCondition(IMethod filterMethod, IMethod method, boolean filterOverrides) throws JavaModelException {
+//		if (filterOverrides) {
+//			return fMethodOverrideTester.isSubsignature(filterMethod, method);
+//		} else {
+//			return fMethodOverrideTester.isSubsignature(method, filterMethod);
+//		}
+		return filterMethod.getSignature().equals(method.getSignature());
 	}
 
 	/**
@@ -129,8 +127,8 @@ public abstract class ContractHierarchyContentProvider implements ITreeContentPr
 	}
 		
 	
-	protected final ITypeHierarchy getHierarchy() {
-		return fTypeHierarchy.getHierarchy();
+	protected final IContractHierarchy getHierarchy() {
+		return fTypeHierarchy.getContractHierarchy();
 	}
 	
 	
@@ -163,7 +161,7 @@ public abstract class ContractHierarchyContentProvider implements ITreeContentPr
 	}
 	
 	protected void getRootTypes(List<IType> res) {
-		ITypeHierarchy hierarchy= getHierarchy();
+		IContractHierarchy hierarchy= getHierarchy();
 		if (hierarchy != null) {
 			IType input= hierarchy.getType();
 			if (input != null) {
@@ -176,12 +174,19 @@ public abstract class ContractHierarchyContentProvider implements ITreeContentPr
 	/**
 	 * Hook to overwrite. Filter will be applied on the returned types
 	 */	
-	protected abstract void getTypesInHierarchy(IType type, List<IType> res);
+	protected abstract void getContractsInHierarchy(IType type, List<IType> res);
 	
 	/**
 	 * Hook to overwrite. Return null if parent is ambiguous.
 	 */	
-	protected abstract IType getParentType(IType type);	
+	protected IType getParentContract(IType type) {
+		IContractHierarchy hierarchy= getHierarchy();
+		if (hierarchy != null) {
+			IType[] supers = hierarchy.getSupercontracts(type);
+			if (supers != null && supers.length == 1) return supers[0];
+		}
+		return null;
+	}
 	
 	
 	private boolean isInScope(IType type) {
@@ -260,7 +265,7 @@ public abstract class ContractHierarchyContentProvider implements ITreeContentPr
 		
 	private void addTypeChildren(IType type, List<IMember> children) throws JavaModelException {
 		ArrayList<IType> types= new ArrayList<IType>();
-		getTypesInHierarchy(type, types);
+		getContractsInHierarchy(type, types);
 		for (IType curr : types) {
 			if (isInTree(curr)) {
 				children.add(curr);
@@ -285,7 +290,7 @@ public abstract class ContractHierarchyContentProvider implements ITreeContentPr
 			if (type.equals(member.getDeclaringType())) {
 				return true;
 			} else if (member instanceof IMethod) {
-				if (hasCompatibleMethod((IMethod) member, type)) {
+				if (hasCompatibleCondition((IMethod) member, type)) {
 					return true;
 				}
 			}
@@ -295,7 +300,7 @@ public abstract class ContractHierarchyContentProvider implements ITreeContentPr
 		
 	private boolean hasTypeChildren(IType type) throws JavaModelException {
 		ArrayList<IType> types= new ArrayList<IType>();
-		getTypesInHierarchy(type, types);
+		getContractsInHierarchy(type, types);
 		for (IType curr : types) {
 			if (isInTree(curr)) {
 				return true;
@@ -327,7 +332,7 @@ public abstract class ContractHierarchyContentProvider implements ITreeContentPr
 		if (element instanceof IMember) {
 			IMember member= (IMember) element;
 			if (member.getElementType() == IJavaElement.TYPE) {
-				return getParentType((IType)member);
+				return getParentContract((IType)member);
 			}
 			return member.getDeclaringType();
 		}
@@ -338,9 +343,11 @@ public abstract class ContractHierarchyContentProvider implements ITreeContentPr
 		return type.getElementName().length() == 0;
 	}
 	
+	/*
 	protected final boolean isAnonymousFromInterface(IType type) {
 		return isAnonymous(type) && fTypeHierarchy.getHierarchy().getSuperInterfaces(type).length != 0;
 	}
+	*/
 	
 	protected final boolean isObject(IType type) {
 		return "Object".equals(type.getElementName()) && type.getDeclaringType() == null && "java.lang".equals(type.getPackageFragment().getElementName());  //$NON-NLS-1$//$NON-NLS-2$
