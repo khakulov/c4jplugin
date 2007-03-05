@@ -17,6 +17,7 @@ import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDropAdapter;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTargetEvent;
 
@@ -25,7 +26,7 @@ public class TypeHierarchyTransferDropAdapter extends SelectionTransferDropAdapt
 	private static final int OPERATION = DND.DROP_LINK;
 	private ContractHierarchyViewPart fTypeHierarchyViewPart;
 
-	public TypeHierarchyTransferDropAdapter(ContractHierarchyViewPart viewPart, AbstractTreeViewer viewer) {
+	public TypeHierarchyTransferDropAdapter(ContractHierarchyViewPart viewPart, StructuredViewer viewer) {
 		super(viewer);
 		setFullWidthMatchesItem(false);
 		fTypeHierarchyViewPart= viewPart;
