@@ -5,6 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.sourceforge.c4jplugin.C4JActivator;
+import net.sourceforge.c4jplugin.internal.ui.contracthierarchy.tree.SubContractHierarchyViewer;
+import net.sourceforge.c4jplugin.internal.ui.contracthierarchy.tree.SuperContractHierarchyViewer;
+import net.sourceforge.c4jplugin.internal.ui.contracthierarchy.tree.TraditionalHierarchyViewer;
 import net.sourceforge.c4jplugin.internal.util.ExceptionHandler;
 
 import org.eclipse.core.runtime.Assert;
@@ -91,6 +94,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ScrollBar;
+import org.eclipse.swt.widgets.Scrollable;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
@@ -179,7 +183,7 @@ public class ContractHierarchyViewPart extends ViewPart {
 	private boolean fIsRefreshRunnablePosted;
 	
 	private int fCurrentViewerIndex;
-	private ContractHierarchyViewer[] fAllViewers;
+	private StructuredViewer[] fAllViewers;
 	
 	private MethodsViewer fMethodsViewer;	
 	
@@ -590,16 +594,16 @@ public class ContractHierarchyViewPart extends ViewPart {
 		KeyListener keyListener= createKeyListener();
 						
 		// Create the viewers
-		ContractHierarchyViewer superTypesViewer= new SuperContractHierarchyViewer(fViewerbook, fHierarchyLifeCycle, this);
+		StructuredViewer superTypesViewer= new SuperContractHierarchyViewer(fViewerbook, fHierarchyLifeCycle, this);
 		initializeTypesViewer(superTypesViewer, keyListener, IContextMenuConstants.TARGET_ID_SUPERTYPES_VIEW);
 		
-		ContractHierarchyViewer subTypesViewer= new SubTypeHierarchyViewer(fViewerbook, fHierarchyLifeCycle, this);
+		StructuredViewer subTypesViewer= new SubContractHierarchyViewer(fViewerbook, fHierarchyLifeCycle, this);
 		initializeTypesViewer(subTypesViewer, keyListener, IContextMenuConstants.TARGET_ID_SUBTYPES_VIEW);
 		
-		ContractHierarchyViewer vajViewer= new TraditionalHierarchyViewer(fViewerbook, fHierarchyLifeCycle, this);
+		StructuredViewer vajViewer= new TraditionalHierarchyViewer(fViewerbook, fHierarchyLifeCycle, this);
 		initializeTypesViewer(vajViewer, keyListener, IContextMenuConstants.TARGET_ID_HIERARCHY_VIEW);
 
-		fAllViewers= new ContractHierarchyViewer[3];
+		fAllViewers= new StructuredViewer[3];
 		fAllViewers[HIERARCHY_MODE_SUPERTYPES]= superTypesViewer;
 		fAllViewers[HIERARCHY_MODE_SUBTYPES]= subTypesViewer;
 		fAllViewers[HIERARCHY_MODE_CLASSIC]= vajViewer;
@@ -646,17 +650,17 @@ public class ContractHierarchyViewPart extends ViewPart {
 	}
 	
 
-	private void initializeTypesViewer(final ContractHierarchyViewer typesViewer, KeyListener keyListener, String cotextHelpId) {
+	private void initializeTypesViewer(final StructuredViewer typesViewer, KeyListener keyListener, String cotextHelpId) {
 		typesViewer.getControl().setVisible(false);
 		typesViewer.getControl().addKeyListener(keyListener);
-		typesViewer.initContextMenu(new IMenuListener() {
+		((IContractHierarchyViewer)typesViewer).initContextMenu(new IMenuListener() {
 			public void menuAboutToShow(IMenuManager menu) {
-				fillTypesViewerContextMenu(typesViewer, menu);
+				fillTypesViewerContextMenu(((IContractHierarchyViewer)typesViewer), menu);
 			}
 		}, cotextHelpId,	getSite());
 		typesViewer.addPostSelectionChangedListener(fSelectionChangedListener);
-		typesViewer.setQualifiedTypeName(isQualifiedTypeNamesEnabled());
-		typesViewer.setWorkingSetFilter(fWorkingSetActionGroup.getWorkingSetFilter());
+		((IContractHierarchyViewer)typesViewer).setQualifiedTypeName(isQualifiedTypeNamesEnabled());
+		((IContractHierarchyViewer)typesViewer).setWorkingSetFilter(fWorkingSetActionGroup.getWorkingSetFilter());
 	}
 	
 	private Control createMethodViewerControl(Composite parent) {
@@ -697,7 +701,7 @@ public class ContractHierarchyViewPart extends ViewPart {
 		dropTarget.addDropListener(new TypeHierarchyTransferDropAdapter(this, fAllViewers[0]));
 	}
 	
-	private void addDropAdapters(AbstractTreeViewer viewer) {
+	private void addDropAdapters(StructuredViewer viewer) {
 		Transfer[] transfers= new Transfer[] { LocalSelectionTransfer.getInstance() };
 		int ops= DND.DROP_MOVE | DND.DROP_COPY | DND.DROP_LINK | DND.DROP_DEFAULT;
 		
@@ -816,7 +820,7 @@ public class ContractHierarchyViewPart extends ViewPart {
 		int nHierarchyViewers= fAllViewers.length; 
 		StructuredViewer[] trackedViewers= new StructuredViewer[nHierarchyViewers + 1];
 		for (int i= 0; i < nHierarchyViewers; i++) {
-			trackedViewers[i]= fAllViewers[i];
+			trackedViewers[i]= (StructuredViewer)fAllViewers[i];
 		}
 		trackedViewers[nHierarchyViewers]= fMethodsViewer;
 		fSelectionProviderMediator= new SelectionProviderMediator(trackedViewers, getCurrentViewer());
@@ -970,7 +974,7 @@ public class ContractHierarchyViewPart extends ViewPart {
 	/*
 	 * Creates the context menu for the hierarchy viewers
 	 */
-	private void fillTypesViewerContextMenu(ContractHierarchyViewer viewer, IMenuManager menu) {
+	private void fillTypesViewerContextMenu(IContractHierarchyViewer viewer, IMenuManager menu) {
 		JavaPlugin.createStandardGroups(menu);
 		
 		menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, new Separator(GROUP_FOCUS));
@@ -1015,20 +1019,20 @@ public class ContractHierarchyViewPart extends ViewPart {
 	private void setMemberFilter(IMember[] memberFilter) {
 		Assert.isNotNull(fAllViewers);
 		for (int i= 0; i < fAllViewers.length; i++) {
-			fAllViewers[i].setMemberFilter(memberFilter);
+			((IContractHierarchyViewer)fAllViewers[i]).setMemberFilter(memberFilter);
 		}
 	}	
 	
 	private IType getSelectableType(IJavaElement elem) {
 		if (elem.getElementType() != IJavaElement.TYPE) {
-			return getCurrentViewer().getTreeRootType();
+			return ((IContractHierarchyViewer)getCurrentViewer()).getRootType();
 		} else {
 			return (IType) elem;
 		}
 	}
 	
 	private void internalSelectType(IMember elem, boolean reveal) {	
-		ContractHierarchyViewer viewer= getCurrentViewer();
+		StructuredViewer viewer= getCurrentViewer();
 		viewer.removePostSelectionChangedListener(fSelectionChangedListener);
 		viewer.setSelection(elem != null ? new StructuredSelection(elem) : StructuredSelection.EMPTY, reveal);
 		viewer.addPostSelectionChangedListener(fSelectionChangedListener);
@@ -1044,10 +1048,10 @@ public class ContractHierarchyViewPart extends ViewPart {
 			fNoHierarchyShownLabel.setText(ContractHierarchyMessages.TypeHierarchyViewPart_empty); 
 			fPagebook.showPage(fNoHierarchyShownLabel);
 		} else {
-			if (getCurrentViewer().containsElements() != null) {
+			if (((IContractHierarchyViewer)getCurrentViewer()).containsElements() != null) {
 				Runnable runnable= new Runnable() {
 					public void run() {
-						getCurrentViewer().updateContent(doExpand); // refresh
+						((IContractHierarchyViewer)getCurrentViewer()).updateContent(doExpand); // refresh
 					}
 				};
 				BusyIndicator.showWhile(getDisplay(), runnable);
@@ -1187,7 +1191,7 @@ public class ContractHierarchyViewPart extends ViewPart {
 	}
 	
 	private void updateTitle() {
-		String viewerTitle= getCurrentViewer().getTitle();
+		String viewerTitle= ((IContractHierarchyViewer)getCurrentViewer()).getTitle();
 		
 		String tooltip;
 		String title;
@@ -1242,7 +1246,7 @@ public class ContractHierarchyViewPart extends ViewPart {
 			updateTitle();
 					
 			fDialogSettings.put(DIALOGSTORE_HIERARCHYVIEW, viewerIndex);
-			getCurrentViewer().getTree().setFocus();
+			getCurrentViewer().getControl().setFocus();
 		}
 		for (int i= 0; i < fViewActions.length; i++) {
 			ToggleViewAction action= fViewActions[i];
@@ -1254,7 +1258,7 @@ public class ContractHierarchyViewPart extends ViewPart {
 		return fCurrentViewerIndex;
 	}
 	
-	private ContractHierarchyViewer getCurrentViewer() {
+	private StructuredViewer getCurrentViewer() {
 		return fAllViewers[fCurrentViewerIndex];
 	}
 
@@ -1270,7 +1274,7 @@ public class ContractHierarchyViewPart extends ViewPart {
 				updateHierarchyViewer(true);
 				updateTitle();
 			
-				if (methodViewerInput != null && getCurrentViewer().isElementShown(methodViewerInput)) {
+				if (methodViewerInput != null && ((IContractHierarchyViewer)getCurrentViewer()).isElementShown(methodViewerInput)) {
 					// avoid that the method view changes content by selecting the previous input
 					internalSelectType(methodViewerInput, true);
 				} else if (fSelectedType != null) {
@@ -1301,7 +1305,7 @@ public class ContractHierarchyViewPart extends ViewPart {
 			fShowQualifiedTypeNames= on;
 			if (fAllViewers != null) {
 				for (int i= 0; i < fAllViewers.length; i++) {
-					fAllViewers[i].setQualifiedTypeName(on);
+					((IContractHierarchyViewer)fAllViewers[i]).setQualifiedTypeName(on);
 				}
 			}
 		}
@@ -1371,7 +1375,7 @@ public class ContractHierarchyViewPart extends ViewPart {
 				fMethodsViewer.refresh();
 				fMethodViewerPaneLabel.setText(fPaneLabelProvider.getText(methodViewerInput));
 				fMethodViewerPaneLabel.setImage(fPaneLabelProvider.getImage(methodViewerInput));				
-				if (getCurrentViewer().isMethodFiltering()) {
+				if (((IContractHierarchyViewer)getCurrentViewer()).isMethodFiltering()) {
 					if (changedTypes.length == 1) {
 						getCurrentViewer().refresh(changedTypes[0]);
 					} else {
@@ -1416,7 +1420,9 @@ public class ContractHierarchyViewPart extends ViewPart {
 		int ratio= (weigths[0] * 1000) / (weigths[0] + weigths[1]);
 		memento.putInteger(TAG_RATIO, ratio);
 		
-		ScrollBar bar= getCurrentViewer().getTree().getVerticalBar();
+		ScrollBar bar= null;
+		Control control = getCurrentViewer().getControl();
+		if (control instanceof Scrollable) bar = ((Scrollable)control).getVerticalBar();
 		int position= bar != null ? bar.getSelection() : 0;
 		memento.putInteger(TAG_VERTICAL_SCROLL, position);
 
@@ -1519,7 +1525,9 @@ public class ContractHierarchyViewPart extends ViewPart {
 		if (ratio != null) {
 			fTypeMethodsSplitter.setWeights(new int[] { ratio.intValue(), 1000 - ratio.intValue() });
 		}
-		ScrollBar bar= getCurrentViewer().getTree().getVerticalBar();
+		ScrollBar bar= null;
+		Control control = getCurrentViewer().getControl();
+		if (control instanceof Scrollable) bar = ((Scrollable)control).getVerticalBar();
 		if (bar != null) {
 			Integer vScroll= memento.getInteger(TAG_VERTICAL_SCROLL);
 			if (vScroll != null) {
