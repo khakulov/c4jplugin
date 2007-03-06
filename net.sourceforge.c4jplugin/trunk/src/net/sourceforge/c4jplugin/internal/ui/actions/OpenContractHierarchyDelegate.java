@@ -6,7 +6,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import net.sourceforge.c4jplugin.C4JActivator;
+import net.sourceforge.c4jplugin.internal.core.ContractReferenceModel;
 import net.sourceforge.c4jplugin.internal.nature.C4JProjectNature;
+import net.sourceforge.c4jplugin.internal.util.ContractReferenceUtil;
 import net.sourceforge.c4jplugin.internal.util.ExceptionHandler;
 import net.sourceforge.c4jplugin.internal.util.OpenContractHierarchyUtil;
 import net.sourceforge.c4jplugin.internal.util.SelectionConverter;
@@ -46,7 +48,7 @@ public class OpenContractHierarchyDelegate extends SelectionDispatchActionDelega
 	public void setActivePart(IAction action, IWorkbenchPart targetPart) {
 		if (targetPart instanceof JavaEditor) {
 			editor = (JavaEditor)targetPart;
-			action.setEnabled(SelectionConverter.canOperateOn(editor));
+			action.setEnabled(isEnabled(editor));
 		}
 		else editor = null;
 		
@@ -66,13 +68,28 @@ public class OpenContractHierarchyDelegate extends SelectionDispatchActionDelega
 	 * Method declared on SelectionDispatchActionDelegate.
 	 */
 	public void selectionChanged(IAction action, ITextSelection selection) {
+		
 	}
 
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchActionDelegate.
 	 */
 	public void selectionChanged(IAction action, IStructuredSelection selection) {
+		// if the selected elements are contained in a project which has
+		// a C4J nature, the action is enabled via plugin.xml
 		if (action.isEnabled()) action.setEnabled(isEnabled(selection));
+	}
+	
+	protected boolean isEnabled(JavaEditor editor) {
+		IJavaElement input = SelectionConverter.getInput(editor);
+		if (input == null) return false;
+		
+		try {
+			return (ContractReferenceModel.isContracted(input.getUnderlyingResource())
+					|| ContractReferenceModel.isContract(input.getUnderlyingResource()));
+		} catch (JavaModelException e) {
+			return false;
+		}
 	}
 	
 	private boolean isEnabled(IStructuredSelection selection) {
@@ -81,8 +98,8 @@ public class OpenContractHierarchyDelegate extends SelectionDispatchActionDelega
 			return false;
 		Object input= selection.getFirstElement();
 		
-		
-		if (input instanceof LogicalPackage) {
+		// No region based hierarchy for now
+		/*if (input instanceof LogicalPackage) {
 			try {
 				if (((LogicalPackage)input).getJavaProject().getProject().hasNature(C4JProjectNature.NATURE_ID))
 					return true;
@@ -90,7 +107,7 @@ public class OpenContractHierarchyDelegate extends SelectionDispatchActionDelega
 			}
 			
 			return false;
-		}
+		}*/
 		
 		if (!(input instanceof IJavaElement))
 			return false;
@@ -99,15 +116,20 @@ public class OpenContractHierarchyDelegate extends SelectionDispatchActionDelega
 			case IJavaElement.METHOD:
 			case IJavaElement.FIELD:
 			case IJavaElement.TYPE:
-			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-			case IJavaElement.JAVA_PROJECT:
-			case IJavaElement.PACKAGE_FRAGMENT:
+			//case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+			//case IJavaElement.JAVA_PROJECT:
+			//case IJavaElement.PACKAGE_FRAGMENT:
 			case IJavaElement.PACKAGE_DECLARATION:
 			case IJavaElement.IMPORT_DECLARATION:	
 			case IJavaElement.CLASS_FILE:
 			case IJavaElement.COMPILATION_UNIT:
-				return true;
-			case IJavaElement.LOCAL_VARIABLE:
+				try {
+					return (ContractReferenceModel.isContracted(((IJavaElement)input).getUnderlyingResource())
+							|| ContractReferenceModel.isContract(((IJavaElement)input).getUnderlyingResource()));
+				} catch (JavaModelException e) {
+					return false;
+				}
+			//case IJavaElement.LOCAL_VARIABLE:
 			default:
 				return false;
 		}

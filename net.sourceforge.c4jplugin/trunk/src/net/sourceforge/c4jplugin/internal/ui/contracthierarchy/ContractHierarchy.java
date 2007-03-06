@@ -30,7 +30,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 public class ContractHierarchy implements IContractHierarchy,
 						IElementChangedListener, ITypeHierarchyChangedListener {
 
-	public static boolean DEBUG = true;
+	public static boolean DEBUG = false;
 	
 	
 	protected ITypeHierarchy typeHierarchy;

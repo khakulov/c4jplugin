@@ -31,7 +31,7 @@ public class OpenContractHierarchyWindowDelegate extends
 		window.getPartService().addPartListener(this);
 		IWorkbenchPart part = window.getActivePage().getActivePart();
 		if (part != null && part instanceof JavaEditor && 
-				SelectionConverter.canOperateOn((JavaEditor)part))
+				isEnabled((JavaEditor)part))
 			editor = (JavaEditor)part;
 		else editor = null;
 	}
@@ -56,7 +56,7 @@ public class OpenContractHierarchyWindowDelegate extends
 
 	public void partActivated(IWorkbenchPart part) {
 		if (part instanceof JavaEditor) {
-			if (SelectionConverter.canOperateOn((JavaEditor)part)) {
+			if (isEnabled((JavaEditor)part)) {
 				editor = (JavaEditor)part;
 			}
 			else editor = null;

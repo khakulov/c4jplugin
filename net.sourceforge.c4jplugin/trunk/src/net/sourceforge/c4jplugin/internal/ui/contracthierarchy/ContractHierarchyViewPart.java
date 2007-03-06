@@ -5,12 +5,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.sourceforge.c4jplugin.C4JActivator;
+import net.sourceforge.c4jplugin.internal.core.ContractReferenceModel;
 import net.sourceforge.c4jplugin.internal.ui.contracthierarchy.tree.SubContractHierarchyViewer;
 import net.sourceforge.c4jplugin.internal.ui.contracthierarchy.tree.SuperContractHierarchyViewer;
 import net.sourceforge.c4jplugin.internal.ui.contracthierarchy.tree.TraditionalHierarchyViewer;
 import net.sourceforge.c4jplugin.internal.ui.contracthierarchy.zest.ZestContractHierarchyViewer;
+import net.sourceforge.c4jplugin.internal.util.ContractReferenceUtil;
 import net.sourceforge.c4jplugin.internal.util.ExceptionHandler;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -429,6 +432,18 @@ public class ContractHierarchyViewPart extends ViewPart {
 	 * @param element the input element
 	 */	
 	public void setInputElement(IJavaElement element) {
+		// if the input element is a contract, change the input to the
+		// contracts target
+		if (element != null) {
+			try {
+				IResource res = element.getUnderlyingResource();
+				IResource target = ContractReferenceModel.getTarget(res);
+				if (target != null) {
+					element = ContractReferenceUtil.getType(JavaCore.create(target));
+				}
+			} catch (JavaModelException e) {}
+		}
+		
 		IMember memberToSelect= null;
 		if (element != null) {
 			if (element instanceof IMember) {
@@ -445,7 +460,7 @@ public class ContractHierarchyViewPart extends ViewPart {
 				int kind= element.getElementType();
 				if (kind != IJavaElement.JAVA_PROJECT && kind != IJavaElement.PACKAGE_FRAGMENT_ROOT && kind != IJavaElement.PACKAGE_FRAGMENT) {
 					element= null;
-					C4JActivator.logErrorMessage("Invalid type hierarchy input type.");//$NON-NLS-1$
+					C4JActivator.logErrorMessage("Invalid contract hierarchy input type.");//$NON-NLS-1$
 				}
 			}
 		}
