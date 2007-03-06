@@ -165,7 +165,7 @@ function adapt_c4jlink(category, page) {
 	</div>
 	
 	<div id="footer">
-		<p>Written by Sascha Zelzer &copy; 2006</p>
+		<p>Written by Sascha Zelzer &copy; 2006 - 2007</p>
 	</div>
 	
 	</div>
