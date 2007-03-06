@@ -245,6 +245,8 @@ public class ContractReferenceModel {
 	}
 	
 	synchronized static public Boolean isContracted(IResource resource) {
+		if (resource == null) return false;
+		
 		Boolean contracted = null;
 		try {
 			contracted = (Boolean)resource.getSessionProperty(QN_CONTRACTED_PROPERTY);

@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.IWorkingCopyProvider;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -25,8 +26,6 @@ public abstract class ContractHierarchyContentProvider implements IStructuredCon
 	
 	protected ContractHierarchyLifeCycle fTypeHierarchy;
 	protected IMember[] fMemberFilter;
-	
-	protected TreeViewer fViewer;
 
 	private ViewerFilter fWorkingSetFilter;
 	private ConditionOverrideTester fMethodOverrideTester;
@@ -123,32 +122,9 @@ public abstract class ContractHierarchyContentProvider implements IStructuredCon
 	 * Called for the root element
 	 * @see IStructuredContentProvider#getElements	 
 	 */
-	public Object[] getElements(Object parent) {
-		ArrayList<IType> types= new ArrayList<IType>();
-		getRootTypes(types);
-		for (int i= types.size() - 1; i >= 0; i--) {
-			IType curr= (IType) types.get(i);
-			try {
-				if (!isInControl(curr)) {
-					types.remove(i);
-				}
-			} catch (JavaModelException e) {
-				// ignore
-			}
-		}
-		return types.toArray();
-	}
+	abstract public Object[] getElements(Object parent);
 	
-	protected void getRootTypes(List<IType> res) {
-		IContractHierarchy hierarchy= getHierarchy();
-		if (hierarchy != null) {
-			IType input= hierarchy.getType();
-			if (input != null) {
-				res.add(input);
-			}
-			// opened on a region: dont show
-		}
-	}
+	
 	
 	protected void addCompatibleMethods(IMethod filterMethod, IType typeToFindIn, List children) throws JavaModelException {
 		boolean filterMethodOverrides= initializeConditionOverrideTester(filterMethod, typeToFindIn);
@@ -231,8 +207,7 @@ public abstract class ContractHierarchyContentProvider implements IStructuredCon
 	 * @see IContentProvider#inputChanged
 	 */
 	public void inputChanged(Viewer part, Object oldInput, Object newInput) {
-		Assert.isTrue(part instanceof TreeViewer);
-		fViewer= (TreeViewer)part;
+		Assert.isTrue(part instanceof StructuredViewer && part instanceof IContractHierarchyViewer);
 	}
 	
 	/*

@@ -45,6 +45,13 @@ public class ToggleViewAction extends Action {
 			setDescription(ContractHierarchyMessages.ToggleViewAction_vajhierarchy_description); 
 			setToolTipText(ContractHierarchyMessages.ToggleViewAction_vajhierarchy_tooltip); 
 			JavaPluginImages.setLocalImageDescriptors(this, "hierarchy_co.gif"); //$NON-NLS-1$
+		} else if (viewerIndex == ContractHierarchyViewPart.HIERARCHY_MODE_GRAPH) {
+			// TODO Update graph info
+			setText("Graph"); 
+			contextHelpId= IJavaHelpContextIds.SHOW_HIERARCHY;
+			setDescription(ContractHierarchyMessages.ToggleViewAction_vajhierarchy_description); 
+			setToolTipText("Graph"); 
+			JavaPluginImages.setLocalImageDescriptors(this, "hierarchy_co.gif"); //$NON-NLS-1$
 		} else {
 			Assert.isTrue(false);
 		}		

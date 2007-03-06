@@ -10,6 +10,7 @@
  *******************************************************************************/
 package net.sourceforge.c4jplugin.internal.ui.contracthierarchy.tree;
 
+import java.util.Collections;
 import java.util.List;
 
 import net.sourceforge.c4jplugin.internal.ui.contracthierarchy.ContractHierarchyLifeCycle;
@@ -110,9 +111,7 @@ public class TraditionalHierarchyViewer extends TreeContractHierarchyViewer {
 			IContractHierarchy hierarchy= getHierarchy();
 			if (hierarchy != null) {
 				IType[] classes= hierarchy.getRootContracts();
-				for (IType clazz : classes) {
-					res.add(clazz);
-				}
+				Collections.addAll(res, classes);
 			}
 		}
 				

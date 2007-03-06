@@ -35,6 +35,32 @@ public abstract class TreeContractHierarchyContentProvider
 		super(lifecycle);
 	}
 	
+	public Object[] getElements(Object parent) {
+		ArrayList<IType> types= new ArrayList<IType>();
+		getRootTypes(types);
+		for (int i= types.size() - 1; i >= 0; i--) {
+			IType curr= (IType) types.get(i);
+			try {
+				if (!isInControl(curr)) {
+					types.remove(i);
+				}
+			} catch (JavaModelException e) {
+				// ignore
+			}
+		}
+		return types.toArray();
+	}
+	
+	protected void getRootTypes(List<IType> res) {
+		IContractHierarchy hierarchy= getHierarchy();
+		if (hierarchy != null) {
+			IType input= hierarchy.getType();
+			if (input != null) {
+				res.add(input);
+			}
+			// opened on a region: dont show
+		}
+	}
 	
 	/*
 	 * Called for the tree children.

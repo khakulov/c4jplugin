@@ -1,7 +1,9 @@
 package net.sourceforge.c4jplugin.internal.ui.contracthierarchy;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
@@ -22,6 +24,7 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.ITypeHierarchyChangedListener;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 
 public class ContractHierarchy implements IContractHierarchy,
@@ -84,6 +87,31 @@ public class ContractHierarchy implements IContractHierarchy,
 				typeHierarchy = type.newTypeHierarchy(subpm1);
 			else
 				typeHierarchy = type.newSupertypeHierarchy(subpm1);
+			
+			if (DEBUG) {
+				System.out.print("TYPE HIERARCHY FOR " + type.getElementName() + " contains: ");
+				for (IType t : typeHierarchy.getAllTypes()) {
+					System.out.print(t.getElementName() + " ");
+				}
+				System.out.println("");
+				for (IType t : typeHierarchy.getAllTypes()) {
+					System.out.print("SUPER TYPES FOR " + t.getElementName() + " are: ");
+					for (IType s : typeHierarchy.getAllSupertypes(t)) {
+						System.out.print(s.getElementName() + " ");
+					}
+					System.out.println("");
+					
+					System.out.print("SUB TYPES FOR " + t.getElementName() + " are: ");
+					for (IType s : typeHierarchy.getAllSubtypes(t)) {
+						System.out.print(s.getElementName() + " ");
+					}
+					System.out.println("");
+				}
+				
+				
+				
+			}
+			
 			
 			IProgressMonitor subpm2 = null;
 			if (pm != null) subpm2 = new SubProgressMonitor(pm, 100);
@@ -185,13 +213,14 @@ public class ContractHierarchy implements IContractHierarchy,
 	}
 
 	public boolean contains(IType type) {
+		//	root classes
+		if (this.rootContracts.contains(type)) return true;
+		
 		// classes
-		if (this.contractToSupercontracts.get(type) != null) {
+		Vector<IType> supers = this.contractToSupercontracts.get(type);
+		if (supers != null) {
 			return true;
 		}
-
-		// root classes
-		if (this.rootContracts.contains(type)) return true;
 
 		return false;
 	}
@@ -204,9 +233,10 @@ public class ContractHierarchy implements IContractHierarchy,
 
 	public IType[] getAllContracts() {
 		Vector<IType> classes = (Vector<IType>)this.rootContracts.clone();
-		for (Vector<IType> superClasses : this.contractToSupercontracts.values()){
-			addAllCheckingDuplicates(classes, superClasses);
+		for (IType root : this.rootContracts) {
+			addAllCheckingDuplicates(classes, Arrays.asList(getAllSubcontracts(root)));
 		}
+		
 		return classes.toArray(new IType[classes.size()]);
 	}
 
@@ -309,44 +339,9 @@ public class ContractHierarchy implements IContractHierarchy,
 		return -1;
 	}
 
-	public IType[] getExtendingContracts(IType type) {
-		return getExtendingContracts0(type);
-	}
-	
-	private IType[] getExtendingContracts0(IType extendedInterface) {
-		ArrayList<IType> contractList = new ArrayList<IType>();
-		for (IType type : this.contractToSupercontracts.keySet()) {
-			
-			Vector<IType> superInterfaces = this.contractToSupercontracts.get(type);
-			if (superInterfaces != null) {
-				for (IType superInterface : superInterfaces) {
-					if (superInterface.equals(extendedInterface)) {
-						contractList.add(type);
-					}
-				}
-			}
-		}
-		IType[] extendingContracts = new IType[contractList.size()];
-		contractList.toArray(extendingContracts);
-		return extendingContracts;
-	}
-	
 
 	public IType[] getRootContracts() {
-		IType[] allInterfaces = getAllContracts();
-		IType[] roots = new IType[allInterfaces.length];
-		int rootNumber = 0;
-		for (int i = 0; i < allInterfaces.length; i++) {
-			IType[] superInterfaces = getSupercontracts(allInterfaces[i]);
-			if (superInterfaces == null || superInterfaces.length == 0) {
-				roots[rootNumber++] = allInterfaces[i];
-			}
-		}
-		IType[] result = new IType[rootNumber];
-		if (result.length > 0) {
-			System.arraycopy(roots, 0, result, 0, rootNumber);
-		}
-		return result;
+		return this.rootContracts.toArray(new IType[this.rootContracts.size()]);
 	}
 
 
@@ -429,16 +424,20 @@ public class ContractHierarchy implements IContractHierarchy,
 	protected void compute() throws JavaModelException {
 		initialize(1);
 		
+		if (DEBUG) System.out.println("BEGIN COMPUTING CONTRACT HIERARCHY");
+		
 		// root contracts
-		IType[] rootClasses = typeHierarchy.getRootClasses();
-		computeRootContracts(rootClasses, this.rootContracts);
+		computeRootContracts(this.typeHierarchy, this.rootContracts);
 		
-		IType[] rootInterfaces = typeHierarchy.getRootInterfaces();
-		computeRootContracts(rootInterfaces, this.rootContracts);
-		
-		
-		
-		IType[] classes = typeHierarchy.getAllClasses();
+		if (DEBUG) {
+			System.out.print("ROOT CONTRACTS ARE : ");
+			for (IType type : getRootContracts()) {
+				System.out.print(type.getElementName() + " ");
+			}
+			System.out.println("");
+		}
+				
+		IType[] classes = typeHierarchy.getAllTypes();
 		for (IType clazz : classes) {
 			IResource contract = ContractReferenceModel.getDirectContract(clazz.getUnderlyingResource());
 			if (contract == null) continue;
@@ -450,80 +449,119 @@ public class ContractHierarchy implements IContractHierarchy,
 			cacheFlags(contractType, contractType.getFlags());
 			
 			// contract to supercontracts
-			if (this.rootContracts.contains(contractType)) {
-				this.contractToSupercontracts.put(contractType, null);
-			}
-			else {
+			if (!this.rootContracts.contains(contractType)) {
 				Vector<IType> supercontracts = new Vector<IType>();
 				computeSupercontracts(clazz, supercontracts);
-				this.contractToSupercontracts.put(contractType, supercontracts);
+				if (supercontracts.size() > 0)
+					this.contractToSupercontracts.put(contractType, supercontracts);
+			}
+			
+			if (DEBUG) {
+				System.out.print("SUPER CONTRACTS FOR " + contractType.getElementName() + " ARE : ");
+				for (IType type : getSupercontracts(contractType)) {
+					System.out.print(type.getElementName() + " ");
+				}
+				System.out.println("");
 			}
 			
 			// contract to subcontracts
 			Vector<IType> subcontracts = new Vector<IType>();
 			computeSubcontracts(clazz, subcontracts);
-			this.contractToSubcontracts.put(contractType, subcontracts);
+			if (subcontracts.size() > 0)
+				this.contractToSubcontracts.put(contractType, subcontracts);
 			
+			if (DEBUG) {
+				System.out.print("SUB CONTRACTS FOR " + contractType.getElementName() + " ARE : ");
+				for (IType type : getSubcontracts(contractType)) {
+					System.out.print(type.getElementName() + " ");
+				}
+				System.out.println("");
+			}
+			
+		}
+		
+		if (DEBUG) {
+			System.out.print("Contract hierarchy of " + (getType() == null ? "null" : getType().getElementName()) + " contains: ");
+			for (IType type : getAllContracts()) {
+				System.out.print(type.getElementName() + " ");
+			}
+			System.out.println("");
 		}
 
 	}
 	
-	private void computeSubcontracts(IType type, Vector<IType> subcontracts) throws JavaModelException {
-		Vector<IType> subs = new Vector<IType>();
-		IType[] subtypes = typeHierarchy.getSubtypes(type);
-		if (subtypes != null) {
-			for (IType subtype : subtypes) {
-				IResource contract = ContractReferenceModel.getDirectContract(subtype.getUnderlyingResource());
-				if (contract != null) {
-					IType sub = ContractReferenceUtil.getType(JavaCore.create(contract));
-					if (sub != null) subs.add(sub);
+	private void computeSubcontracts(IType type, Vector<IType> res) throws JavaModelException {
+		Vector<IType> subTypes = new Vector<IType>();
+		Collections.addAll(subTypes, this.typeHierarchy.getAllSubtypes(type));
+		
+		for (IType subType : subTypes) {
+			
+			IResource subContract = ContractReferenceModel.getDirectContract(subType.getUnderlyingResource());
+			if (subContract == null) continue;
+			
+			boolean bIsSub = true;
+			for (IType superType : this.typeHierarchy.getAllSupertypes(subType)) {
+				if (!subTypes.contains(superType)) continue;
+				
+				if (ContractReferenceModel.getDirectContract(superType.getUnderlyingResource()) != null) {
+					bIsSub = false;
+					break;
 				}
 			}
+			
+			if (bIsSub) {
+				res.add(ContractReferenceUtil.getType(JavaCore.create(subContract)));
+			}
 		}
-	
-		addAllCheckingDuplicates(subcontracts, subs);
 	}
 	
-	private void computeSupercontracts(IType type, Vector<IType> supercontracts) throws JavaModelException {
-		Vector<IType> supers = new Vector<IType>();
-		IType superclass = typeHierarchy.getSuperclass(type);
-		if (superclass != null) {
-			IResource contract = ContractReferenceModel.getDirectContract(superclass.getUnderlyingResource());
-			if (contract != null) {
-				IType supertype = ContractReferenceUtil.getType(JavaCore.create(contract));
-				if (supertype != null) supers.add(supertype);
+	private void computeSupercontracts(IType type, Vector<IType> res) throws JavaModelException {
+		Vector<IType> superTypes = new Vector<IType>();
+		Collections.addAll(superTypes, this.typeHierarchy.getAllSupertypes(type));
+		
+		for (IType superType : superTypes) {
+			
+			IResource superContract = ContractReferenceModel.getDirectContract(superType.getUnderlyingResource());
+			if (superContract == null) continue;
+			
+			boolean bIsSuper = true;
+			for (IType subType : this.typeHierarchy.getAllSubtypes(superType)) {
+				if (!superTypes.contains(subType)) continue;
+				
+				if (ContractReferenceModel.getDirectContract(subType.getUnderlyingResource()) != null) {
+					bIsSuper = false;
+					break;
+				}
+			}
+			
+			if (bIsSuper) {
+				res.add(ContractReferenceUtil.getType(JavaCore.create(superContract)));
 			}
 		}
 		
-		IType[] superinterfaces = typeHierarchy.getSuperInterfaces(type);
-		if (superinterfaces != null) {
-			for (IType superinterface : superinterfaces) {
-				IResource contract = ContractReferenceModel.getDirectContract(superinterface.getUnderlyingResource());
-				if (contract != null) {
-					IType supertype = ContractReferenceUtil.getType(JavaCore.create(contract));
-					if (supertype != null) supers.add(supertype);
-				}
-			}
-		}
-		
-		addAllCheckingDuplicates(supercontracts, supers);
 	}
 	
-	private void computeRootContracts(IType[] types, Vector<IType> rootcontracts) throws JavaModelException {
-		if (types == null || types.length == 0) return;
-		for (IType type : types) {
-			IResource rootContract = ContractReferenceModel.getDirectContract(type.getUnderlyingResource());
-			if (rootContract == null) {
-				computeRootContracts(typeHierarchy.getSubtypes(type), rootcontracts);
-			}
-			else {
-				IType rootType = ContractReferenceUtil.getType(JavaCore.create(rootContract));
-				if (!rootcontracts.contains(rootType)) {
-					rootcontracts.add(rootType);
+	private void computeRootContracts(ITypeHierarchy hierarchy, Vector<IType> res) throws JavaModelException {
+		IType[] allTypes = hierarchy.getAllTypes();
+		for (IType type : allTypes) {
+			IResource contract = ContractReferenceModel.getDirectContract(type.getUnderlyingResource());
+			if (contract == null) continue;
+			
+			boolean isRoot = true;
+			IType[] supers = hierarchy.getAllSupertypes(type);
+			for (IType superType : supers) {
+				if (ContractReferenceModel.isContracted(superType.getUnderlyingResource())) {
+					isRoot = false;
+					break;
 				}
+			}
+			
+			if (isRoot) {
+				res.add(ContractReferenceUtil.getType(JavaCore.create(contract)));
 			}
 		}
 	}
+	
 		
 	public void removeContractHierarchyChangedListener(
 			IContractHierarchyChangedListener listener) {

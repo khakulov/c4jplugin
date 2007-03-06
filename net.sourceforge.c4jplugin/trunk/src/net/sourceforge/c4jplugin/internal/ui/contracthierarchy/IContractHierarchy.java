@@ -114,18 +114,6 @@ IType[] getAllSupercontracts(IType type);
  */
 int getCachedFlags(IType type);
 
-/**
- * Returns all contracts resolved to extend the given contract,
- * in no particular order, limited to the interfaces in this
- * hierarchy's graph.
- * Returns an empty collection if the given type is a class, or
- * if no interfaces were resolved to extend the given interface.
- * 
- * @param type the given type 
- * @return all interfaces resolved to extend the given interface limited to the interfaces in this
- * hierarchy's graph, an empty array if none.
- */
-IType[] getExtendingContracts(IType type);
 
 /**
  * Returns all classes in the graph which have no resolved superclass,
