@@ -8,7 +8,10 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package net.sourceforge.c4jplugin.internal.ui.contracthierarchy;
+package net.sourceforge.c4jplugin.internal.ui.contracthierarchy.actions;
+
+import net.sourceforge.c4jplugin.internal.ui.contracthierarchy.ContractHierarchyMessages;
+import net.sourceforge.c4jplugin.internal.ui.contracthierarchy.ContractHierarchyViewPart;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;

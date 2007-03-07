@@ -6,6 +6,7 @@ import java.util.List;
 
 import net.sourceforge.c4jplugin.C4JActivator;
 import net.sourceforge.c4jplugin.internal.core.ContractReferenceModel;
+import net.sourceforge.c4jplugin.internal.ui.contracthierarchy.actions.EnableMemberFilterAction;
 import net.sourceforge.c4jplugin.internal.ui.contracthierarchy.tree.SubContractHierarchyViewer;
 import net.sourceforge.c4jplugin.internal.ui.contracthierarchy.tree.SuperContractHierarchyViewer;
 import net.sourceforge.c4jplugin.internal.ui.contracthierarchy.tree.TraditionalHierarchyViewer;
@@ -823,6 +824,11 @@ public class ContractHierarchyViewPart extends ViewPart {
 			viewMenu.add(action);
 			action.setEnabled(false);
 		}
+		viewMenu.add(new Separator());
+		
+		// set the presentation menu items
+		
+		
 		viewMenu.add(new Separator());
 		
 		fWorkingSetActionGroup.fillViewMenu(viewMenu);
