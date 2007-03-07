@@ -54,7 +54,7 @@ public class ZestContractHierarchyViewer extends StaticGraphViewer implements
 		
 		fLabelProvider= new HierarchyLabelProvider(lifeCycle);
 		
-		setLabelProvider(new DecoratingZestHierarchyLabelProvider(fLabelProvider));
+		setLabelProvider(new ZestDecoratingHierarchyLabelProvider(fLabelProvider));
 		setUseHashlookup(true);
 		setContentProvider(new ZestContractHierarchyContentProvider(lifeCycle));
 		setComparator(new HierarchyViewerSorter(lifeCycle));

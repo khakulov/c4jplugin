@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.sourceforge.c4jplugin.C4JActivator;
+import net.sourceforge.c4jplugin.internal.ui.contracthierarchy.actions.ShowInheritedMembersAction;
+import net.sourceforge.c4jplugin.internal.ui.contracthierarchy.actions.SortByDefiningTypeAction;
 import net.sourceforge.c4jplugin.internal.util.SelectionUtil;
 
 import org.eclipse.jdt.core.IMethod;
