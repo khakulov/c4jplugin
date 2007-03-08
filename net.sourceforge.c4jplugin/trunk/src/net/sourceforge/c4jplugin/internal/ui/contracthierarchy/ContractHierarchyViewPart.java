@@ -13,6 +13,7 @@ import net.sourceforge.c4jplugin.internal.ui.contracthierarchy.actions.HistoryDr
 import net.sourceforge.c4jplugin.internal.ui.contracthierarchy.actions.ShowQualifiedTypeNamesAction;
 import net.sourceforge.c4jplugin.internal.ui.contracthierarchy.actions.ToggleLinkingAction;
 import net.sourceforge.c4jplugin.internal.ui.contracthierarchy.actions.ToggleOrientationAction;
+import net.sourceforge.c4jplugin.internal.ui.contracthierarchy.actions.ToggleRepresentationAction;
 import net.sourceforge.c4jplugin.internal.ui.contracthierarchy.actions.ToggleViewAction;
 import net.sourceforge.c4jplugin.internal.ui.contracthierarchy.tree.SubContractHierarchyViewer;
 import net.sourceforge.c4jplugin.internal.ui.contracthierarchy.tree.SuperContractHierarchyViewer;
@@ -134,6 +135,8 @@ import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 
+import com.sun.org.apache.regexp.internal.RE;
+
 public class ContractHierarchyViewPart extends ViewPart {
 	
 	public static final int VIEW_LAYOUT_VERTICAL= 0;
@@ -141,19 +144,26 @@ public class ContractHierarchyViewPart extends ViewPart {
 	public static final int VIEW_LAYOUT_SINGLE= 2;
 	public static final int VIEW_LAYOUT_AUTOMATIC= 3;
 	
+	public static final int REPRESENTATION_MODE_TREE = 0;
+	public static final int REPRESENTATION_MODE_GRAPH = 1;
+	
 	public static final int HIERARCHY_MODE_CLASSIC= 2;
 	public static final int HIERARCHY_MODE_SUPERTYPES= 0;	
 	public static final int HIERARCHY_MODE_SUBTYPES= 1;
-	public static final int HIERARCHY_MODE_GRAPH=3;
+	
+	// the index of this mode must always come last
+	public static final int HIERARCHY_SPECIALMODE_GRAPH = 3;
 
 	private static final String DIALOGSTORE_HIERARCHYVIEW= "ContractHierarchyViewPart.hierarchyview";	 //$NON-NLS-1$
 	private static final String DIALOGSTORE_VIEWLAYOUT= "ContractHierarchyViewPart.orientation";	 //$NON-NLS-1$
+	private static final String DIALOGSTORE_REPRESENTATION= "ContractHierarchyViewPart.representation";	 //$NON-NLS-1$
 	private static final String DIALOGSTORE_QUALIFIED_NAMES= "ContractHierarchyViewPart.qualifiednames";	 //$NON-NLS-1$
 	private static final String DIALOGSTORE_LINKEDITORS= "ContractHierarchyViewPart.linkeditors";	 //$NON-NLS-1$
 
 	private static final String TAG_INPUT= "input"; //$NON-NLS-1$
 	private static final String TAG_VIEW= "view"; //$NON-NLS-1$
 	private static final String TAG_LAYOUT= "orientation"; //$NON-NLS-1$
+	private static final String TAG_REPRESENTATION = "representation"; //$NON_NLS-1$
 	private static final String TAG_RATIO= "ratio"; //$NON-NLS-1$
 	private static final String TAG_SELECTION= "selection"; //$NON-NLS-1$
 	private static final String TAG_VERTICAL_SCROLL= "vertical_scroll"; //$NON-NLS-1$
@@ -187,6 +197,8 @@ public class ContractHierarchyViewPart extends ViewPart {
 	private int fCurrentLayout;
 	private boolean fInComputeLayout;
 	
+	private int fCurrentRepresentation;
+	
 	private boolean fLinkingEnabled;
 	private boolean fShowQualifiedTypeNames;
 	private boolean fSelectInEditor;
@@ -198,6 +210,8 @@ public class ContractHierarchyViewPart extends ViewPart {
 	
 	private int fCurrentViewerIndex;
 	private StructuredViewer[] fAllViewers;
+	
+	//private ZestContractHierarchyViewer fGraphViewer;
 	
 	private MethodsViewer fMethodsViewer;	
 	
@@ -216,6 +230,7 @@ public class ContractHierarchyViewPart extends ViewPart {
 	private Composite fParent;
 	
 	private ToggleViewAction[] fViewActions;
+	private ToggleRepresentationAction[] fRepActions;
 	private ToggleLinkingAction fToggleLinkingAction;
 	private HistoryDropDownAction fHistoryDropDownAction;
 	private ToggleOrientationAction[] fToggleOrientationActions;
@@ -256,12 +271,17 @@ public class ContractHierarchyViewPart extends ViewPart {
 		
 		fInputHistory= new ArrayList();
 		fAllViewers= null;
+		//fGraphViewer = null;
 				
 		fViewActions= new ToggleViewAction[] {
 			new ToggleViewAction(this, HIERARCHY_MODE_CLASSIC),
 			new ToggleViewAction(this, HIERARCHY_MODE_SUPERTYPES),
 			new ToggleViewAction(this, HIERARCHY_MODE_SUBTYPES),
-			new ToggleViewAction(this, HIERARCHY_MODE_GRAPH)
+		};
+		
+		fRepActions = new ToggleRepresentationAction[] {
+			new ToggleRepresentationAction(this, REPRESENTATION_MODE_GRAPH),
+			new ToggleRepresentationAction(this, REPRESENTATION_MODE_TREE)
 		};
 		
 		fDialogSettings= C4JActivator.getDefault().getDialogSettings();
@@ -339,7 +359,7 @@ public class ContractHierarchyViewPart extends ViewPart {
 			}
 		}
 		if (IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE.equals(property)) {
-			updateHierarchyViewer(true);
+			updateHierarchyViewer(true, true);
 			updateTitle();
 		}
 	}
@@ -531,7 +551,7 @@ public class ContractHierarchyViewPart extends ViewPart {
 			internalSelectType(null, false); // clear selection
 			fIsEnableMemberFilter= false;
 			if (!inputElement.equals(prevInput)) {
-				updateHierarchyViewer(true);
+				updateHierarchyViewer(true, true);
 			}
 			IType root= getSelectableType(inputElement);
 			internalSelectType(root, true);
@@ -554,7 +574,7 @@ public class ContractHierarchyViewPart extends ViewPart {
 		fInputElement= null;
 		fHierarchyLifeCycle.freeHierarchy();
 		
-		updateHierarchyViewer(false);
+		updateHierarchyViewer(false, false);
 		updateToolbarButtons();
 	}
 
@@ -630,21 +650,20 @@ public class ContractHierarchyViewPart extends ViewPart {
 		StructuredViewer vajViewer= new TraditionalHierarchyViewer(fViewerbook, fHierarchyLifeCycle, this);
 		initializeTypesViewer(vajViewer, keyListener, "net.sourceforge.c4jplugin.ui.contracthierarchy.tree");
 		
-		// TODO graph viewer
 		StructuredViewer graphViewer= new ZestContractHierarchyViewer(fViewerbook, fHierarchyLifeCycle, this);
 		initializeTypesViewer(graphViewer, keyListener, "net.sourceforge.c4jplugin.ui.contracthierarchy.graph");
-		
-		
+				
 		fAllViewers= new StructuredViewer[4];
 		fAllViewers[HIERARCHY_MODE_SUPERTYPES]= superTypesViewer;
 		fAllViewers[HIERARCHY_MODE_SUBTYPES]= subTypesViewer;
 		fAllViewers[HIERARCHY_MODE_CLASSIC]= vajViewer;
-		fAllViewers[HIERARCHY_MODE_GRAPH] = graphViewer;
+		fAllViewers[HIERARCHY_SPECIALMODE_GRAPH] = graphViewer;
+		
 		
 		int currViewerIndex;
 		try {
 			currViewerIndex= fDialogSettings.getInt(DIALOGSTORE_HIERARCHYVIEW);
-			if (currViewerIndex < 0 || currViewerIndex > 3) {
+			if (currViewerIndex < 0 || currViewerIndex > 2) {
 				currViewerIndex= HIERARCHY_MODE_CLASSIC;
 			}
 		} catch (NumberFormatException e) {
@@ -653,12 +672,26 @@ public class ContractHierarchyViewPart extends ViewPart {
 			
 		fEmptyTypesViewer= new Label(fViewerbook, SWT.TOP | SWT.LEFT | SWT.WRAP);
 		
-		for (int i= 0; i < fAllViewers.length; i++) {
-			fAllViewers[i].setInput(fAllViewers[i]);
+		for (StructuredViewer viewer : fAllViewers) {
+			viewer.setInput(viewer);
 		}
+		
+		int currRepresMode;
+		try {
+			currRepresMode = fDialogSettings.getInt(DIALOGSTORE_REPRESENTATION);
+			if (currRepresMode != REPRESENTATION_MODE_GRAPH ||
+					currRepresMode != REPRESENTATION_MODE_TREE) {
+				currRepresMode = REPRESENTATION_MODE_GRAPH;
+			}
+		} catch (NumberFormatException e) {
+			currRepresMode = REPRESENTATION_MODE_GRAPH;
+		}
+		
 		
 		// force the update
 		fCurrentViewerIndex= -1;
+		fCurrentRepresentation = -1;
+		setRepresentationMode(currRepresMode, false);
 		setHierarchyMode(currViewerIndex);
 				
 		return fViewerbook;
@@ -674,7 +707,7 @@ public class ContractHierarchyViewPart extends ViewPart {
 							fHierarchyLifeCycle.contractHierarchyChanged(hierarchy);
 							doTypeHierarchyChangedOnViewers(null);
 						}
-						updateHierarchyViewer(false);
+						updateHierarchyViewer(false, false);
 						return;
 					}
  				}
@@ -826,15 +859,17 @@ public class ContractHierarchyViewPart extends ViewPart {
 		// set the filter menu items
 		IActionBars actionBars= getViewSite().getActionBars();
 		IMenuManager viewMenu= actionBars.getMenuManager();
-		for (int i= 0; i < fViewActions.length; i++) {
-			ToggleViewAction action= fViewActions[i];
+		for (ToggleViewAction action : fViewActions) {
 			viewMenu.add(action);
 			action.setEnabled(false);
 		}
 		viewMenu.add(new Separator());
 		
 		// set the presentation menu items
-		
+		for (ToggleRepresentationAction action : fRepActions) {
+			viewMenu.add(action);
+			action.setEnabled(false);
+		}
 		
 		viewMenu.add(new Separator());
 		
@@ -863,7 +898,7 @@ public class ContractHierarchyViewPart extends ViewPart {
 		int nHierarchyViewers= fAllViewers.length; 
 		StructuredViewer[] trackedViewers= new StructuredViewer[nHierarchyViewers + 1];
 		for (int i= 0; i < nHierarchyViewers; i++) {
-			trackedViewers[i]= (StructuredViewer)fAllViewers[i];
+			trackedViewers[i]= fAllViewers[i];
 		}
 		trackedViewers[nHierarchyViewers]= fMethodsViewer;
 		fSelectionProviderMediator= new SelectionProviderMediator(trackedViewers, getCurrentViewer());
@@ -971,11 +1006,51 @@ public class ContractHierarchyViewPart extends ViewPart {
 		}
 	}
 	
+	public void setRepresentationMode(int representation, boolean update) {
+		System.out.println("setRepMode called with " + representation + ", curr = " + fCurrentRepresentation);
+		if (fCurrentRepresentation != representation) {
+			Assert.isNotNull(fAllViewers);
+			if (representation != REPRESENTATION_MODE_GRAPH
+					&& representation != REPRESENTATION_MODE_TREE) {
+				return;
+			}
+			
+			System.out.println("Setting rep mode to " + representation);
+			fCurrentRepresentation = representation;
+			fDialogSettings.put(DIALOGSTORE_REPRESENTATION, representation);
+			
+			if (update) {
+				updateHierarchyViewer(true, false);
+				
+				if (fInputElement != null) {
+					ISelection currSelection= getCurrentViewer().getSelection();
+					if (currSelection == null || currSelection.isEmpty()) {
+						internalSelectType(getSelectableType(fInputElement), false);
+						currSelection= getCurrentViewer().getSelection();
+					}
+					if (!fIsEnableMemberFilter) {
+						typeSelectionChanged(currSelection);
+					}
+				}		
+				//updateTitle();
+						
+				getCurrentViewer().getControl().setFocus();
+			}
+		}
+		for (ToggleRepresentationAction action : fRepActions) {
+			action.setChecked(fCurrentRepresentation == action.getRepresentation());
+		}
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.ITypeHierarchyViewPart#getViewLayout()
 	 */
 	public int getViewLayout() {
 		return fCurrentLayout;
+	}
+	
+	public int getRepresentationMode() {
+		return fCurrentRepresentation;
 	}
 		
 	private void updateCheckedState() {
@@ -1084,9 +1159,9 @@ public class ContractHierarchyViewPart extends ViewPart {
 	/*
 	 * When the input changed or the hierarchy pane becomes visible,
 	 * <code>updateHierarchyViewer<code> brings up the correct view and refreshes
-	 * the current tree
+	 * the current tree or graph
 	 */
-	private void updateHierarchyViewer(final boolean doExpand) {
+	private void updateHierarchyViewer(final boolean doExpand, final boolean inputChanged) {
 		if (fInputElement == null) {
 			fNoHierarchyShownLabel.setText(ContractHierarchyMessages.TypeHierarchyViewPart_empty); 
 			fPagebook.showPage(fNoHierarchyShownLabel);
@@ -1095,6 +1170,9 @@ public class ContractHierarchyViewPart extends ViewPart {
 				Runnable runnable= new Runnable() {
 					public void run() {
 						((IContractHierarchyViewer)getCurrentViewer()).updateContent(doExpand); // refresh
+						if (inputChanged && getCurrentViewer() instanceof ZestContractHierarchyViewer) {
+							((ZestContractHierarchyViewer)getCurrentViewer()).applyLayout();
+						}
 					}
 				};
 				BusyIndicator.showWhile(getDisplay(), runnable);
@@ -1158,7 +1236,7 @@ public class ContractHierarchyViewPart extends ViewPart {
 					selected.toArray(memberFilter);
 				}
 				setMemberFilter(memberFilter);
-				updateHierarchyViewer(true);
+				updateHierarchyViewer(true, true);
 				updateTitle();
 				internalSelectType(fSelectedType, true);	
 			}
@@ -1259,23 +1337,29 @@ public class ContractHierarchyViewPart extends ViewPart {
 	
 	private void updateToolbarButtons() {
 		boolean isType= fInputElement instanceof IType;
-		for (int i= 0; i < fViewActions.length; i++) {
-			ToggleViewAction action= fViewActions[i];
+		for (ToggleViewAction action : fViewActions) {
 			if (action.getViewerIndex() == HIERARCHY_MODE_CLASSIC) {
 				action.setEnabled(fInputElement != null);
 			} else {
 				action.setEnabled(isType);
 			}
 		}
+		
+		for (ToggleRepresentationAction action : fRepActions) {
+			action.setEnabled(fInputElement != null);
+		}
 	}
 		
 
 	public void setHierarchyMode(int viewerIndex) {
+		System.out.println("setHierarchyMode called with " + viewerIndex + ", curr = " + fCurrentViewerIndex);
+		
 		Assert.isNotNull(fAllViewers);
-		if (viewerIndex < fAllViewers.length && fCurrentViewerIndex != viewerIndex) {			
+		if (viewerIndex < fAllViewers.length-1 && fCurrentViewerIndex != viewerIndex) {			
 			fCurrentViewerIndex= viewerIndex;
+			((ZestContractHierarchyViewer)fAllViewers[HIERARCHY_SPECIALMODE_GRAPH]).setHierarchyMode(viewerIndex);
 			
-			updateHierarchyViewer(true);
+			updateHierarchyViewer(true, false);
 			if (fInputElement != null) {
 				ISelection currSelection= getCurrentViewer().getSelection();
 				if (currSelection == null || currSelection.isEmpty()) {
@@ -1291,8 +1375,7 @@ public class ContractHierarchyViewPart extends ViewPart {
 			fDialogSettings.put(DIALOGSTORE_HIERARCHYVIEW, viewerIndex);
 			getCurrentViewer().getControl().setFocus();
 		}
-		for (int i= 0; i < fViewActions.length; i++) {
-			ToggleViewAction action= fViewActions[i];
+		for (ToggleViewAction action : fViewActions) {
 			action.setChecked(fCurrentViewerIndex == action.getViewerIndex());
 		}
 	}
@@ -1302,6 +1385,9 @@ public class ContractHierarchyViewPart extends ViewPart {
 	}
 	
 	private StructuredViewer getCurrentViewer() {
+		if (fCurrentRepresentation == REPRESENTATION_MODE_GRAPH)
+			return fAllViewers[HIERARCHY_SPECIALMODE_GRAPH];
+		
 		return fAllViewers[fCurrentViewerIndex];
 	}
 
@@ -1314,7 +1400,7 @@ public class ContractHierarchyViewPart extends ViewPart {
 			if (!on) {
 				IType methodViewerInput= (IType) fMethodsViewer.getInput();
 				setMemberFilter(null);
-				updateHierarchyViewer(true);
+				updateHierarchyViewer(true, false);
 				updateTitle();
 			
 				if (methodViewerInput != null && ((IContractHierarchyViewer)getCurrentViewer()).isElementShown(methodViewerInput)) {
@@ -1411,7 +1497,7 @@ public class ContractHierarchyViewPart extends ViewPart {
 					return;
 				}
 				fMethodsViewer.refresh();
-				updateHierarchyViewer(false);
+				updateHierarchyViewer(false, true);
 			} else {
 				// elements in hierarchy modified
 				Object methodViewerInput= fMethodsViewer.getInput();
@@ -1422,7 +1508,7 @@ public class ContractHierarchyViewPart extends ViewPart {
 					if (changedTypes.length == 1) {
 						getCurrentViewer().refresh(changedTypes[0]);
 					} else {
-						updateHierarchyViewer(false);
+						updateHierarchyViewer(false, true);
 					}
 				} else {
 					getCurrentViewer().update(changedTypes, new String[] { IBasicPropertyConstants.P_TEXT, IBasicPropertyConstants.P_IMAGE } );
@@ -1456,6 +1542,7 @@ public class ContractHierarchyViewPart extends ViewPart {
 		}		
 		memento.putInteger(TAG_VIEW, getHierarchyMode());
 		memento.putInteger(TAG_LAYOUT, getViewLayout());
+		memento.putInteger(TAG_REPRESENTATION, getRepresentationMode());
 		memento.putInteger(TAG_QUALIFIED_NAMES, isQualifiedTypeNamesEnabled() ? 1 : 0);
 		memento.putInteger(TAG_EDITOR_LINKING, isLinkingEnabled() ? 1 : 0);	
 		
@@ -1543,10 +1630,16 @@ public class ContractHierarchyViewPart extends ViewPart {
 		fWorkingSetActionGroup.restoreState(memento);
 		setInputElement(input);
 
+		Integer rep = memento.getInteger(TAG_REPRESENTATION);
+		if (rep != null) {
+			setRepresentationMode(rep.intValue(), false);
+		}
+		
 		Integer viewerIndex= memento.getInteger(TAG_VIEW);
 		if (viewerIndex != null) {
 			setHierarchyMode(viewerIndex.intValue());
 		}
+		
 		Integer layout= memento.getInteger(TAG_LAYOUT);
 		if (layout != null) {
 			setViewLayout(layout.intValue());

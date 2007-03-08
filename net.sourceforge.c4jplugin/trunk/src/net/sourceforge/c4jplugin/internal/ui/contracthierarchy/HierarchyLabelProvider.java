@@ -81,6 +81,10 @@ public class HierarchyLabelProvider extends AppearanceAwareLabelProvider {
 		fHierarchy= lifeCycle;
 		fFilter= null;
 	}
+	
+	public ContractHierarchyLifeCycle getHierarchyLifeCycle() {
+		return fHierarchy;
+	}
 
 	/**
 	 * @return Returns the filter.

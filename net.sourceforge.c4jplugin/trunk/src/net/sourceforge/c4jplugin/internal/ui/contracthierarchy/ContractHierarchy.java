@@ -624,4 +624,52 @@ public class ContractHierarchy implements IContractHierarchy,
 		return false;
 	}
 
+	public boolean isSubcontract(IType contract) {
+		if (this.inputContract != null) {
+			IType[] subs = getAllSubcontracts(this.inputContract);
+			for (IType sub : subs) {
+				if (contract.equals(sub)) return true;
+			}
+			return false;
+		}
+		else {
+			try {
+				IResource res = ContractReferenceModel.getTarget(contract.getUnderlyingResource());
+				if (res != null) {
+					IType target = ContractReferenceUtil.getType(JavaCore.create(res));
+					IType[] subs = typeHierarchy.getAllSubtypes(typeHierarchy.getType());
+					for (IType sub : subs) {
+						if (target.equals(sub)) return true;
+					}
+					return false;
+				}
+			} catch (JavaModelException e) {}
+			return false;
+		}
+	}
+
+	public boolean isSupercontract(IType contract) {
+		if (this.inputContract != null) {
+			IType[] supers = getAllSupercontracts(this.inputContract);
+			for (IType s : supers) {
+				if (contract.equals(s)) return true;
+			}
+			return false;
+		}
+		else {
+			try {
+				IResource res = ContractReferenceModel.getTarget(contract.getUnderlyingResource());
+				if (res != null) {
+					IType target = ContractReferenceUtil.getType(JavaCore.create(res));
+					IType[] supers = typeHierarchy.getAllSupertypes(typeHierarchy.getType());
+					for (IType s : supers) {
+						if (target.equals(s)) return true;
+					}
+					return false;
+				}
+			} catch (JavaModelException e) {}
+			return false;
+		}
+	}
+
 }

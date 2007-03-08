@@ -19,13 +19,8 @@ import org.eclipse.mylar.zest.core.viewers.IGraphEntityContentProvider;
 public class ZestContractHierarchyContentProvider 
 		extends ContractHierarchyContentProvider implements IGraphEntityContentProvider {
 	
-	private Random random = null;
-	
 	public ZestContractHierarchyContentProvider(ContractHierarchyLifeCycle lifecycle) {
 		super(lifecycle);
-		
-		random = new Random();		
-		
 	}
 
 	@Override
@@ -71,7 +66,6 @@ public class ZestContractHierarchyContentProvider
 	
 	public double getWeight(Object entity1, Object entity2) {
 		return -1;
-		//return random.nextDouble();
 	}
 
 }

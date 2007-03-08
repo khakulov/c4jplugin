@@ -43,6 +43,7 @@ public class ZestContractHierarchyViewer extends StaticGraphViewer implements
 
 	private OpenAction fOpen;
 	private HierarchyLabelProvider fLabelProvider;
+	private ZestDecoratingHierarchyLabelProvider fZestLabelProvider;
 	
 	protected ResourceToItemsMapper fResourceToItemsMapper;
 	
@@ -54,7 +55,9 @@ public class ZestContractHierarchyViewer extends StaticGraphViewer implements
 		
 		fLabelProvider= new HierarchyLabelProvider(lifeCycle);
 		
-		setLabelProvider(new ZestDecoratingHierarchyLabelProvider(fLabelProvider));
+		fZestLabelProvider = new ZestDecoratingHierarchyLabelProvider(fLabelProvider);
+		setLabelProvider(fZestLabelProvider);
+		//setLabelProvider(new DecoratingJavaLabelProvider(fLabelProvider));
 		setUseHashlookup(true);
 		setContentProvider(new ZestContractHierarchyContentProvider(lifeCycle));
 		setComparator(new HierarchyViewerSorter(lifeCycle));
@@ -154,9 +157,14 @@ public class ZestContractHierarchyViewer extends StaticGraphViewer implements
 	}
 
 	public void updateContent(boolean doExpand) {
+		System.out.println("ZEST updateContent called");
 		//getControl().setRedraw(true);
 		refresh();
-		applyLayout();
+		//applyLayout();
+	}
+	
+	public void setHierarchyMode(int mode) {
+		fZestLabelProvider.setHierarchyMode(mode);
 	}
 	
 	protected ZestContractHierarchyContentProvider getHierarchyContentProvider() {

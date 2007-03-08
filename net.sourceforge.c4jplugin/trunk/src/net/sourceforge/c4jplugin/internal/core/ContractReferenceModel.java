@@ -432,6 +432,8 @@ public class ContractReferenceModel {
 	 * @return The target or null in case something went wrong
 	 */
 	synchronized static public IResource getTarget(IResource contract) {
+		if (contract == null) return null;
+		
 		try {
 			IResource target = (IResource)contract.getSessionProperty(QN_TARGET_PROPERTY);
 			return target;

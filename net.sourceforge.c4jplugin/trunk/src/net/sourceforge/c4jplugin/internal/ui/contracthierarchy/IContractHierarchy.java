@@ -154,6 +154,10 @@ IType[] getSupercontracts(IType type);
 
 boolean isSupercontract(IType possibleSupercontract, IType type);
 
+boolean isSupercontract(IType contract);
+
+boolean isSubcontract(IType contract);
+
 /**
  * Returns the type this hierarchy was computed for.
  * Returns <code>null</code> if this hierarchy was computed for a region.
