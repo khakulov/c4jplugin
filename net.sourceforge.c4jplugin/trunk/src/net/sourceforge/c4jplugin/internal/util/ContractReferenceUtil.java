@@ -38,6 +38,8 @@ import org.eclipse.osgi.util.NLS;
 
 public class ContractReferenceUtil {
 	
+	private static boolean DEBUG = true;
+	
 	static public void deleteMarkers(IProject project) throws CoreException {
 		project.deleteMarkers(IClassInvariantMarker.ID, true, IResource.DEPTH_INFINITE);
 		project.deleteMarkers(IContractedClassInvariantMarker.ID, true, IResource.DEPTH_INFINITE);
@@ -272,7 +274,7 @@ public class ContractReferenceUtil {
 	 */
 	static public Collection<IResource> checkResourceForContracts(IResource resource) {
 		try {
-			//System.out.println("Checking for contracts: " + resource.getName());
+			if (DEBUG) System.out.println("Checking for contracts: " + resource.getName());
 			Boolean contracted = ContractReferenceModel.isContracted(resource);
 			if (contracted != null && contracted == true)
 				return ContractReferenceModel.getContracts(resource);
@@ -280,20 +282,20 @@ public class ContractReferenceUtil {
 				return Collections.emptyList();
 			
 			
-			//System.out.println("Creating Java Element from resource");
+			if (DEBUG) System.out.println("Creating Java Element from resource");
 			IJavaElement javaElement = JavaCore.create(resource);
 			IType type = getType(javaElement);
 			if (type != null) {
 				
-				//System.out.println("Trying to get direct contract reference");
+				if (DEBUG) System.out.println("Trying to get direct contract reference");
 				IResource ref = AnnotationUtil.getContractReference(resource);
 				if (ref != null) {
 					// we found a class which is directly contracted
-					//System.out.println("Found direct contract " + ref.getName());
+					if (DEBUG) System.out.println("Found direct contract " + ref.getName());
 					ContractReferenceModel.addDirectContract(resource, ref);
 				}
 				
-				//System.out.println("Searching for super contracts");
+				if (DEBUG) System.out.println("Searching for super contracts");
 				// search all super types for contracts
 				Vector<IResource> contractReferences = new Vector<IResource>();
 				IType[] superTypes = type.newSupertypeHierarchy(null).getSupertypes(type);
@@ -301,7 +303,7 @@ public class ContractReferenceUtil {
 					IResource superResource = superType.getResource();
 					if (superResource == null) continue;
 					
-					//System.out.println("Checking supertype " + superResource.getName() + " for contracts");
+					if (DEBUG) System.out.println("Checking supertype " + superResource.getName() + " for contracts");
 					
 					contracted = ContractReferenceModel.isContracted(superResource);
 					if (contracted == null) {
@@ -315,7 +317,7 @@ public class ContractReferenceUtil {
 				
 				if (contractReferences.size() > 0) {
 					// this type has supercontracts
-					//System.out.println("Resource " + resource.getName() + " has " + contractReferences.size() + " contracts");
+					if (DEBUG) System.out.println("Resource " + resource.getName() + " has " + contractReferences.size() + " contracts");
 					ContractReferenceModel.addSuperContracts(resource, contractReferences);
 				}
 				
@@ -398,11 +400,11 @@ public class ContractReferenceUtil {
 			
 			submonitor = new SubProgressMonitor(monitor, 50);
 			Collection<IResource> contracts = contractVisitor.getContracts();
-			System.out.println("found " + contracts.size() + " contracts:");
+			if (DEBUG) System.out.println("found " + contracts.size() + " contracts:");
 			try {
 				submonitor.beginTask(UIMessages.Builder_creatingContractMarkers, contracts.size());
 				for (IResource contract : contracts) {
-					System.out.println(contract.getName());
+					if (DEBUG) System.out.println(contract.getName());
 					if (submonitor.isCanceled()) throw new OperationCanceledException();
 					
 					createContractMarkers(contract);

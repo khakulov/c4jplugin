@@ -9,6 +9,7 @@ import net.sourceforge.c4jplugin.internal.ui.contracthierarchy.IContractHierarch
 import net.sourceforge.c4jplugin.internal.ui.contracthierarchy.tree.TreeContractHierarchyContentProvider;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.gef.editparts.ZoomManager;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -165,6 +166,10 @@ public class ZestContractHierarchyViewer extends StaticGraphViewer implements
 	
 	public void setHierarchyMode(int mode) {
 		fZestLabelProvider.setHierarchyMode(mode);
+	}
+	
+	public ZoomManager getZoomManager() {
+		return super.getZoomManager();
 	}
 	
 	protected ZestContractHierarchyContentProvider getHierarchyContentProvider() {

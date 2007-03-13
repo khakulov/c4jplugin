@@ -251,7 +251,7 @@ public class ContractReferenceModel {
 		try {
 			contracted = (Boolean)resource.getSessionProperty(QN_CONTRACTED_PROPERTY);
 		} catch (CoreException e) {}
-		
+				
 		return contracted;
 	}
 	

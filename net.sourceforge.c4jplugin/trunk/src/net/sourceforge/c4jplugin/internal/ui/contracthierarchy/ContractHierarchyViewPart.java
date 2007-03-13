@@ -19,6 +19,7 @@ import net.sourceforge.c4jplugin.internal.ui.contracthierarchy.tree.SubContractH
 import net.sourceforge.c4jplugin.internal.ui.contracthierarchy.tree.SuperContractHierarchyViewer;
 import net.sourceforge.c4jplugin.internal.ui.contracthierarchy.tree.TraditionalHierarchyViewer;
 import net.sourceforge.c4jplugin.internal.ui.contracthierarchy.zest.ZestContractHierarchyViewer;
+import net.sourceforge.c4jplugin.internal.ui.contracthierarchy.zest.ZoomContributionItem;
 import net.sourceforge.c4jplugin.internal.util.ContractReferenceUtil;
 import net.sourceforge.c4jplugin.internal.util.ExceptionHandler;
 
@@ -85,6 +86,9 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.mylar.zest.core.viewers.AbstractStructuredGraphViewer;
+import org.eclipse.mylar.zest.core.viewers.AbstractZoomableViewer;
+import org.eclipse.mylar.zest.core.viewers.IZoomableWorkbenchPart;
+import org.eclipse.mylar.zest.core.viewers.ZoomContributionViewItem;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
@@ -211,7 +215,7 @@ public class ContractHierarchyViewPart extends ViewPart {
 	private int fCurrentViewerIndex;
 	private StructuredViewer[] fAllViewers;
 	
-	//private ZestContractHierarchyViewer fGraphViewer;
+	private ZoomContributionItem fZoomControl;
 	
 	private MethodsViewer fMethodsViewer;	
 	
@@ -1007,7 +1011,6 @@ public class ContractHierarchyViewPart extends ViewPart {
 	}
 	
 	public void setRepresentationMode(int representation, boolean update) {
-		System.out.println("setRepMode called with " + representation + ", curr = " + fCurrentRepresentation);
 		if (fCurrentRepresentation != representation) {
 			Assert.isNotNull(fAllViewers);
 			if (representation != REPRESENTATION_MODE_GRAPH
@@ -1015,7 +1018,6 @@ public class ContractHierarchyViewPart extends ViewPart {
 				return;
 			}
 			
-			System.out.println("Setting rep mode to " + representation);
 			fCurrentRepresentation = representation;
 			fDialogSettings.put(DIALOGSTORE_REPRESENTATION, representation);
 			
@@ -1040,6 +1042,9 @@ public class ContractHierarchyViewPart extends ViewPart {
 		for (ToggleRepresentationAction action : fRepActions) {
 			action.setChecked(fCurrentRepresentation == action.getRepresentation());
 		}
+		if (fZoomControl != null)
+			fZoomControl.setVisible(representation == REPRESENTATION_MODE_GRAPH);
+		
 	}
 	
 	/* (non-Javadoc)
@@ -1076,6 +1081,9 @@ public class ContractHierarchyViewPart extends ViewPart {
 	
 	private void fillMainToolBar(IToolBarManager tbmanager) {
 		tbmanager.removeAll();
+		fZoomControl = new ZoomContributionItem(((ZestContractHierarchyViewer)fAllViewers[HIERARCHY_SPECIALMODE_GRAPH]).getZoomManager());
+		tbmanager.add(fZoomControl);
+		//tbmanager.add(new Separator());
 		for (int i= 0; i < fViewActions.length; i++) {
 			tbmanager.add(fViewActions[i]);
 		}
@@ -1771,6 +1779,5 @@ public class ContractHierarchyViewPart extends ViewPart {
 	public void clearNeededRefresh() {
 		fNeedRefresh= false;
 	}
-
 
 }

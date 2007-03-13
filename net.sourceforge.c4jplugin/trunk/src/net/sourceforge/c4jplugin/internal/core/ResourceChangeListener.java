@@ -94,8 +94,14 @@ public class ResourceChangeListener implements IResourceChangeListener {
 						}
 					}
 				}
-				// resource changes or additions
+				// a contract could have been added via the
+				// NewContractWizard
+				else if (delta.getKind() == IResourceDelta.ADDED) {
+					System.out.println("Resource added: " + resource.getName());
+				}
+				// resource changes
 				else {
+					System.out.println("Resource changed: " + resource.getName());
 					// check if the resource is a contract
 					if (ContractReferenceModel.isContract(resource)) {
 						handleChangedContract(resource);

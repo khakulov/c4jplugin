@@ -85,7 +85,8 @@ public class OpenContractHierarchyDelegate extends SelectionDispatchActionDelega
 		if (input == null) return false;
 		
 		try {
-			return (ContractReferenceModel.isContracted(input.getUnderlyingResource())
+			Boolean isContracted = ContractReferenceModel.isContracted(input.getUnderlyingResource());
+			return ((isContracted != null && isContracted == true)
 					|| ContractReferenceModel.isContract(input.getUnderlyingResource()));
 		} catch (JavaModelException e) {
 			return false;
@@ -124,7 +125,8 @@ public class OpenContractHierarchyDelegate extends SelectionDispatchActionDelega
 			case IJavaElement.CLASS_FILE:
 			case IJavaElement.COMPILATION_UNIT:
 				try {
-					return (ContractReferenceModel.isContracted(((IJavaElement)input).getUnderlyingResource())
+					Boolean isContracted = ContractReferenceModel.isContracted(((IJavaElement)input).getUnderlyingResource());
+					return ((isContracted != null && isContracted == true) 
 							|| ContractReferenceModel.isContract(((IJavaElement)input).getUnderlyingResource()));
 				} catch (JavaModelException e) {
 					return false;

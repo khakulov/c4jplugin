@@ -54,7 +54,7 @@ public class ContractHierarchy implements IContractHierarchy,
 	/**
 	 * The progress monitor to report work completed too.
 	 */
-	//protected IProgressMonitor progressMonitor = null;
+	protected IProgressMonitor progressMonitor = null;
 	
 	
 	/**
@@ -80,7 +80,7 @@ public class ContractHierarchy implements IContractHierarchy,
 			
 			if (pm != null) {
 				pm.beginTask("Creating Contract Hierarchy", 300);
-				new SubProgressMonitor(pm, 200);
+				subpm1 = new SubProgressMonitor(pm, 200);
 			}
 			
 			if (computeSubcontracts)
@@ -107,11 +107,7 @@ public class ContractHierarchy implements IContractHierarchy,
 					}
 					System.out.println("");
 				}
-				
-				
-				
 			}
-			
 			
 			IProgressMonitor subpm2 = null;
 			if (pm != null) subpm2 = new SubProgressMonitor(pm, 100);
@@ -374,12 +370,17 @@ public class ContractHierarchy implements IContractHierarchy,
 
 	public synchronized void refresh(IProgressMonitor monitor) throws JavaModelException {
 		try {
-			//this.progressMonitor = monitor;
+			this.progressMonitor = monitor;
 			if (monitor != null) {
+				int num = typeHierarchy.getAllTypes().length;
+				// 5 points for checking super and sub contracts of each type
+				// 1 point for checking root types
+				// 1 point for initialization
+				int amount = num*5 + num + 1;
 				if (this.inputContract != null) {
-					monitor.beginTask(ContractHierarchyMessages.bind(ContractHierarchyMessages.hierarchy_creatingOnType, this.inputContract.getFullyQualifiedName()), 100); 
+					monitor.beginTask(ContractHierarchyMessages.bind(ContractHierarchyMessages.hierarchy_creatingOnType, this.inputContract.getFullyQualifiedName()), amount); 
 				} else {
-					monitor.beginTask(ContractHierarchyMessages.hierarchy_creating, 100); 
+					monitor.beginTask(ContractHierarchyMessages.hierarchy_creating, amount); 
 				}
 			}
 			long start = -1;
@@ -416,18 +417,21 @@ public class ContractHierarchy implements IContractHierarchy,
 			if (monitor != null) {
 				monitor.done();
 			}
-			//this.progressMonitor = null;
+			this.progressMonitor = null;
 		}
 
 	}
 	
 	protected void compute() throws JavaModelException {
 		initialize(1);
+		if (this.progressMonitor != null) this.progressMonitor.worked(1);
+		
 		
 		if (DEBUG) System.out.println("BEGIN COMPUTING CONTRACT HIERARCHY");
 		
 		// root contracts
 		computeRootContracts(this.typeHierarchy, this.rootContracts);
+		
 		
 		if (DEBUG) {
 			System.out.print("ROOT CONTRACTS ARE : ");
@@ -438,6 +442,7 @@ public class ContractHierarchy implements IContractHierarchy,
 		}
 				
 		IType[] classes = typeHierarchy.getAllTypes();
+		
 		for (IType clazz : classes) {
 			IResource contract = ContractReferenceModel.getDirectContract(clazz.getUnderlyingResource());
 			if (contract == null) continue;
@@ -469,6 +474,8 @@ public class ContractHierarchy implements IContractHierarchy,
 			computeSubcontracts(clazz, subcontracts);
 			if (subcontracts.size() > 0)
 				this.contractToSubcontracts.put(contractType, subcontracts);
+			
+			if (this.progressMonitor != null) this.progressMonitor.worked(5);
 			
 			if (DEBUG) {
 				System.out.print("SUB CONTRACTS FOR " + contractType.getElementName() + " ARE : ");
@@ -550,7 +557,8 @@ public class ContractHierarchy implements IContractHierarchy,
 			boolean isRoot = true;
 			IType[] supers = hierarchy.getAllSupertypes(type);
 			for (IType superType : supers) {
-				if (ContractReferenceModel.isContracted(superType.getUnderlyingResource())) {
+				Boolean isContracted = ContractReferenceModel.isContracted(superType.getUnderlyingResource());
+				if (isContracted != null && isContracted == true) {
 					isRoot = false;
 					break;
 				}
@@ -559,6 +567,8 @@ public class ContractHierarchy implements IContractHierarchy,
 			if (isRoot) {
 				res.add(ContractReferenceUtil.getType(JavaCore.create(contract)));
 			}
+			
+			if (this.progressMonitor != null) this.progressMonitor.worked(1);
 		}
 	}
 	
