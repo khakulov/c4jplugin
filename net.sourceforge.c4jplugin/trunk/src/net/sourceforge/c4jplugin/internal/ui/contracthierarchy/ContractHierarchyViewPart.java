@@ -168,6 +168,7 @@ public class ContractHierarchyViewPart extends ViewPart {
 	private static final String TAG_VIEW= "view"; //$NON-NLS-1$
 	private static final String TAG_LAYOUT= "orientation"; //$NON-NLS-1$
 	private static final String TAG_REPRESENTATION = "representation"; //$NON_NLS-1$
+	private static final String TAG_ZOOMLEVEL = "zoomlevel"; //$NON_NLS-1$
 	private static final String TAG_RATIO= "ratio"; //$NON-NLS-1$
 	private static final String TAG_SELECTION= "selection"; //$NON-NLS-1$
 	private static final String TAG_VERTICAL_SCROLL= "vertical_scroll"; //$NON-NLS-1$
@@ -1011,7 +1012,9 @@ public class ContractHierarchyViewPart extends ViewPart {
 	}
 	
 	public void setRepresentationMode(int representation, boolean update) {
-		if (fCurrentRepresentation != representation) {
+		System.out.println("setRepMode called with " + representation + ", curr = " + fCurrentRepresentation);
+		
+		if (getRepresentationMode() != representation) {
 			Assert.isNotNull(fAllViewers);
 			if (representation != REPRESENTATION_MODE_GRAPH
 					&& representation != REPRESENTATION_MODE_TREE) {
@@ -1038,13 +1041,12 @@ public class ContractHierarchyViewPart extends ViewPart {
 						
 				getCurrentViewer().getControl().setFocus();
 			}
+			
+			updateMainToolbar(fTypeViewerViewForm.getTopLeft() != null);
 		}
 		for (ToggleRepresentationAction action : fRepActions) {
-			action.setChecked(fCurrentRepresentation == action.getRepresentation());
+			action.setChecked(getRepresentationMode() == action.getRepresentation());
 		}
-		if (fZoomControl != null)
-			fZoomControl.setVisible(representation == REPRESENTATION_MODE_GRAPH);
-		
 	}
 	
 	/* (non-Javadoc)
@@ -1080,15 +1082,18 @@ public class ContractHierarchyViewPart extends ViewPart {
 	}
 	
 	private void fillMainToolBar(IToolBarManager tbmanager) {
+		System.out.println("filling main toolbar (graph mode: " + (getRepresentationMode() == REPRESENTATION_MODE_GRAPH) + ")");
 		tbmanager.removeAll();
-		fZoomControl = new ZoomContributionItem(((ZestContractHierarchyViewer)fAllViewers[HIERARCHY_SPECIALMODE_GRAPH]).getZoomManager());
-		tbmanager.add(fZoomControl);
+		if (getRepresentationMode() == REPRESENTATION_MODE_GRAPH) {
+			fZoomControl = new ZoomContributionItem(((ZestContractHierarchyViewer)fAllViewers[HIERARCHY_SPECIALMODE_GRAPH]).getZoomManager());
+			tbmanager.add(fZoomControl);
+		}
 		//tbmanager.add(new Separator());
 		for (int i= 0; i < fViewActions.length; i++) {
 			tbmanager.add(fViewActions[i]);
 		}
 		tbmanager.add(fHistoryDropDownAction);
-		tbmanager.update(false);	
+		tbmanager.update(false);
 	}
 
 	private void clearMainToolBar(IToolBarManager tbmanager) {
@@ -1393,7 +1398,7 @@ public class ContractHierarchyViewPart extends ViewPart {
 	}
 	
 	private StructuredViewer getCurrentViewer() {
-		if (fCurrentRepresentation == REPRESENTATION_MODE_GRAPH)
+		if (getRepresentationMode() == REPRESENTATION_MODE_GRAPH)
 			return fAllViewers[HIERARCHY_SPECIALMODE_GRAPH];
 		
 		return fAllViewers[fCurrentViewerIndex];
@@ -1551,6 +1556,7 @@ public class ContractHierarchyViewPart extends ViewPart {
 		memento.putInteger(TAG_VIEW, getHierarchyMode());
 		memento.putInteger(TAG_LAYOUT, getViewLayout());
 		memento.putInteger(TAG_REPRESENTATION, getRepresentationMode());
+		memento.putString(TAG_ZOOMLEVEL, ((ZestContractHierarchyViewer)fAllViewers[HIERARCHY_SPECIALMODE_GRAPH]).getZoomManager().getZoomAsText());
 		memento.putInteger(TAG_QUALIFIED_NAMES, isQualifiedTypeNamesEnabled() ? 1 : 0);
 		memento.putInteger(TAG_EDITOR_LINKING, isLinkingEnabled() ? 1 : 0);	
 		
@@ -1641,6 +1647,15 @@ public class ContractHierarchyViewPart extends ViewPart {
 		Integer rep = memento.getInteger(TAG_REPRESENTATION);
 		if (rep != null) {
 			setRepresentationMode(rep.intValue(), false);
+		}
+		
+		String zoom = memento.getString(TAG_ZOOMLEVEL);
+		System.out.println("setting zoomlevel in manager during restore-state");
+		if (zoom != null) {
+			((ZestContractHierarchyViewer)fAllViewers[HIERARCHY_SPECIALMODE_GRAPH]).getZoomManager().setZoomAsText(zoom);
+		}
+		else {
+			((ZestContractHierarchyViewer)fAllViewers[HIERARCHY_SPECIALMODE_GRAPH]).getZoomManager().setZoomAsText("100%");
 		}
 		
 		Integer viewerIndex= memento.getInteger(TAG_VIEW);

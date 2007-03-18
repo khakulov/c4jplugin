@@ -61,13 +61,15 @@ public class ZoomContributionItem extends ControlContribution implements ZoomLis
 		super("net.sourceforge.c4jplugin.zoomitem");
 		this.zoomManager = zm;
 		this.zoomLevels = initialZooms;
-		
+		zm.addZoomListener(this);
 	}
 	
 	private Combo createCombo(Composite parent) {
 		this.combo = new Combo(parent, SWT.DROP_DOWN | SWT.FLAT);
 		this.combo.setItems(zoomLevels);
 		this.combo.setSize(computeWidth(this.combo), 20);
+		refresh(false);
+		
 		this.combo.addSelectionListener(new SelectionAdapter() {
 			/* (non-Javadoc)
 			 * @see org.eclipse.swt.events.SelectionAdapter#widgetSelected(org.eclipse.swt.events.SelectionEvent)
@@ -79,6 +81,10 @@ public class ZoomContributionItem extends ControlContribution implements ZoomLis
 				} else {
 					doZoom(combo.getItem(0));
 				}
+			}
+			
+			public void widgetDefaultSelected(SelectionEvent e) {
+				doZoom(combo.getText().trim());
 			}
 		});
 		return this.combo;
@@ -147,8 +153,11 @@ public class ZoomContributionItem extends ControlContribution implements ZoomLis
 		}	
 		String zoom = zoomManager.getZoomAsText();
 		int index = combo.indexOf(zoom);
-		if (index > 0) {
+		if (index >= 0) {
 			combo.select(index);
+		}
+		else {
+			combo.setText(zoom);
 		}
 		combo.setEnabled(true);
 	}
@@ -165,6 +174,8 @@ public class ZoomContributionItem extends ControlContribution implements ZoomLis
 	 */
 	
 	public void dispose() {
+		zoomManager.removeZoomListener(this);
+		
 		if (combo != null) {
 			combo = null;
 		}

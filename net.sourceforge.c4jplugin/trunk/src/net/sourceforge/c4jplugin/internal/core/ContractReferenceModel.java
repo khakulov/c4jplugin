@@ -172,7 +172,7 @@ public class ContractReferenceModel {
 		
 		for (IProject project : projects) {
 			try {
-				//if (project.isNatureEnabled(C4JProjectNature.NATURE_ID))
+				if (project.isOpen())
 					project.accept(clearSessionProperties);
 			} catch (CoreException e) {
 				e.printStackTrace();

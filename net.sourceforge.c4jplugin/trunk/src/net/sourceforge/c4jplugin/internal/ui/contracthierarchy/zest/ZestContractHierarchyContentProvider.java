@@ -43,7 +43,7 @@ public class ZestContractHierarchyContentProvider
 		IType[] all = new IType[subs.length + supers.length];
 		System.arraycopy(subs, 0, all, 0, subs.length);
 		System.arraycopy(supers, 0, all, subs.length, supers.length);
-		System.out.println(((IType)entity).getElementName() + " is connected to " + all.length + " types");
+		//System.out.println(((IType)entity).getElementName() + " is connected to " + all.length + " types");
 		return all;
 	}
 
@@ -51,15 +51,15 @@ public class ZestContractHierarchyContentProvider
 		IContractHierarchy hierarchy = getHierarchy();
 		if (hierarchy != null) {
 			IType[] all = hierarchy.getAllContracts();
-			System.out.print("HIERARCHY NOT NULL: " + all.length + " types: ");
+			/*System.out.print("HIERARCHY NOT NULL: " + all.length + " types: ");
 			for (IType type : all) {
 				System.out.print(type.getElementName() + " ");
 			}
-			System.out.println("");
+			System.out.println("")*/;
 			return all;
 		}
 		else {
-			System.out.println("HIERARCHY NULL");
+			//System.out.println("HIERARCHY NULL");
 			return NO_ELEMENTS;
 		}
 	}

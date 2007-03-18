@@ -158,7 +158,7 @@ public class ZestContractHierarchyViewer extends StaticGraphViewer implements
 	}
 
 	public void updateContent(boolean doExpand) {
-		System.out.println("ZEST updateContent called");
+		//System.out.println("ZEST updateContent called");
 		//getControl().setRedraw(true);
 		refresh();
 		//applyLayout();

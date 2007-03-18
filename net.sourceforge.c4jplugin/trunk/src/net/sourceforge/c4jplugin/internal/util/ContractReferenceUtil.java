@@ -38,7 +38,7 @@ import org.eclipse.osgi.util.NLS;
 
 public class ContractReferenceUtil {
 	
-	private static boolean DEBUG = true;
+	private static boolean DEBUG = false;
 	
 	static public void deleteMarkers(IProject project) throws CoreException {
 		project.deleteMarkers(IClassInvariantMarker.ID, true, IResource.DEPTH_INFINITE);
