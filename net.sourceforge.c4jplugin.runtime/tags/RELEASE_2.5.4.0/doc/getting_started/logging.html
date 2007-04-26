@@ -1,0 +1,46 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"/>
+    <link rel="stylesheet" href="../book.css" charset="ISO-8859-1" type="text/css"/>
+
+    <title>Logging</title>
+  </head>
+
+  <body>
+  	<span id="c4jdoc">
+  <h1>Logging</h1>
+  <p>
+  C4J comes with a logging mechanism which enables you to log class invariant, post, and
+  pre condition checks. A logger class must implement the interface
+  <a onclick="if (!adapt_link) return true; adapt_link('extern','runtime/doc/javadoc/net/sourceforge/c4j/Logger.html'); return false;" href="../javadoc/net/sourceforge/c4j/Logger.html">Logger</a> and can then be
+  registered via <tt>ContractBase.addLogger(Logger logger)</tt>.</p>
+  
+  <p>
+  Here is an example:</p>
+  <pre>public class ContractLogger implements Logger {
+    void classInvariantCheck(String className) {
+        System.out.println("Verifying class invariant of: " + className);
+    }
+    
+    void postConditionCheck(String className, String method, Object[] parameters) {
+        System.out.println("Verifying post condition of method" + method + " in class " + className);
+    }
+	
+    void preConditionCheck(String className, String method, Object[] parameters) {
+        System.out.println("Verifying pre condition of method" + method + " in class " + className);
+    }
+}
+
+public class SomeContract extends ContractBase&lt;Some&gt; {
+    public void SomeContract(Some target) {
+        super(target);
+        addLogger(new ContractLogger());
+    }
+	
+    ...
+}</pre>
+</span>
+  </body>
+</html>

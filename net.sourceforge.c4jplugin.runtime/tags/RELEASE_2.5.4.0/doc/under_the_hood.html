@@ -1,0 +1,75 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<html>
+<head>
+
+  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+
+  <link rel="stylesheet" href="book.css" charset="ISO-8859-1" type="text/css">
+  <title>Under the Hood</title>
+
+
+</head>
+
+
+
+  <body>
+<span id="c4jdoc">
+<h1>Under the Hood of C4J</h1>
+<p>
+C4J use the new <b>-javaagent</b> switch that was added to
+Java
+1.5. It provides a way to hook on to the class loader, and return
+custom byte code for any class that is loaded by the Java runtime. C4J
+contain an "instrumentor class" that instruments all loaded classes
+that defines a ContractReference annotation with contract verification
+code.<br>
+<a href="http://www.jboss.com/products/javassist" target="_blank">Javassist</a>, an extremely easy to
+use byte code library, is used for instrumenting.</p>
+
+<p>
+The C4J instrumentor class does the following on each class that is
+loaded:</p>
+<ul>
+
+  <li>Does the target class or any of it's parents contain a
+valid ContractReference annotation? If not, don't instrument this class.</li>
+
+  <li>If the target class has a direct contract (as opposed to
+inherited from
+a parent), insert a private member of the contract class in to the
+target class.</li>
+
+</ul>
+<p>
+For each method in the target class:</p>
+<ul>
+
+  <li>If
+the target class has a direct contract (as opposed to inherited from a
+parent), insert a private member of the contract class in to the target
+class.</li>
+
+  <li>If a <tt>pre_&lt;method-name&gt;</tt> exists in the contract
+or the parents contract, add a call to it at the beginning of the
+method.</li>
+
+  <li>If a <tt>post_&lt;method-name&gt;</tt> exists in the
+contract or the parents contract, add a call to it at the end of the
+method.</li>
+
+  <li>If a classInvariant exists in the contract or the parents
+contract, add a call to it at the end of the method.</li>
+
+  <li>For
+all of the above, if both a direct contract and an inherited contract
+exist for the method, add method calls to both, according to the rules
+of contract inheritance.</li>
+
+</ul>
+<p>
+Apart from this there is more stuff going on if the contract extends
+ContractBase; return- and pre- values are made available to post
+conditions, and logging hooks are notified of all contract checking.</p>
+</span>
+</body>
+</html>

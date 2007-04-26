@@ -1,0 +1,35 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" href="../book.css" charset="ISO-8859-1"
+	type="text/css">
+<title>Contract Inheritance</title>
+</head>
+<body>
+	<span id="c4jdoc">
+<h1>Contract Inheritance</h1>
+<p>
+C4J supports full contract inheritance, both for target classes and for contracts
+ themselves. If a class is protected by a contract, all extending classes will 
+ automatically enforce those contracts as well. Also, if a parent class is protected 
+ by a contract and an extending class is protected by another contract, the contracts 
+ will be combined for the extending class.
+Furthermore, contracts defined for super interfaces to interfaces that a class implements 
+will also be enforced.</p>
+
+<p><b>Contract inheritance in C4J works as follows:</b></p>
+<ul>
+	<li>Class invariants are merged, except for in constructors where only the 
+	target class' own class invariants are verified.</li>
+	<li>Pre conditions may not be strengthened, i.e. the contract in the 
+	extending class may not disallow a method call that the contract in the parent allows.</li>
+	<li>Post conditions may not be weakened, i.e. the contract in the extending 
+	class may not allow more outcomes than the contract in the parent.</li>
+</ul>
+<p>
+If contracts don't adhere to these rules, it will be discovered during run time 
+and a warning will be printed.</p>
+</span>
+</body>
+</html>

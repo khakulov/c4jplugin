@@ -1,0 +1,45 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<html>
+<head>
+
+  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+
+  <link rel="stylesheet" href="book.css" charset="ISO-8859-1" type="text/css">
+  <title>Features</title>
+
+
+</head>
+
+
+
+  <body>
+  	<span  id="c4jdoc">
+
+<h1>Features</h1>
+The C4J Library supports the following features:
+<ul>
+  <li>Class invariants.</li>
+  <li>Pre conditions.</li>
+  <li>Post conditions, with access to return- and pre- values.</li>
+  <li>Access to private members of the tested class from the contract implementation.</li>
+  <li>Automatic
+detection of simple getters (i.e. "pure" methods, that don't change
+state), where no class invariant verifications are necessary.</li>
+  <li>It is possible to explicit mark methods as "pure" (even methods defined in interfaces).</li>
+  <li>Inheritance of contracts, i.e. extending classes inherit the parent's contracts, also overridden methods.</li>
+  <li>Contract
+refinement, i.e. extending classes may define their own contracts in
+which case they are merged according to DBC theory.</li>
+  <li>Contracts
+for interfaces, i.e. define a contract for an Interface and all
+implementing classes (and their sub classes) will verify the contract.</li>
+  <li>Combinations of "interface contracts" and "class contracts", works like contract refinement.</li>
+  <li>Logging
+of contract verifications, it is possible to register loggers that are
+notified when contracts are verified, e.g. to support statistics
+gathering.</li>
+  <li>Possibility to debug contracts in your favorite IDE.</li>
+</ul>
+</span>
+</body>
+</html>

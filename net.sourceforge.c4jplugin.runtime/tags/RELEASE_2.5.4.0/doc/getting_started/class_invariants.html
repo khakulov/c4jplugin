@@ -1,0 +1,40 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"/>
+    <link rel="stylesheet" href="../book.css" charset="ISO-8859-1" type="text/css"/>
+
+    <title>Class Invariants</title>
+  </head>
+
+  <body>
+  	<span id="c4jdoc">
+  <h1>Class Invariants</h1>
+  <p>
+  Class invariants are a concept which allow you to assure that your target class is
+  always in a valid (&quot;invariant&quot;) state. They can be used to restrain the value
+  of class variables to a certain range (being never <tt>null</tt>, or a collection to
+  hold at least 1 object, ...).
+  </p>
+  <p>
+  To define a class invariant, you have to implement a method called <tt>classInvariant()</tt>
+  in your contract:</p>
+  <pre>public class DummyContract {
+  
+    public void classInvariant() {
+        // check some properties of the target class
+        ...
+    }
+	
+}</pre>
+<p>
+  Everytime a method of the target class (or subtypes of it) gets called, the classInvariant()
+  method is called afterwards.</p>
+  
+<p>
+  In order to see a full example of a class invariant, click <a onclick="if (!adapt_link) return true; adapt_link('c4j_help','runtime/doc/examples.html#Class_Invariants'); return false;" href="../examples.html#Class_Invariants">here</a>.
+</p>
+  </span>
+  </body>
+</html>
