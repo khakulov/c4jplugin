@@ -108,7 +108,8 @@ B: BUILD ECLIPSE UPDATE SITE AND UPDATE HOMEPAGE
   in the list.
 
 - With the entry "net.sourceforge.c4jplugin.runtime.feature (...)" still selected,
-  click "Build". This will create the two files:
+  click "Build" (if you get an error, check in the "site.xml" tab if the version
+  number is correct). This will create the two files:
     
     htdocs/update/features/net.sourceforge.c4jplugin.runtime.feature_<version>.jar
     htdocs/update/plugins/net.sourceforge.c4jplugin.runtime_<version>.jar
