@@ -26,7 +26,8 @@ tr {vertical-align: top;}
 <p>Here is a list of new features in each new version:</p>
 
 <ul>
-
+  
+  <li><a href="#2.6">2.6</a></li>
   <li><a href="#2.5">2.5</a></li>
 
 </ul>
@@ -36,6 +37,37 @@ tr {vertical-align: top;}
 
   <colgroup><col width="20%"><col width="80%"></colgroup>
   <tbody>
+  
+  <tr>
+
+      <td colspan="2"><a name="2.6"></a>
+      <div style="font-size: 20px; font-weight: bold;">Version
+2.6 compared to 2.5</div>
+
+      </td>
+
+    </tr>
+
+    <tr>
+
+      <td>
+      <p align="right"><b>Contracts for overloaded methods and constructors</b></p>
+
+      </td>
+
+      <td>
+      <p>Contracts for overloaded methods and constructors is now supported. 
+   Note however that overloaded methods with the same number of parameters 
+   where the parameter types have the same name (but not the same package)
+    is not supported.</p>
+   
+   	  <p>For example, the following will not work:</p>
+   	  <pre>public void foo(java.lang.String s)
+public void foo(my.company.String s)</pre>
+
+      </td>
+
+    </tr>
 
     <tr>
 
