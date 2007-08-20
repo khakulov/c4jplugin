@@ -1,0 +1,130 @@
+#c4jdoc P.Code {
+	display: block;
+	text-align: left;
+	text-indent: 0.00pt;
+	margin-top: 0.000000pt;
+	margin-bottom: 0.000000pt;
+	margin-right: 0.000000pt;
+	margin-left: 15pt;
+	font-size: 10.000000pt;
+	font-weight: normal;
+	font-style: normal;
+	color: #4444CC;
+	text-decoration: none;
+	vertical-align: baseline;
+	text-transform: none;
+	font-family: "Courier New", Courier, monospace;
+}
+#c4jdoc H6.CaptionFigColumn {
+	display: block;
+	text-align: left;
+	text-indent: 0.000000pt;
+	margin-top: 3.000000pt;
+	margin-bottom: 11.000000pt;
+	margin-right: 0.000000pt;
+	margin-left: 0.000000pt;
+	font-size: 9.000000pt;
+	font-weight: normal;
+	font-style: Italic;
+	color: #000000;
+	text-decoration: none;
+	vertical-align: baseline;
+	text-transform: none;
+}
+#c4jdoc P.Note {
+	display: block;
+	text-align: left;
+	text-indent: 0pt;
+	margin-top: 19.500000pt;
+	margin-bottom: 19.500000pt;
+	margin-right: 0.000000pt;
+	margin-left: 30pt;
+	font-size: 11.000000pt;
+	font-weight: normal;
+	font-style: Italic;
+	color: #000000;
+	text-decoration: none;
+	vertical-align: baseline;
+	text-transform: none;
+}
+#c4jdoc EM.UILabel {
+	font-weight: Bold;
+	font-style: normal;
+	text-decoration: none;
+	vertical-align: baseline;
+	text-transform: none;
+}
+#c4jdoc EM.CodeName {
+	font-weight: Bold;
+	font-style: normal;
+	text-decoration: none;
+	vertical-align: baseline;
+	text-transform: none;
+	font-family: "Courier New", Courier, monospace;
+}
+
+#c4jdoc { 
+	border: 0px;
+	font-family: Arial, Helvetica sans-serif;
+	color: #000000;
+	font-size: 10pt; 
+	background: #FFFFFF; 
+	margin-bottom: 1em; }
+
+
+#c4jdoc pre				{ font-family: "Courier New", Courier, monospace;}
+
+
+#c4jdoc h1           { font-size: 18pt; margin-top: 5px; margin-bottom: 10px; }	
+#c4jdoc h2           { font-size: 14pt; margin-top: 25px; margin-bottom: 8px; }
+#c4jdoc h3           { font-size: 11pt; margin-top: 20px; margin-bottom: 5px; }
+#c4jdoc h4           { font-size: 10pt; margin-top: 20px; margin-bottom: 3px; font-style: italic }
+#c4jdoc p            { margin-top: 10px; margin-bottom: 10px; }
+#c4jdoc pre          { margin-left: 15px; font-size: 9pt; color: #4444CC } 
+#c4jdoc a:link	     { color: #0000FF }
+#c4jdoc a:hover	     { color: #000080 }
+#c4jdoc a:visited    { text-decoration: underline }
+#c4jdoc ul	     { margin-top: 10px; margin-bottom: 10px; }
+#c4jdoc li	     { margin-top: 5px; margin-bottom: 5px; } 
+#c4jdoc li p	     { margin-top: 5px; margin-bottom: 5px; }
+#c4jdoc ol	     { margin-top: 10px; margin-bottom: 10px; }
+#c4jdoc dl	     { margin-top: 10px; margin-bottom: 10px; }
+#c4jdoc dt	     { margin-top: 5px; margin-bottom: 5px; font-weight: bold; }
+#c4jdoc dd	     { margin-top: 5px; margin-bottom: 5px; }
+#c4jdoc strong	     { font-weight: bold}
+#c4jdoc em	     { font-style: italic}
+#c4jdoc var	     { font-style: italic}
+#c4jdoc div.revision { border-left-style: solid; border-left-width: thin; 
+				   border-left-color: #7B68EE; padding-left:5px; }
+#c4jdoc th	     { font-weight: bold }
+
+#c4jdoc a.command-link {
+}
+#c4jdoc a.command-link img {
+	border-width: 0px;
+	border-style: none;
+	vertical-align: middle;
+}
+
+table.whatsnew[rules=rows] {
+	border-collapse: collapse;
+}
+
+table.whatsnew[rules=rows] tr {
+	border-top: solid thin;
+}
+
+table.whatsnew td {
+	margin: 0;
+	padding: 8px;
+	vertical-align: top;
+}
+
+.whatsnew img[alt] {
+	background-color:#ffdddd;
+}
+
+.whatsnew .header {
+	font-size: 20px;
+	font-weight: bold;
+}

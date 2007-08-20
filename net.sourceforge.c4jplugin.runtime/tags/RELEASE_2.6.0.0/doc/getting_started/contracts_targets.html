@@ -1,0 +1,99 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<html>
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+
+<link rel="stylesheet" href="../book.css" charset="ISO-8859-1"
+	type="text/css">
+
+<style type="text/css">
+pre { margin-left: 20px; }
+  </style>
+<title>Contracts and Targets</title>
+
+
+</head>
+
+
+<body>
+<span id="c4jdoc">
+<h1>Contracts and Targets</h1>
+<p>
+In C4J, contracts for a class (called the target) are implemented in a
+separate class (the contract). The contract class can by of any type, in
+any location. However, since you usually do not want to deploy your
+contracts together with your final product, it is a good idea to keep
+them in a separate source tree (or even a separate project).
+</p>
+
+<h3>Connecting Contracts and Target Classes</h3>
+<p>
+The contracts are tied to their targets via the
+<a onclick="if (!adapt_link) return true; adapt_link('extern','runtime/doc/javadoc/net/sourceforge/c4j/ContractReference.html'); return false;" href="../javadoc/net/sourceforge/c4j/ContractReference.html"><tt>ContractReference</tt></a>
+annotation. The simplest example of a target class and its contract,
+wich both do nothing, is:
+</p>
+
+<pre>@ContractReference(contractClassName="DummyContract")<br>public class Dummy {}<br><br>public class DummyContract {}</pre>
+
+<p>
+This works if the <tt>Dummy</tt> and <tt>DummyContract</tt>
+classes are defined in the same package. If they are not, you must
+supply a fully qualified class name as the value for the
+<tt>contractClassName</tt>
+attribute.
+</p>
+
+<p>
+How to write actual contracts for classes and methods is explained in
+the sections
+<a onclick="if (!adapt_link) return true; adapt_link('c4j_help','runtime/doc/getting_started/class_invariants.html'); return false;" href="class_invariants.html">Class Invariants</a>,
+<a onclick="if (!adapt_link) return true; adapt_link('c4j_help','runtime/doc/getting_started/conditions.html'); return false;" href="conditions.html">Pre and Post Conditions</a>
+and<a onclick="if (!adapt_link) return true; adapt_link('c4j_help','runtime/doc/getting_started/target_members.html'); return false;" href="target_members.html">Target Members</a>.
+</p>
+
+
+<h3>Target Access</h3>
+<p>
+Your contract class gains access to its target by defining a
+non-standard constructor, which has as its only argument a target
+object. This enables the contract to access all but the private members
+of its target:
+</p>
+
+<pre>@ContractReference(contractClassName="DummyContract")
+public class Dummy {
+    ...
+}
+
+public class DummyContract {
+    Dummy m_target;
+    
+    public DummyContract(Dummy target) {
+        m_target = target
+    }
+    
+    ...
+}</pre>
+
+<p>
+If you need to get your hands on private members, see
+<a onclick="if (!adapt_link) return true; adapt_link('c4j_help','runtime/doc/getting_started/target_members.html'); return false;" href="target_members.html">Target Members</a>.
+</p>
+
+
+<h3>The <tt>ContractBase</tt> class</h3>
+<p>
+The package <tt>net.sourceforge.c4j</tt> contains the generic class
+<a onclick="if (!adapt_link) return true; adapt_link('extern','runtime/doc/javadoc/net/sourceforge/c4j/ContractBase.html'); return false;" href="../javadoc/net/sourceforge/c4j/ContractBase.html"><tt>ContractBase&lt;T&gt;</tt></a>
+which is designed in order to give your contracts access to pre
+invocation values, method return values and private members of the target class.
+Additionally, you can register a
+<a onclick="if (!adapt_link) return true; adapt_link('extern','runtime/doc/javadoc/net/sourceforge/c4j/Logger.html'); return false;" href="../javadoc/net/sourceforge/c4j/Logger.html"><tt>Logger</tt></a>
+object to track contract verifications, see also the
+<a onclick="if (!adapt_link) return true; adapt_link('c4j_help','runtime/doc/getting_started/logging.html'); return false;" href="logging.html">Logging section</a>, for further details.
+</p>
+</span>
+</body>
+</html>

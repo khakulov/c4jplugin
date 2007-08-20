@@ -1,0 +1,114 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<html>
+<head>
+
+  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+
+  <link rel="stylesheet" href="book.css" charset="ISO-8859-1" type="text/css">
+  <title>Overview</title>
+
+
+</head>
+
+
+
+  <body>
+  	<span id="c4jdoc">
+
+<h1>Overview</h1>
+<p>
+This guide is about the Eclipse plug-in <tt>net.sourceforge.c4jplugin.runtime</tt>
+and the C4J Library it encapsulates. Most of this documentation has
+been extracted from the <a href="http://c4j.sourceforge.net">homepage
+of C4J</a>.</p>
+
+<h2>What is C4J and Design by Contract (DBC)</h2>
+
+<p><em>Contracts for Java</em> (C4J) is a <i>Design By
+Contract</i> (DBC, see <a href="http://en.wikipedia.org/wiki/DBC" target="_blank">Wikipedia
+DBC definition</a> and <a href="http://archive.eiffel.com/doc/manuals/technology/contract/" target="_blank">Eiffel DBC docs</a>)
+framework for Java 1.5 and later. The primary goal for C4J is ease of
+use. DBC is about design and quality, aspects of programming that a lot
+programmers don't spend enough time and energy on.</p>
+
+<p>Therefore a DBC framework must be simple and painless to use. At the
+same time the framework must be powerful.</p>
+
+<p>C4J is simple <em>and</em> powerful.</p>
+
+<p>
+Two favourite ideas of the author of C4J, underlying the philosophy of
+Design by Contract, are:</p>
+
+<ul>
+
+  <li>To be able to define meaningful contracts you are forced to
+split
+lengthy methods in to small, well defined, methods with a single
+responsibility. This single "side effect" of DBC has very positive
+effects on the code quality, maintainability, and readability.</li>
+
+  <li>Your tests are verified against the <i>real</i>
+usage of your application, not against some test cases that may not
+even be real use cases.</li>
+
+</ul>
+
+<h2>How does it work</h2>
+<p>
+Adding class invariants, pre conditions, and post conditions to your
+regular Java objects is easy with C4J. Contracts for a class (the
+target) are implemented in a separate class (the contract). The
+contract is linked to the target at compile time using an annotation,
+and the actual contract verification code is tied to the target using
+instrumentation during class loading at run time.</p>
+
+<p>
+Contracts implementations have a reference to the instance of the
+target that it is verifying. This reference is used to implement class
+invariants. Pre and post conditions also have access to the target
+reference, as well as the parameters that the target method is invoked
+with. If the contract class extends a C4J ContractBase class, post
+conditions will also have access to method return values, and pre
+invokation values (i.e. values of instance variables in the target
+prior to the method invocation).</p>
+
+<p>
+There are several reasons for defining contracts in plain Java and in a
+separate class:</p>
+<ul>
+
+  <li>You don't have to learn any new language constructs.</li>
+
+  <li>You will get help from your IDE when implementing the
+contract (as opposed to implementing contracts in comment blocks).</li>
+
+  <li>It is possible to put break points in your contract if you
+want to debug them.</li>
+
+  <li>Separating
+the contract code from the application makes it possible to remove the
+risk of accidentally deploying the contracts together with your
+application.</li>
+
+  <li>You get to keep your beautiful code nice and clean without
+all the ugly assertions.</li>
+
+</ul>
+
+
+<h2>The plug-in <tt>net.sourceforge.c4jplugin.runtime</tt></h2>
+<p>
+This plug-in is part of the <a href="http://c4jplugin.sourceforge.net">C4JPlugin
+sourceforge project</a> and acts as a wrapper for the c4j.jar and
+javassist.jar library. In addition, it contains this guide which is
+integrated into the Eclipse help system. This eases the use of C4J for
+Eclipse developers and constitutes the basis for the <tt>net.sourceforge.c4jplugin</tt>
+plug-in. This additional plug-in extends Eclipse with useful
+capabilities in order to write and manage contracts more easily. A
+description
+of it can be found in the <span style="font-weight: bold;">C4J
+Plug-in User Guide</span> in the Eclipse help system.</p>
+</span>
+</body>
+</html>

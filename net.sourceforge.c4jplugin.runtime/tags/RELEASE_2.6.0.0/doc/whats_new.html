@@ -1,0 +1,119 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<html>
+<head>
+
+  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+
+  <link rel="stylesheet" href="book.css" charset="ISO-8859-1" type="text/css">
+
+  <style>
+td {border-top: solid thin black;}
+img[alt] {background-color:#ffdddd;}
+tr {vertical-align: top;}
+  </style>
+  <title>What's New</title>
+
+
+</head>
+
+
+
+  <body>
+  	<span id="c4jdoc">
+
+<h1>What's new in C4J</h1>
+
+<p>Here is a list of new features in each new version:</p>
+
+<ul>
+  
+  <li><a href="#2.6">2.6</a></li>
+  <li><a href="#2.5">2.5</a></li>
+
+</ul>
+<br>
+
+<table cellpadding="10" cellspacing="0" width="600">
+
+  <colgroup><col width="20%"><col width="80%"></colgroup>
+  <tbody>
+  
+  <tr>
+
+      <td colspan="2"><a name="2.6"></a>
+      <div style="font-size: 20px; font-weight: bold;">Version
+2.6 compared to 2.5</div>
+
+      </td>
+
+    </tr>
+
+    <tr>
+
+      <td>
+      <p align="right"><b>Contracts for overloaded methods and constructors</b></p>
+
+      </td>
+
+      <td>
+      <p>Contracts for overloaded methods and constructors is now supported. 
+   Note however that overloaded methods with the same number of parameters 
+   where the parameter types have the same name (but not the same package)
+    is not supported.</p>
+   
+   	  <p>For example, the following will not work:</p>
+   	  <pre>public void foo(java.lang.String s)
+public void foo(my.company.String s)</pre>
+
+      </td>
+
+    </tr>
+
+    <tr>
+
+      <td colspan="2"><a name="2.5"></a>
+      <div style="font-size: 20px; font-weight: bold;">Version
+2.5 compared to 2.4</div>
+
+      </td>
+
+    </tr>
+
+    <tr>
+
+      <td>
+      <p align="right"><b>Resolving simple
+contractClassName attributes</b></p>
+
+      </td>
+
+      <td>
+      <p>It is now possible to specify the contract class
+name
+with its simple name in the
+ContractReference annotation, if the contract class if defined in the
+same package as the target class.</p>
+
+      <p>Assume the classes below are defined in the same
+package
+(of course, they may be in different source trees).
+Then the following code now works:</p>
+
+      <pre>public class DummyContract extends ContractBase&lt;Dummy&gt; {
+    ...
+}
+
+@ContractReference(contractClassName="DummyContract")
+public class Dummy {
+    ...
+}</pre>
+
+      </td>
+
+    </tr>
+
+  </tbody>
+</table>
+</span>
+</body>
+</html>

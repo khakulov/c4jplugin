@@ -1,0 +1,108 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<html>
+<head>
+
+  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+
+  <link rel="stylesheet" href="book.css" charset="ISO-8859-1" type="text/css">
+  <title>Running</title>
+
+
+</head>
+
+<body>
+<span id="c4jdoc">
+<h1>Enabling and Running C4J Applications</h1>
+
+<p>
+For your java projects to compile, you must have the c4j.jar library in
+your classpath. We will discuss the best way how to add the library
+below.</p>
+
+<p>
+In order to enable contract verification during the runtime of your
+application, you need to supply a <span style="font-weight: bold;">-javaagent</span>
+VM argument and <span style="font-weight: bold;">enable
+assertions</span>. You could do this in the command-line like:</p>
+
+<p class="Code">java -cp
+&lt;your_classpath&gt;
+-javaagent:$ECLIPSE_HOME/plugins/net.sourceforge.c4jplugin.runtime/c4j.jar
+-ea &lt;your_main_class&gt;</p>
+
+<p>
+where $ECLIPSE_HOME stands for your Eclipse installation path, assuming
+that you installed the <tt>net.sourceforge.c4jplugin.runtime</tt> plug-in in the
+standard Eclipse plug-ins folder. But this is not the preferred way,
+since Eclipse uses run configurations to run your applications.</p>
+
+<p class="Note"><span style="font-weight: bold;">Note:</span>
+The plug-in <tt>net.sourceforge.c4jplugin</tt> can
+automatically perform the
+following steps for you. See the <span style="font-weight: bold;">C4J
+Plug-in User Guide</span> for more
+information.</p>
+
+<h2>The Eclipse Way for Java Projects</h2>
+<p>
+To add c4j.jar to your build path and enable C4J for a specific run
+configuration of your java project, follow these two steps:</p>
+
+<ol>
+
+  <li><span style="font-weight: bold;">Add the
+c4j.jar library to the build path of your project</span><br>
+
+    <br>
+
+    <img alt="" src="images/running_javaproject_cp.jpg"><br>
+
+    <br>
+
+  </li>
+
+  <li><span style="font-weight: bold;">Add the
+following VM arguments to your run configuration</span><br>
+
+    <br>
+
+    <img alt="" src="images/running_javaproject_vmarg.jpg"></li>
+
+</ol>
+
+<br>
+
+<h2>The Eclipse Way for Plug-in Projects</h2>
+<p>
+Because the c4j.jar library is contained in the plugin
+<tt>net.sourceforge.c4jplugin.runtime</tt>, you can add the
+plug-in to the list
+of required plug-ins in your <tt>MANIFEST.MF</tt> file.
+Then you need to add the
+VM arguments as above:</p>
+
+<ol>
+
+  <li><span style="font-weight: bold;">Add plug-in
+dependency</span><br>
+
+    <br>
+
+    <img alt="" src="images/running_plugin_dep.jpg"><br>
+
+    <br>
+
+  </li>
+
+  <li><span style="font-weight: bold;">Add VM
+arguments to your run configuration</span><br>
+
+You can use the
+same arguments as in step 2 above for Java projects.</li>
+
+  <br>
+
+</ol>
+</span>
+</body>
+</html>
