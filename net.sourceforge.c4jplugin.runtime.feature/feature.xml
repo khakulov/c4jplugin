@@ -2,7 +2,7 @@
 <feature
       id="net.sourceforge.c4jplugin.runtime.feature"
       label="C4J Plugin Runtime"
-      version="2.5.4.0"
+      version="2.6.0.0"
       provider-name="chessed">
 
    <description>
@@ -490,7 +490,7 @@ DAMAGES.
    <plugin
          id="net.sourceforge.c4jplugin.runtime"
          download-size="563"
-         install-size="668"
+         install-size="669"
          version="0.0.0"/>
 
 </feature>
